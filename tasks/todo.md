@@ -1,5 +1,27 @@
 # TODO
 
+## Current Task (FDICnet Main Menu Accessibility Fixes)
+- [x] Ensure mega menu is removed from accessibility tree and tab order when closed.
+- [x] Preserve L3 preview when keyboard focus moves from L2 into the L3 column.
+- [x] Add visible focus indicators for L2 and L3 links that meet focus visibility expectations.
+- [x] Add a visible focus indicator for the profile icon button in the masthead.
+- [x] Verify script syntax and confirm selector wiring for updated behavior/styles.
+
+## Review / Results (FDICnet Main Menu Accessibility Fixes)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - `openMenu()` now sets `megaMenu.hidden = false`.
+  - `closeMenu()` now sets `megaMenu.hidden = true`.
+  - removed init behavior that force-exposed mega-menu to assistive tech on load.
+  - added L3-column keyboard focus guards (`focusin`/`focusout`) to preserve L2 preview when focus moves into L3.
+  - updated L2 `focusout` logic to retain preview when `relatedTarget` is in L3.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added visible focus ring for `.icon-button:focus-visible` in masthead.
+  - replaced no-op focus styling on `.l2-item` / `.l3-item` with visible focus treatment (`outline` + white background).
+  - retained transparent hover treatment without suppressing focus visibility.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - selector/behavior grep checks for updated focus and menu-hidden logic
+
 ## Current Task (Overview Hover + Expanded Test Content)
 - [x] Update L2 overview hover behavior so L3 shows overview description (not L3 links).
 - [x] Add plausible page descriptions for L2 items across menu panels.
