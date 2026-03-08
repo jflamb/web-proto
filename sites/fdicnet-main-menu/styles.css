@@ -13,8 +13,10 @@
   --menu-divider: #bdbdbf;
   --menu-text-primary: #212123;
   --menu-link: #1278b0;
-  --menu-link-hover-underline: #70b6f1;
-  --menu-focus-ring: #0c5a88;
+  --menu-link-hover-underline: #1278b0;
+  --menu-hover-overlay: rgba(0, 0, 0, 0.04);
+  --menu-focus-inner: #ffffff;
+  --menu-focus-ring: #38b6ff;
   --menu-bottom-accent: #84dbff;
 }
 
@@ -378,9 +380,10 @@ body {
 
 .l2-item:focus-visible,
 .l3-item:focus-visible {
-  outline: 2px solid var(--menu-focus-ring);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
   background: transparent;
+  text-decoration-thickness: 2px;
 }
 
 .l2-item {
@@ -397,6 +400,7 @@ body {
 .overview-link:hover {
   background: transparent;
   color: var(--menu-link);
+  box-shadow: inset 0 0 0 999px var(--menu-hover-overlay);
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;
 }
@@ -426,9 +430,10 @@ body {
 }
 
 .overview-link:focus-visible {
-  outline: 2px solid var(--menu-focus-ring);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
   background: transparent;
+  text-decoration-thickness: 2px;
 }
 
 .menu-description {
