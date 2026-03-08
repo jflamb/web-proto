@@ -1,5 +1,25 @@
 # TODO
 
+## Current Task (FDICnet Main Menu Cross-Column Keyboard Navigation)
+- [x] Add left/right arrow-key navigation across L1, L2, and L3 columns while preserving existing up/down roving behavior.
+- [x] Ensure target focus selection is predictable (selected/active item first, then sensible fallback).
+- [x] Strengthen focus-visible styling so focused menu items are clearly visible during keyboard navigation.
+- [x] Run syntax/selector verification and record results.
+
+## Review / Results (FDICnet Main Menu Cross-Column Keyboard Navigation)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added cross-column navigation via `ArrowLeft` / `ArrowRight` inside `.mega-menu`.
+  - added focus-target helpers so cross-column moves land on selected/active items first:
+    - L1 target: selected item (`aria-current="true"`)
+    - L2 target: active item (`data-active="true"`) then roving focus item fallback
+    - L3 target: current roving focus item (when L3 list is visible)
+  - added `data-column="l2"` metadata to L2 overview link so left/right navigation works consistently from all L2 options.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added visible focus ring to `.l1-item:focus-visible` (`2px #005ea2`) so keyboard focus is obvious in L1.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - grep checks for cross-column key handlers and focus-visible selectors
+
 ## Current Task (FDICnet Main Menu High-Priority Accessibility Issues #1-#4)
 - [x] Create a dedicated branch for issues #1, #2, #3, and #4.
 - [x] Post implementation-plan comments on each GitHub issue with acceptance criteria and verification notes.

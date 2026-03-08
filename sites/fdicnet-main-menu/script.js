@@ -294,6 +294,8 @@ function renderL2() {
     overviewLink.className = "l2-item l2-item--overview";
     overviewLink.href = l2Overview.href || "#";
     overviewLink.textContent = l2Overview.label || "Overview";
+    overviewLink.dataset.column = "l2";
+    overviewLink.dataset.index = String(l2Items.length);
     overviewLink.tabIndex = l2Items.length === 0 ? 0 : -1;
     overviewLink.addEventListener("mouseenter", setPreviewOverview);
     overviewLink.addEventListener("focus", setPreviewOverview);
@@ -384,6 +386,60 @@ function setupColumnArrowNav(container, selector) {
   });
 }
 
+function setColumnFocus(container, selector, target) {
+  if (!target) return false;
+  const items = [...container.querySelectorAll(selector)];
+  if (items.length === 0) return false;
+  items.forEach((item) => {
+    item.tabIndex = item === target ? 0 : -1;
+  });
+  target.focus();
+  return true;
+}
+
+function focusSelectedL1() {
+  const target = l1List.querySelector('.l1-item[aria-current="true"]') || l1List.querySelector(".l1-item");
+  return setColumnFocus(l1List, ".l1-item", target);
+}
+
+function focusActiveL2() {
+  const target = l2List.querySelector('.l2-item[data-active="true"]')
+    || l2List.querySelector('.l2-item[tabindex="0"]')
+    || l2List.querySelector(".l2-item");
+  return setColumnFocus(l2List, ".l2-item", target);
+}
+
+function focusActiveL3() {
+  if (l3List.hidden) return false;
+  const target = l3List.querySelector('.l3-item[tabindex="0"]') || l3List.querySelector(".l3-item");
+  return setColumnFocus(l3List, ".l3-item", target);
+}
+
+function setupColumnCrossNav() {
+  megaMenu.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    const activeElement = document.activeElement;
+    if (!(activeElement instanceof HTMLElement)) return;
+
+    const column = activeElement.dataset.column;
+    let moved = false;
+
+    if (event.key === "ArrowRight") {
+      if (column === "l1") moved = focusActiveL2();
+      if (column === "l2") moved = focusActiveL3();
+    }
+
+    if (event.key === "ArrowLeft") {
+      if (column === "l3") moved = focusActiveL2();
+      if (column === "l2") moved = focusSelectedL1();
+    }
+
+    if (moved) {
+      event.preventDefault();
+    }
+  });
+}
+
 function setupEvents() {
   document.addEventListener("pointerdown", (event) => {
     if (menuOpen && !header.contains(event.target)) {
@@ -445,6 +501,7 @@ function setupEvents() {
   setupColumnArrowNav(l1List, ".l1-item");
   setupColumnArrowNav(l2List, ".l2-item");
   setupColumnArrowNav(l3List, ".l3-item");
+  setupColumnCrossNav();
 }
 
 async function init() {

@@ -327,11 +327,16 @@ body {
 }
 
 .l1-item:hover,
-.l1-item:focus-visible,
 .l1-item[aria-current="true"] {
   background: #fff;
-  outline: none;
   position: relative;
+}
+
+.l1-item:focus-visible {
+  background: #fff;
+  position: relative;
+  outline: 2px solid #005ea2;
+  outline-offset: -2px;
 }
 
 .l1-item:hover::before,
