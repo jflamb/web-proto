@@ -15,7 +15,39 @@
 - [x] Issue #17: simplify overlapping selected-nav CSS selectors and remove redundant border override patterns.
 - [x] Issue #20: remove dead L2 active-state font-weight CSS rule (or make active state intentional and distinct).
 - [x] Verify behavior with syntax checks and targeted regression checks (top-nav keyboard roving, mega-menu open/close, column keyboard navigation, responsive menu interaction).
-- [ ] Commit, push, and open a PR documenting issue-by-issue implementation and verification.
+- [x] Commit, push, and open a PR documenting issue-by-issue implementation and verification.
+
+## Review / Results (FDICnet Main Menu Low-Priority Issues #11-#17, #19, #20)
+- Branch created: `fix/fdicnet-main-menu-low-issues-11-17-19-20`.
+- Posted issue plan comments on:
+  - `#11`: `issuecomment-4020219280`
+  - `#12`: `issuecomment-4020219302`
+  - `#13`: `issuecomment-4020219318`
+  - `#14`: `issuecomment-4020219341`
+  - `#15`: `issuecomment-4020219365`
+  - `#16`: `issuecomment-4020219381`
+  - `#17`: `issuecomment-4020219403`
+  - `#19`: `issuecomment-4020219430`
+  - `#20`: `issuecomment-4020219453`
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - added mobile menu toggle button scaffold.
+  - added `<noscript>` fallback notice.
+  - replaced static mega-menu label with neutral `aria-label="Main menu"`.
+  - added SRI and `crossorigin="anonymous"` for Phosphor Icons and `js-yaml` CDNs.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - consolidated mutable state into centralized `menuState`.
+  - added mobile menu state/behavior (`mobileNavOpen`, toggle sync, click-off and `Escape` close).
+  - replaced immediate hide-on-close with transition-aware close flow while preserving `hidden` semantics.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - replaced mega-menu `max-height` hack with predictable `grid-template-rows` + opacity/transform transition.
+  - added responsive mobile nav layout/styling for breakpoint behavior.
+  - removed redundant selected-nav and border override patterns.
+  - removed dead `.l2-item[data-active="true"]` rule.
+  - added horizontal overflow clipping guard on header container.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - targeted grep checks for SRI/noscript/mobile-toggle wiring and removed stale CSS/ARIA patterns.
+- PR: `https://github.com/jflamb/pens-github-test/pull/23`
 
 ## Current Task (FDICnet Header Click-Off Menu Close Behavior)
 - [x] Reproduce click-off behavior where header clicks outside top-level menu items fail to close open mega menu.
