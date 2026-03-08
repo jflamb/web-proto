@@ -12,7 +12,7 @@
 - [x] Issue #9: add initialization guard for required DOM elements with actionable error reporting.
 - [x] Issue #10: remove dead `overviewDescription` fallback or wire schema intentionally (choose one consistent direction).
 - [x] Verify with syntax checks and targeted regression checks for nav/menu keyboard behavior.
-- [ ] Commit, push, and open a PR documenting issue-by-issue implementation and verification.
+- [x] Commit, push, and open a PR documenting issue-by-issue implementation and verification.
 
 ## Review / Results (FDICnet Main Menu Medium-Priority Issues #5-#10)
 - Branch created: `fix/fdicnet-main-menu-medium-issues-5-10`.
@@ -33,6 +33,7 @@
 - Verification:
   - `node --check sites/fdicnet-main-menu/script.js`
   - grep checks for helper extraction, removed `overviewDescription` usage, and ARIA/current-state selectors
+- PR: `https://github.com/jflamb/pens-github-test/pull/22`
 
 ## Current Task (FDICnet Header Top-Nav Roving Keyboard Behavior)
 - [x] Convert header top-level nav items to a single-tab-stop roving tabindex pattern.
