@@ -108,7 +108,12 @@ body {
 .icon-button:hover,
 .icon-button:focus-visible {
   color: #fff;
-  outline: none;
+}
+
+.icon-button:focus-visible {
+  outline: 2px solid #84dbff;
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 .search-input {
@@ -356,16 +361,19 @@ body {
 }
 
 .l2-item:hover,
-.l2-item:focus-visible,
-.l2-item[data-active="true"],
-.l3-item:hover,
-.l3-item:focus-visible {
+.l3-item:hover {
   background: transparent;
-  outline: none;
 }
 
 .l2-item[data-active="true"] {
   font-weight: 400;
+}
+
+.l2-item:focus-visible,
+.l3-item:focus-visible {
+  outline: 2px solid #005ea2;
+  outline-offset: -2px;
+  background: #ffffff;
 }
 
 .l2-item {

@@ -116,6 +116,7 @@ function renderTopNav() {
 function openMenu() {
   if (menuOpen) return;
   menuOpen = true;
+  megaMenu.hidden = false;
   header.classList.add("menu-open");
   syncTopNavState();
 }
@@ -124,6 +125,7 @@ function closeMenu() {
   if (!menuOpen) return;
   menuOpen = false;
   header.classList.remove("menu-open");
+  megaMenu.hidden = true;
   previewL2Index = null;
   previewingOverview = false;
   renderL2();
@@ -414,10 +416,28 @@ function setupEvents() {
       }
       schedulePreviewClear();
     });
+    l3Column.addEventListener("focusin", cancelPreviewClear);
+    l3Column.addEventListener("focusout", (event) => {
+      const nextFocusTarget = event.relatedTarget;
+      if (
+        nextFocusTarget &&
+        (l3Column.contains(nextFocusTarget) || l2List.contains(nextFocusTarget))
+      ) {
+        return;
+      }
+      clearPreviewL2();
+    });
   }
 
   l2List.addEventListener("focusout", (event) => {
-    if (!l2List.contains(event.relatedTarget)) {
+    const nextFocusTarget = event.relatedTarget;
+    if (
+      nextFocusTarget &&
+      (l2List.contains(nextFocusTarget) || (l3Column && l3Column.contains(nextFocusTarget)))
+    ) {
+      return;
+    }
+    if (!l2List.contains(nextFocusTarget)) {
       clearPreviewL2();
     }
   });
@@ -443,10 +463,7 @@ async function init() {
   renderPageContent();
   renderMenuPanel();
   setupEvents();
-
-  if (megaMenu) {
-    megaMenu.hidden = false;
-  }
+  megaMenu.hidden = true;
 
   if (siteContent.menu?.openByDefault) {
     openMenu();
