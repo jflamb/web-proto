@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (FDICnet Header Top-Nav Roving Keyboard Behavior)
+- [x] Convert header top-level nav items to a single-tab-stop roving tabindex pattern.
+- [x] Add left/right arrow navigation across top-level nav items.
+- [x] Ensure keyboard key activation toggles menu visibility for menu-backed nav button.
+- [x] Verify script syntax and key handler wiring.
+
+## Review / Results (FDICnet Header Top-Nav Roving Keyboard Behavior)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added top-nav roving state (`topNavFocusIndex`) and `applyTopNavRoving()` so only one `.fdic-nav-item` is tabbable (`tabIndex=0`) at a time.
+  - added `navList` keyboard handler for `ArrowLeft`, `ArrowRight`, `Home`, and `End` to move focus across top-level nav items.
+  - added keyboard activation for menu-backed nav items: `Enter`/`Space` on `.fdic-nav-item--button` now triggers toggle behavior via click.
+  - preserved existing click behavior and panel-selection logic.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - grep checks for roving helpers and top-nav key handler wiring
+
 ## Current Task (FDICnet Menu Keyboard Follow-up Fixes)
 - [x] Fix first-column arrow-key navigation so `ArrowDown` can reach the first-column Overview link.
 - [x] Fix cross-column focus visibility by preserving L2 focus when focus-triggered preview rendering occurs.

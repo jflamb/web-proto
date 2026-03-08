@@ -21,6 +21,7 @@ let selectedL2Index = 0;
 let previewL2Index = null;
 let previewingOverview = false;
 let previewClearTimer = null;
+let topNavFocusIndex = 0;
 
 async function loadContent() {
   const response = await fetch("content.yaml", { cache: "no-store" });
@@ -64,6 +65,34 @@ function syncTopNavState() {
   });
 }
 
+function getTopNavItems() {
+  return [...navList.querySelectorAll(".fdic-nav-item")];
+}
+
+function getActiveTopNavIndex(items = getTopNavItems()) {
+  return items.findIndex(
+    (item) => item.classList.contains("fdic-nav-item--button") && item.dataset.panelKey === activePanelKey
+  );
+}
+
+function applyTopNavRoving({ focus = false } = {}) {
+  const items = getTopNavItems();
+  if (items.length === 0) return;
+
+  const activeIndex = getActiveTopNavIndex(items);
+  if (topNavFocusIndex < 0 || topNavFocusIndex >= items.length) {
+    topNavFocusIndex = activeIndex >= 0 ? activeIndex : 0;
+  }
+
+  items.forEach((item, index) => {
+    item.tabIndex = index === topNavFocusIndex ? 0 : -1;
+  });
+
+  if (focus) {
+    items[topNavFocusIndex].focus();
+  }
+}
+
 function resetPanelSelection() {
   selectedL1Index = 0;
   selectedL2Index = 0;
@@ -81,10 +110,12 @@ function renderTopNav() {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "fdic-nav-item fdic-nav-item--button";
+      button.dataset.navIndex = String(navList.children.length);
       button.dataset.panelKey = item.panelKey || item.id;
       button.setAttribute("aria-controls", "megaMenu");
       button.textContent = item.label;
       button.addEventListener("click", () => {
+        topNavFocusIndex = Number(button.dataset.navIndex || 0);
         const nextPanel = button.dataset.panelKey;
         if (activePanelKey === nextPanel) {
           if (menuOpen) {
@@ -104,6 +135,7 @@ function renderTopNav() {
     } else {
       const link = document.createElement("a");
       link.className = "fdic-nav-item";
+      link.dataset.navIndex = String(navList.children.length);
       link.href = item.href || "#";
       link.textContent = item.label;
       li.appendChild(link);
@@ -112,6 +144,7 @@ function renderTopNav() {
   });
 
   syncTopNavState();
+  applyTopNavRoving();
 }
 
 function openMenu() {
@@ -456,6 +489,33 @@ function setupColumnCrossNav() {
 }
 
 function setupEvents() {
+  navList.addEventListener("keydown", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || !target.classList.contains("fdic-nav-item")) {
+      return;
+    }
+
+    const items = getTopNavItems();
+    if (items.length === 0) return;
+    const currentIndex = items.indexOf(target);
+    if (currentIndex === -1) return;
+
+    if (["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) {
+      event.preventDefault();
+      if (event.key === "ArrowRight") topNavFocusIndex = (currentIndex + 1) % items.length;
+      if (event.key === "ArrowLeft") topNavFocusIndex = (currentIndex - 1 + items.length) % items.length;
+      if (event.key === "Home") topNavFocusIndex = 0;
+      if (event.key === "End") topNavFocusIndex = items.length - 1;
+      applyTopNavRoving({ focus: true });
+      return;
+    }
+
+    if ((event.key === "Enter" || event.key === " ") && target.classList.contains("fdic-nav-item--button")) {
+      event.preventDefault();
+      target.click();
+    }
+  });
+
   document.addEventListener("pointerdown", (event) => {
     if (menuOpen && !header.contains(event.target)) {
       closeMenu();
