@@ -13,7 +13,6 @@
   --menu-divider: #bdbdbf;
   --menu-text-primary: #212123;
   --menu-link: #1278b0;
-  --menu-link-hover: #0d6191;
   --menu-link-hover-underline: #70b6f1;
   --menu-focus-ring: #0c5a88;
   --menu-bottom-accent: #84dbff;
@@ -397,7 +396,7 @@ body {
 .l3-item:hover,
 .overview-link:hover {
   background: transparent;
-  color: var(--menu-link-hover);
+  color: var(--menu-link);
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;
 }
