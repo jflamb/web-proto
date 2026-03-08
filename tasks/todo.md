@@ -1,5 +1,19 @@
 # TODO
 
+## Current Task (FDICnet Header Click-Off Menu Close Behavior)
+- [x] Reproduce click-off behavior where header clicks outside top-level menu items fail to close open mega menu.
+- [x] Update pointer handler to close menu for non-menu-button header clicks while preserving menu-button and mega-panel interactions.
+- [x] Run syntax validation and record verification.
+
+## Review / Results (FDICnet Header Click-Off Menu Close Behavior)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - refined document `pointerdown` close logic:
+    - keep menu open for clicks inside `#megaMenu`
+    - keep menu open for clicks on `.fdic-nav-item--button`
+    - close menu for all other clicks, including header clicks off top-level menu items
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+
 ## Current Task (FDICnet L1 Space Activation Focus Persistence)
 - [x] Reproduce and isolate focus-loss path when activating L1 item via keyboard (`Space`).
 - [x] Preserve focus on the selected L1 control after L1/L2/L3 re-render on activation.

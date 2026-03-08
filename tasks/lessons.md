@@ -53,3 +53,9 @@ Use this file to record correction-driven learning.
 - Root cause: L1 activation re-rendered menu columns and replaced the focused element without explicitly restoring keyboard focus.
 - Prevention rule: Any keyboard-activatable control that triggers re-render must restore focus to a deterministic target immediately after render.
 - Actionable check for future tasks: Add a keyboard regression step for `Enter` and `Space` activation on each roving item and verify visible focus remains on the same item (or an intentional next target).
+
+- Date: 2026-03-08
+- Trigger / correction: User reported that clicking header areas outside top-level menu items did not close the open menu.
+- Root cause: Global pointer close logic only handled clicks outside the entire header, so in-header non-menu clicks were excluded.
+- Prevention rule: For click-off behavior, define explicit keep-open targets and close on all other pointer targets.
+- Actionable check for future tasks: Add a pointer regression pass covering four zones: top-nav button, mega-menu panel, header non-menu controls, and page body.

@@ -546,9 +546,13 @@ function setupEvents() {
   });
 
   document.addEventListener("pointerdown", (event) => {
-    if (menuOpen && !header.contains(event.target)) {
-      closeMenu();
-    }
+    if (!menuOpen || !(event.target instanceof HTMLElement)) return;
+    if (megaMenu.contains(event.target)) return;
+
+    const navButton = event.target.closest(".fdic-nav-item--button");
+    if (navButton && navList.contains(navButton)) return;
+
+    closeMenu();
   });
 
   document.addEventListener("keydown", (event) => {
