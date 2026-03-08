@@ -1,14 +1,19 @@
-{
-  "sites": [
-    {
-      "name": "Hello World",
-      "path": "sites/hello-world/",
-      "description": "First micro-site with a simple greeting page."
-    },
-    {
-      "name": "FDIC Public Information FAQ",
-      "path": "sites/fdic-public-information-faq/",
-      "description": "FAQ micro-site preserving categories, questions, and answers from the FDIC Information and Support Center public information experience."
-    }
-  ]
+﻿{
+    "sites":  [
+                  {
+                      "name":  "Hello World",
+                      "path":  "sites/hello-world/",
+                      "description":  "First micro-site with a simple greeting page."
+                  },
+                  {
+                      "name":  "FDIC Public Information FAQ",
+                      "path":  "sites/fdic-public-information-faq/",
+                      "description":  "FAQ micro-site preserving categories, questions, and answers from the FDIC Information and Support Center public information experience."
+                  },
+                  {
+                      "name":  "FDICNet Main Menu",
+                      "path":  "sites/fdicnet-main-menu/",
+                      "description":  "Main menu micro-site for FDICNet prototype navigation."
+                  }
+              ]
 }

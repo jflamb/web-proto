@@ -1,5 +1,139 @@
 # TODO
 
+## Current Task (Overview Hover + Expanded Test Content)
+- [x] Update L2 overview hover behavior so L3 shows overview description (not L3 links).
+- [x] Add plausible page descriptions for L2 items across menu panels.
+- [x] Add plausible L1/L2/L3 test content for `Benefits`, `Employee Services`, and `About`.
+- [x] Verify script syntax and content wiring for new panels.
+
+## Review / Results (Overview Hover + Expanded Test Content)
+- Added `previewingOverview` state in `sites/fdicnet-main-menu/script.js` so hovering/focusing the L2 overview link shows description-only content in L3.
+- Expanded `sites/fdicnet-main-menu/content.yaml` with:
+  - L2 descriptions across existing panels
+  - new menu-backed panels for `Benefits`, `Employee Services`, and `About`
+  - plausible L1/L2/L3 test content for each new panel
+- Kept existing Figma-aligned menu structure and interaction model intact while broadening content coverage for QA.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - content sanity checks for new panel keys and description fields in `content.yaml`
+
+## Current Task (FDICnet Multi-Panel Figma Content + Header Fixes)
+- [x] Fix selected L1 chevron size/alignment to match Figma.
+- [x] Fix selected top-nav label visibility for `News & Events`.
+- [x] Update `News & Events` panel content to Figma node `12724:12704`.
+- [x] Update `Events` L2/L3 content to Figma node `12724:13156`.
+- [x] Update `Career Development & Training` panel content to Figma node `12724:11825`.
+- [x] Verify runtime rendering and interaction behavior after YAML/content updates.
+
+## Review / Results (FDICnet Multi-Panel Figma Content + Header Fixes)
+- Pulled and applied content updates from Figma nodes:
+  - `12724:12704` (`News` tab content and L3 headlines)
+  - `12724:13156` (`Events` L2/L3 content)
+  - `12724:11825` (`Career Development & Training` panel content)
+- Refactored `sites/fdicnet-main-menu/script.js` to support multiple menu-backed top-nav tabs using YAML panel keys:
+  - `News & Events` panel
+  - `Career Development & Training` panel
+- Updated `sites/fdicnet-main-menu/content.yaml` to store tab-specific L1/L2/L3 content with Figma-aligned labels and ordering.
+- Fixed selected top-nav visibility bug by adding explicit selected-open-state styling and preserving selected tab color/background when menu is open.
+- Replaced L1 caret pseudo-content with a dedicated icon element (`.l1-caret`) sized and centered at `20px` to match Figma alignment.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - selector/content checks for updated style hooks and Figma labels in `styles.css` and `content.yaml`
+
+## Current Task (FDICnet Content YAML + Menu Alignment)
+- [x] Move site content text into a YAML file under `sites/fdicnet-main-menu`.
+- [x] Update `fdicnet-main-menu` to fetch YAML and render header/menu/page copy at runtime.
+- [x] Align top-nav and mega-menu content with the Figma mock-up content (remove `Home`).
+- [x] Update L1 panel styling so background extends to viewport left edge and text aligns with top-nav text.
+- [x] Verify behavior and record results.
+
+## Review / Results (FDICnet Content YAML + Menu Alignment)
+- Added `sites/fdicnet-main-menu/content.yaml` as the source of truth for:
+  - top navigation labels
+  - L1/L2/L3 menu content
+  - search placeholder text
+  - page title and intro paragraphs
+- Refactored `sites/fdicnet-main-menu/script.js` to:
+  - fetch and parse YAML at runtime using `js-yaml`
+  - render nav/menu/main page copy from YAML
+  - keep existing keyboard and open/close interactions
+- Updated `sites/fdicnet-main-menu/index.html` to:
+  - render nav and page-copy placeholders for runtime injection
+  - load `js-yaml` in-browser
+  - remove static menu content that was out of sync with mock-up
+- Updated `sites/fdicnet-main-menu/styles.css` to:
+  - extend L1 panel background to viewport left edge (`.mega-col--l1::before`)
+  - align L1 and overview text start with top-nav item text (`padding-left: 16px`)
+  - support selected top-nav tab styling via class (`.fdic-nav-item--selected`)
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - grep checks confirm old static nav labels removed and YAML runtime wiring in place
+
+## Current Task (FDICnet Header Figma Alignment)
+- [x] Capture FDICnet header design context and SVG asset from the target Figma node.
+- [x] Add Phosphor icon dependency scoped only to `sites/fdicnet-main-menu`.
+- [x] Align `fdicnet-main-menu` header structure and spacing to Figma spec values.
+- [x] Verify behavior/visual parity and record results.
+
+## Review / Results (FDICnet Header Figma Alignment)
+- Pulled Figma design context and variables for node `12724:12595` from file `ts65AKlW3gRREgr2dD4ZtB` and aligned key tokens:
+  - `Brand/Core/Darker`: `#003256`
+  - `Body/Normal`: Source Sans 3, 18px, 400, 1.375 line-height
+  - `Brand/Core/Light`: `#38b6ff`
+  - `Background/Input`: `#ffffff`, `Border/Input/Rest`: `#bdbdbf`
+- Updated `sites/fdicnet-main-menu` only:
+  - integrated provided `FDICnet.svg` logo asset
+  - switched header controls to Phosphor icons matching the Figma composition (user icon + search icon)
+  - applied consistent 18px / 400 typography across header menu and mega-menu text states
+  - corrected header/nav background blue and active-tab styling
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - selector/token grep checks across `sites/fdicnet-main-menu/index.html` and `styles.css`
+
+## Current Task (FDICNet Main Menu Interaction Prototype)
+- [x] Replace starter `fdicnet-main-menu` page with header + expanding menu layout matching the tabbed menu concept.
+- [x] Implement L1/L2/L3 interaction model (L1 click select, L2 hover/focus preview, default selections, last L1 overview link behavior).
+- [x] Implement keyboard and accessibility behavior (Tab between columns, Arrow Up/Down within columns, outside-click and Escape to close).
+- [x] Verify behavior and record implementation results.
+
+## Review / Results (FDICNet Main Menu Interaction Prototype)
+- Replaced the initial scaffold page with a full desktop header and tabbed mega-menu prototype in `sites/fdicnet-main-menu/`.
+- Implemented requested interaction model:
+  - header menu item toggles expanded/collapsed state and styling
+  - menu is in normal document flow and pushes page content down
+  - L1 items in column 1 are click-select, with first item selected by default
+  - final item in column 1 is a dynamic L1 overview link for the selected L1 section
+  - L2 items for selected L1 render in column 2
+  - column 3 shows selected L2 description by default, and updates L3 links on L2 hover/focus
+  - column 3 is configured as flexible (`1fr`) to fill remaining menu width
+- Added keyboard and close behaviors:
+  - Arrow Up/Down + Home/End navigate items within each column (roving tabindex pattern)
+  - standard Tab order moves between controls/columns
+  - outside click and Escape close the menu
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - selector presence checks for key IDs/classes in `index.html` and `styles.css`
+
+## Current Task (Create fdicnet-main-menu Site)
+- [x] Add a task log entry for the new micro-site request.
+- [x] Scaffold `sites/fdicnet-main-menu` using the repository micro-site workflow.
+- [x] Confirm `sites.json` includes the new site and that required starter files exist.
+- [x] Record verification and results for this task.
+
+## Review / Results (Create fdicnet-main-menu Site)
+- Created new micro-site directory: `sites/fdicnet-main-menu`.
+- Added starter files:
+  - `index.html`
+  - `styles.css`
+  - `script.js`
+- Updated `sites.json` with a new registry entry:
+  - `name`: `FDICNet Main Menu`
+  - `path`: `sites/fdicnet-main-menu/`
+  - `description`: `Main menu micro-site for FDICNet prototype navigation.`
+- Verification:
+  - Confirmed folder/file presence with `Get-ChildItem sites/fdicnet-main-menu -Name`.
+  - Confirmed `sites.json` includes the new site entry.
+
 ## Current Task (VS Code Live Preview Workspace Defaults)
 - [x] Configure workspace-level Live Preview defaults for the support site root and default page.
 - [x] Add a one-click VS Code task to run Live Preview for the support site folder.
