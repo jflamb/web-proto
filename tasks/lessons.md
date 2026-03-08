@@ -47,3 +47,9 @@ Use this file to record correction-driven learning.
 - Root cause: Header navigation used default tab sequence across multiple items and lacked roving keyboard semantics at the top-nav level.
 - Prevention rule: For horizontal header navigation, implement roving tabindex by default and wire `ArrowLeft`/`ArrowRight` plus key activation (`Enter`/`Space`) for interactive toggles.
 - Actionable check for future tasks: In keyboard QA, verify only one top-nav item is tabbable at a time and that `ArrowLeft`/`ArrowRight` moves focus across all top-level items without adding extra tab stops.
+
+- Date: 2026-03-08
+- Trigger / correction: User reported that pressing `Space` on a first-column menu item caused focus to disappear.
+- Root cause: L1 activation re-rendered menu columns and replaced the focused element without explicitly restoring keyboard focus.
+- Prevention rule: Any keyboard-activatable control that triggers re-render must restore focus to a deterministic target immediately after render.
+- Actionable check for future tasks: Add a keyboard regression step for `Enter` and `Space` activation on each roving item and verify visible focus remains on the same item (or an intentional next target).

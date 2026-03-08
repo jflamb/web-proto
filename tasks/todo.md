@@ -1,5 +1,17 @@
 # TODO
 
+## Current Task (FDICnet L1 Space Activation Focus Persistence)
+- [x] Reproduce and isolate focus-loss path when activating L1 item via keyboard (`Space`).
+- [x] Preserve focus on the selected L1 control after L1/L2/L3 re-render on activation.
+- [x] Run syntax validation and capture the verification result.
+
+## Review / Results (FDICnet L1 Space Activation Focus Persistence)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added optional focus restoration in `setSelectedL1(index, { restoreFocus })`.
+  - wired L1 click activation to request focus restoration on the selected L1 item after re-render.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+
 ## Current Task (FDICnet Main Menu Medium-Priority Issues #5-#10)
 - [x] Create a dedicated branch for medium-priority issues #5 through #10.
 - [x] Review each issue and post an implementation-plan comment on each open issue (#5, #6, #7, #8, #9, #10).

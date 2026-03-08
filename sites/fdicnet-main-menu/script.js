@@ -216,7 +216,7 @@ function getL2Overview(selectedL1) {
   );
 }
 
-function setSelectedL1(index) {
+function setSelectedL1(index, { restoreFocus = false } = {}) {
   selectedL1Index = index;
   selectedL2Index = 0;
   previewL2Index = null;
@@ -224,6 +224,10 @@ function setSelectedL1(index) {
   renderL1();
   renderL2();
   renderL3();
+  if (restoreFocus) {
+    const target = l1List.querySelector(`.l1-item[data-index="${index}"]`);
+    setColumnFocus(l1List, ".l1-item", target);
+  }
 }
 
 function setPreviewL2(index, { restoreFocus = false } = {}) {
@@ -306,7 +310,7 @@ function renderL1() {
 
     button.append(label, caret);
     button.addEventListener("click", () => {
-      setSelectedL1(index);
+      setSelectedL1(index, { restoreFocus: true });
       openMenu();
     });
 
