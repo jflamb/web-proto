@@ -9,6 +9,7 @@ const l2List = document.getElementById("l2List");
 const l3List = document.getElementById("l3List");
 const l3Description = document.getElementById("l3Description");
 const l3Column = document.querySelector(".mega-col--l3");
+const l1Column = document.querySelector(".mega-col--l1");
 const l1OverviewLink = document.getElementById("l1OverviewLink");
 const pageTitle = document.getElementById("pageTitle");
 const pageIntro = document.getElementById("pageIntro");
@@ -160,18 +161,29 @@ function setSelectedL1(index) {
   renderL3();
 }
 
-function setPreviewL2(index) {
+function setPreviewL2(index, { restoreFocus = false } = {}) {
+  const previewChanged = previewL2Index !== index || previewingOverview;
+  if (!previewChanged) return;
   previewingOverview = false;
   previewL2Index = index;
   renderL2();
   renderL3();
+  if (restoreFocus) {
+    const target = l2List.querySelector(`.l2-item[data-index="${index}"]`);
+    setColumnFocus(l2List, ".l2-item", target);
+  }
 }
 
-function setPreviewOverview() {
+function setPreviewOverview({ restoreFocus = false } = {}) {
+  if (previewL2Index === null && previewingOverview) return;
   previewL2Index = null;
   previewingOverview = true;
   renderL2();
   renderL3();
+  if (restoreFocus) {
+    const target = l2List.querySelector(".l2-item--overview");
+    setColumnFocus(l2List, ".l2-item", target);
+  }
 }
 
 function clearPreviewL2() {
@@ -235,6 +247,9 @@ function renderL1() {
 
   l1OverviewLink.textContent = panel?.overviewLabel || selected?.overviewLabel || "Overview";
   l1OverviewLink.href = panel?.overviewHref || selected?.overviewHref || "#";
+  l1OverviewLink.dataset.column = "l1";
+  l1OverviewLink.dataset.index = String(getPanelL1().length);
+  l1OverviewLink.tabIndex = getPanelL1().length === 0 ? 0 : -1;
 }
 
 function renderL2() {
@@ -257,7 +272,7 @@ function renderL2() {
     button.tabIndex = index === 0 ? 0 : -1;
 
     button.addEventListener("mouseenter", () => setPreviewL2(index));
-    button.addEventListener("focus", () => setPreviewL2(index));
+    button.addEventListener("focus", () => setPreviewL2(index, { restoreFocus: true }));
     button.addEventListener("click", () => {
       selectedL2Index = index;
       previewingOverview = false;
@@ -297,8 +312,8 @@ function renderL2() {
     overviewLink.dataset.column = "l2";
     overviewLink.dataset.index = String(l2Items.length);
     overviewLink.tabIndex = l2Items.length === 0 ? 0 : -1;
-    overviewLink.addEventListener("mouseenter", setPreviewOverview);
-    overviewLink.addEventListener("focus", setPreviewOverview);
+    overviewLink.addEventListener("mouseenter", () => setPreviewOverview());
+    overviewLink.addEventListener("focus", () => setPreviewOverview({ restoreFocus: true }));
     overviewLi.appendChild(overviewLink);
     l2List.appendChild(overviewLi);
   }
@@ -498,7 +513,9 @@ function setupEvents() {
     }
   });
 
-  setupColumnArrowNav(l1List, ".l1-item");
+  if (l1Column) {
+    setupColumnArrowNav(l1Column, ".l1-item, #l1OverviewLink");
+  }
   setupColumnArrowNav(l2List, ".l2-item");
   setupColumnArrowNav(l3List, ".l3-item");
   setupColumnCrossNav();

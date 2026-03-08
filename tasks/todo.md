@@ -1,5 +1,20 @@
 # TODO
 
+## Current Task (FDICnet Menu Keyboard Follow-up Fixes)
+- [x] Fix first-column arrow-key navigation so `ArrowDown` can reach the first-column Overview link.
+- [x] Fix cross-column focus visibility by preserving L2 focus when focus-triggered preview rendering occurs.
+- [x] Re-run script syntax check and targeted diff validation.
+
+## Review / Results (FDICnet Menu Keyboard Follow-up Fixes)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - first-column arrow-nav now includes both `.l1-item` controls and `#l1OverviewLink`.
+  - first-column overview link now participates in keyboard metadata/roving (`data-column`, `data-index`, `tabIndex`).
+  - added focus-preserving logic for L2 preview updates to prevent focus loss when entering L2 by keyboard.
+  - added no-op guards in preview setters to avoid unnecessary re-renders and focus churn.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - targeted grep/diff checks for updated first-column selector and focus-preservation paths.
+
 ## Current Task (FDICnet Main Menu Cross-Column Keyboard Navigation)
 - [x] Add left/right arrow-key navigation across L1, L2, and L3 columns while preserving existing up/down roving behavior.
 - [x] Ensure target focus selection is predictable (selected/active item first, then sensible fallback).
