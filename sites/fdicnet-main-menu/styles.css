@@ -251,12 +251,14 @@ body {
   grid-template-rows: 1fr;
   opacity: 1;
   transform: translateY(0);
+  overflow: visible;
   border-bottom-width: 6px;
   border-bottom-color: var(--menu-bottom-accent);
 }
 
 .mega-menu-inner {
-  overflow: hidden;
+  overflow-y: hidden;
+  overflow-x: visible;
   min-height: 237px;
   display: grid;
   grid-template-columns: 320px 320px minmax(280px, 1fr);
