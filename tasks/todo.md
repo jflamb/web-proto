@@ -8,7 +8,7 @@
 - [x] Fix issue #3 by adding a clearly visible focus indicator for `.overview-link:focus-visible`.
 - [x] Fix issue #4 by adding a full-element focus indicator for `.fdic-nav-item:focus-visible` (without removing existing selected/hover behavior).
 - [x] Run verification checks (`node --check`, targeted source grep, and basic interaction sanity validation).
-- [ ] Commit changes, push branch, and open a PR that references all four issues.
+- [x] Commit changes, push branch, and open a PR that references all four issues.
 
 ## Review / Results (FDICnet Main Menu High-Priority Accessibility Issues #1-#4)
 - Branch created: `fix/fdicnet-main-menu-a11y-issues-1-4`.
@@ -27,6 +27,7 @@
 - Verification:
   - `node --check sites/fdicnet-main-menu/script.js`
   - grep checks for L2 button rendering and focus selector presence in CSS
+- PR: `https://github.com/jflamb/pens-github-test/pull/21`
 
 ## Current Task (FDICnet Main Menu Accessibility Fixes)
 - [x] Ensure mega menu is removed from accessibility tree and tab order when closed.
