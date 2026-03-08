@@ -1,5 +1,66 @@
 # TODO
 
+## Current Task (FDICnet Header Click-Off Menu Close Behavior)
+- [x] Reproduce click-off behavior where header clicks outside top-level menu items fail to close open mega menu.
+- [x] Update pointer handler to close menu for non-menu-button header clicks while preserving menu-button and mega-panel interactions.
+- [x] Run syntax validation and record verification.
+
+## Review / Results (FDICnet Header Click-Off Menu Close Behavior)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - refined document `pointerdown` close logic:
+    - keep menu open for clicks inside `#megaMenu`
+    - keep menu open for clicks on `.fdic-nav-item--button`
+    - close menu for all other clicks, including header clicks off top-level menu items
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+
+## Current Task (FDICnet L1 Space Activation Focus Persistence)
+- [x] Reproduce and isolate focus-loss path when activating L1 item via keyboard (`Space`).
+- [x] Preserve focus on the selected L1 control after L1/L2/L3 re-render on activation.
+- [x] Run syntax validation and capture the verification result.
+
+## Review / Results (FDICnet L1 Space Activation Focus Persistence)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added optional focus restoration in `setSelectedL1(index, { restoreFocus })`.
+  - wired L1 click activation to request focus restoration on the selected L1 item after re-render.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+
+## Current Task (FDICnet Main Menu Medium-Priority Issues #5-#10)
+- [x] Create a dedicated branch for medium-priority issues #5 through #10.
+- [x] Review each issue and post an implementation-plan comment on each open issue (#5, #6, #7, #8, #9, #10).
+- [x] Implement accessibility fixes:
+- [x] Issue #5: expose L2 active state via ARIA semantics.
+- [x] Issue #6: remove noisy `aria-current="false"` from non-current L1 items.
+- [x] Implement maintainability/runtime fixes:
+- [x] Issue #7: extract shared L2 overview construction helper used by both `renderL2` and `renderL3`.
+- [x] Issue #8: avoid full `renderTopNav()` re-render on panel switch; sync state/update roving without rebuilding nav.
+- [x] Issue #9: add initialization guard for required DOM elements with actionable error reporting.
+- [x] Issue #10: remove dead `overviewDescription` fallback or wire schema intentionally (choose one consistent direction).
+- [x] Verify with syntax checks and targeted regression checks for nav/menu keyboard behavior.
+- [x] Commit, push, and open a PR documenting issue-by-issue implementation and verification.
+
+## Review / Results (FDICnet Main Menu Medium-Priority Issues #5-#10)
+- Branch created: `fix/fdicnet-main-menu-medium-issues-5-10`.
+- Posted issue plan comments on:
+  - `#5`: `issuecomment-4020170132`
+  - `#6`: `issuecomment-4020170154`
+  - `#7`: `issuecomment-4020170182`
+  - `#8`: `issuecomment-4020170203`
+  - `#9`: `issuecomment-4020170220`
+  - `#10`: `issuecomment-4020170237`
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added required-DOM initialization guard with explicit missing-element error reporting.
+  - removed top-nav full re-render on panel switch; now syncs nav state and roving focus without rebuilding nodes.
+  - removed `aria-current="false"` from non-selected L1 items.
+  - added ARIA current-state exposure for active L2 item and updated focus-target logic to use it.
+  - extracted shared `getL2Overview()` helper and removed duplicated L2 overview construction blocks.
+  - removed dead `overviewDescription` fallback path and aligned fallback description to current YAML schema.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - grep checks for helper extraction, removed `overviewDescription` usage, and ARIA/current-state selectors
+- PR: `https://github.com/jflamb/pens-github-test/pull/22`
+
 ## Current Task (FDICnet Header Top-Nav Roving Keyboard Behavior)
 - [x] Convert header top-level nav items to a single-tab-stop roving tabindex pattern.
 - [x] Add left/right arrow navigation across top-level nav items.

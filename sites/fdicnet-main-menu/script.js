@@ -23,6 +23,24 @@ let previewingOverview = false;
 let previewClearTimer = null;
 let topNavFocusIndex = 0;
 
+function getMissingRequiredElements() {
+  const requiredElements = [
+    ["fdicHeader", header],
+    ["fdicNavList", navList],
+    ["megaMenu", megaMenu],
+    ["l1List", l1List],
+    ["l2List", l2List],
+    ["l3List", l3List],
+    ["l3Description", l3Description],
+    ["l1OverviewLink", l1OverviewLink],
+    ["pageTitle", pageTitle],
+    ["pageIntro", pageIntro],
+  ];
+  return requiredElements
+    .filter(([, element]) => !element)
+    .map(([name]) => name);
+}
+
 async function loadContent() {
   const response = await fetch("content.yaml", { cache: "no-store" });
   if (!response.ok) {
@@ -127,7 +145,8 @@ function renderTopNav() {
         }
         activePanelKey = nextPanel;
         resetPanelSelection();
-        renderTopNav();
+        syncTopNavState();
+        applyTopNavRoving();
         renderMenuPanel();
         openMenu();
       });
@@ -184,7 +203,20 @@ function getVisibleL2() {
   return items[getVisibleL2Index()] || null;
 }
 
-function setSelectedL1(index) {
+function getL2Overview(selectedL1) {
+  if (!selectedL1) return null;
+  return selectedL1.l2Overview || (
+    selectedL1.overviewLabel || selectedL1.overviewHref
+      ? {
+          label: selectedL1.overviewLabel || `${selectedL1.label || "Overview"} Overview`,
+          href: selectedL1.overviewHref || "#",
+          description: "",
+        }
+      : null
+  );
+}
+
+function setSelectedL1(index, { restoreFocus = false } = {}) {
   selectedL1Index = index;
   selectedL2Index = 0;
   previewL2Index = null;
@@ -192,6 +224,10 @@ function setSelectedL1(index) {
   renderL1();
   renderL2();
   renderL3();
+  if (restoreFocus) {
+    const target = l1List.querySelector(`.l1-item[data-index="${index}"]`);
+    setColumnFocus(l1List, ".l1-item", target);
+  }
 }
 
 function setPreviewL2(index, { restoreFocus = false } = {}) {
@@ -259,7 +295,11 @@ function renderL1() {
     button.className = "l1-item";
     button.dataset.column = "l1";
     button.dataset.index = String(index);
-    button.setAttribute("aria-current", index === selectedL1Index ? "true" : "false");
+    if (index === selectedL1Index) {
+      button.setAttribute("aria-current", "true");
+    } else {
+      button.removeAttribute("aria-current");
+    }
     button.tabIndex = index === selectedL1Index ? 0 : -1;
 
     label.className = "l1-label";
@@ -270,7 +310,7 @@ function renderL1() {
 
     button.append(label, caret);
     button.addEventListener("click", () => {
-      setSelectedL1(index);
+      setSelectedL1(index, { restoreFocus: true });
       openMenu();
     });
 
@@ -302,6 +342,11 @@ function renderL2() {
     button.dataset.column = "l2";
     button.dataset.index = String(index);
     button.dataset.active = isActive ? "true" : "false";
+    if (isActive) {
+      button.setAttribute("aria-current", "true");
+    } else {
+      button.removeAttribute("aria-current");
+    }
     button.tabIndex = index === 0 ? 0 : -1;
 
     button.addEventListener("mouseenter", () => setPreviewL2(index));
@@ -318,15 +363,7 @@ function renderL2() {
     l2List.appendChild(li);
   });
 
-  const l2Overview = selectedL1?.l2Overview || (
-    selectedL1?.overviewLabel || selectedL1?.overviewHref
-      ? {
-          label: selectedL1?.overviewLabel || `${selectedL1?.label || "Overview"} Overview`,
-          href: selectedL1?.overviewHref || "#",
-          description: selectedL1?.overviewDescription || "",
-        }
-      : null
-  );
+  const l2Overview = getL2Overview(selectedL1);
   if (l2Overview) {
     const separatorLi = document.createElement("li");
     separatorLi.className = "l2-separator-item";
@@ -357,15 +394,7 @@ function renderL3() {
   const selectedL2 = getSelectedL1()?.l2?.[selectedL2Index] || null;
   const previewL2 = getVisibleL2();
   const selectedL1 = getSelectedL1();
-  const l2Overview = selectedL1?.l2Overview || (
-    selectedL1?.overviewLabel || selectedL1?.overviewHref
-      ? {
-          label: selectedL1?.overviewLabel || `${selectedL1?.label || "Overview"} Overview`,
-          href: selectedL1?.overviewHref || "#",
-          description: selectedL1?.overviewDescription || "",
-        }
-      : null
-  );
+  const l2Overview = getL2Overview(selectedL1);
   const descriptionText = previewingOverview
     ? l2Overview?.description || ""
     : showingPreview
@@ -451,7 +480,7 @@ function focusSelectedL1() {
 }
 
 function focusActiveL2() {
-  const target = l2List.querySelector('.l2-item[data-active="true"]')
+  const target = l2List.querySelector('.l2-item[aria-current="true"]')
     || l2List.querySelector('.l2-item[tabindex="0"]')
     || l2List.querySelector(".l2-item");
   return setColumnFocus(l2List, ".l2-item", target);
@@ -517,9 +546,13 @@ function setupEvents() {
   });
 
   document.addEventListener("pointerdown", (event) => {
-    if (menuOpen && !header.contains(event.target)) {
-      closeMenu();
-    }
+    if (!menuOpen || !(event.target instanceof HTMLElement)) return;
+    if (megaMenu.contains(event.target)) return;
+
+    const navButton = event.target.closest(".fdic-nav-item--button");
+    if (navButton && navList.contains(navButton)) return;
+
+    closeMenu();
   });
 
   document.addEventListener("keydown", (event) => {
@@ -582,6 +615,14 @@ function setupEvents() {
 }
 
 async function init() {
+  const missingElements = getMissingRequiredElements();
+  if (missingElements.length > 0) {
+    console.error(
+      `FDICnet menu initialization aborted: missing required DOM element(s): ${missingElements.join(", ")}`
+    );
+    return;
+  }
+
   try {
     siteContent = await loadContent();
   } catch (error) {
