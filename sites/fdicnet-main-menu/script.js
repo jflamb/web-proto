@@ -215,7 +215,7 @@ function renderL1() {
     button.dataset.column = "l1";
     button.dataset.index = String(index);
     button.setAttribute("aria-current", index === selectedL1Index ? "true" : "false");
-    button.tabIndex = index === 0 ? 0 : -1;
+    button.tabIndex = index === selectedL1Index ? 0 : -1;
 
     label.className = "l1-label";
     label.textContent = l1Item.label;
@@ -245,20 +245,20 @@ function renderL2() {
 
   l2Items.forEach((l2Item, index) => {
     const li = document.createElement("li");
-    const link = document.createElement("a");
+    const button = document.createElement("button");
     const isActive = index === activeIndex;
 
-    link.className = "l2-item";
-    link.href = l2Item.href;
-    link.textContent = l2Item.label;
-    link.dataset.column = "l2";
-    link.dataset.index = String(index);
-    link.dataset.active = isActive ? "true" : "false";
-    link.tabIndex = index === 0 ? 0 : -1;
+    button.type = "button";
+    button.className = "l2-item";
+    button.textContent = l2Item.label;
+    button.dataset.column = "l2";
+    button.dataset.index = String(index);
+    button.dataset.active = isActive ? "true" : "false";
+    button.tabIndex = index === 0 ? 0 : -1;
 
-    link.addEventListener("mouseenter", () => setPreviewL2(index));
-    link.addEventListener("focus", () => setPreviewL2(index));
-    link.addEventListener("click", () => {
+    button.addEventListener("mouseenter", () => setPreviewL2(index));
+    button.addEventListener("focus", () => setPreviewL2(index));
+    button.addEventListener("click", () => {
       selectedL2Index = index;
       previewingOverview = false;
       previewL2Index = index;
@@ -266,7 +266,7 @@ function renderL2() {
       renderL3();
     });
 
-    li.appendChild(link);
+    li.appendChild(button);
     l2List.appendChild(li);
   });
 

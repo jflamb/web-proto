@@ -188,11 +188,16 @@ body {
 }
 
 .fdic-nav-item:hover,
-.fdic-nav-item:focus-visible,
 .fdic-nav-item--button[aria-expanded="true"] {
   background: var(--fdic-blue-800);
   border-bottom-color: var(--fdic-accent);
-  outline: none;
+}
+
+.fdic-nav-item:focus-visible {
+  background: var(--fdic-blue-800);
+  border-bottom-color: var(--fdic-accent);
+  outline: 2px solid #005ea2;
+  outline-offset: -2px;
 }
 
 .fdic-nav-item--button {
@@ -212,6 +217,11 @@ body {
   background: #fff;
   color: #003256;
   border-bottom-color: transparent;
+}
+
+.fdic-nav-item--selected:focus-visible {
+  outline: 2px solid #005ea2;
+  outline-offset: -2px;
 }
 
 .fdic-nav-item--selected[aria-expanded="true"] {
@@ -408,7 +418,11 @@ body {
 .overview-link:hover,
 .overview-link:focus-visible {
   background: var(--fdic-blue-100);
-  outline: none;
+}
+
+.overview-link:focus-visible {
+  outline: 2px solid #005ea2;
+  outline-offset: -2px;
 }
 
 .menu-description {

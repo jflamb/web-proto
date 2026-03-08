@@ -1,5 +1,33 @@
 # TODO
 
+## Current Task (FDICnet Main Menu High-Priority Accessibility Issues #1-#4)
+- [x] Create a dedicated branch for issues #1, #2, #3, and #4.
+- [x] Post implementation-plan comments on each GitHub issue with acceptance criteria and verification notes.
+- [x] Fix issue #1 by converting L2 selection controls from links-with-preventDefault semantics to button semantics.
+- [x] Fix issue #2 by setting L1 roving tabindex initial focus target to the currently selected L1 item.
+- [x] Fix issue #3 by adding a clearly visible focus indicator for `.overview-link:focus-visible`.
+- [x] Fix issue #4 by adding a full-element focus indicator for `.fdic-nav-item:focus-visible` (without removing existing selected/hover behavior).
+- [x] Run verification checks (`node --check`, targeted source grep, and basic interaction sanity validation).
+- [ ] Commit changes, push branch, and open a PR that references all four issues.
+
+## Review / Results (FDICnet Main Menu High-Priority Accessibility Issues #1-#4)
+- Branch created: `fix/fdicnet-main-menu-a11y-issues-1-4`.
+- Posted issue plan comments on:
+  - `#1`: `issuecomment-4020102598`
+  - `#2`: `issuecomment-4020102597`
+  - `#3`: `issuecomment-4020102600`
+  - `#4`: `issuecomment-4020102599`
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - L2 interactive items now render as `<button type="button">` controls.
+  - L1 roving tabindex now gives `tabIndex=0` to the selected L1 item.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `.fdic-nav-item:focus-visible` now has a full-element 2px focus ring.
+  - `.fdic-nav-item--selected:focus-visible` keeps ring visibility on selected state.
+  - `.overview-link:focus-visible` now has a clear 2px focus ring.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - grep checks for L2 button rendering and focus selector presence in CSS
+
 ## Current Task (FDICnet Main Menu Accessibility Fixes)
 - [x] Ensure mega menu is removed from accessibility tree and tab order when closed.
 - [x] Preserve L3 preview when keyboard focus moves from L2 into the L3 column.
