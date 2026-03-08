@@ -257,8 +257,6 @@ body {
 }
 
 .mega-menu-inner {
-  overflow-y: hidden;
-  overflow-x: visible;
   min-height: 237px;
   display: grid;
   grid-template-columns: 320px 320px minmax(280px, 1fr);
