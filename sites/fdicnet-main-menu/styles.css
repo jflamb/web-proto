@@ -325,7 +325,9 @@ body {
   padding-left: 0;
   padding-right: 16px;
   color: var(--menu-text-primary);
-  font-weight: 600;
+  font-weight: 550;
+  font-variation-settings: "wght" 550;
+  font-synthesis: none;
   justify-content: space-between;
 }
 
