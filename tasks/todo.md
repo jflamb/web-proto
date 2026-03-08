@@ -1,5 +1,85 @@
 # TODO
 
+## Current Task (FDICnet Header Top-Nav Roving Keyboard Behavior)
+- [x] Convert header top-level nav items to a single-tab-stop roving tabindex pattern.
+- [x] Add left/right arrow navigation across top-level nav items.
+- [x] Ensure keyboard key activation toggles menu visibility for menu-backed nav button.
+- [x] Verify script syntax and key handler wiring.
+
+## Review / Results (FDICnet Header Top-Nav Roving Keyboard Behavior)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added top-nav roving state (`topNavFocusIndex`) and `applyTopNavRoving()` so only one `.fdic-nav-item` is tabbable (`tabIndex=0`) at a time.
+  - added `navList` keyboard handler for `ArrowLeft`, `ArrowRight`, `Home`, and `End` to move focus across top-level nav items.
+  - added keyboard activation for menu-backed nav items: `Enter`/`Space` on `.fdic-nav-item--button` now triggers toggle behavior via click.
+  - preserved existing click behavior and panel-selection logic.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - grep checks for roving helpers and top-nav key handler wiring
+
+## Current Task (FDICnet Menu Keyboard Follow-up Fixes)
+- [x] Fix first-column arrow-key navigation so `ArrowDown` can reach the first-column Overview link.
+- [x] Fix cross-column focus visibility by preserving L2 focus when focus-triggered preview rendering occurs.
+- [x] Re-run script syntax check and targeted diff validation.
+
+## Review / Results (FDICnet Menu Keyboard Follow-up Fixes)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - first-column arrow-nav now includes both `.l1-item` controls and `#l1OverviewLink`.
+  - first-column overview link now participates in keyboard metadata/roving (`data-column`, `data-index`, `tabIndex`).
+  - added focus-preserving logic for L2 preview updates to prevent focus loss when entering L2 by keyboard.
+  - added no-op guards in preview setters to avoid unnecessary re-renders and focus churn.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - targeted grep/diff checks for updated first-column selector and focus-preservation paths.
+
+## Current Task (FDICnet Main Menu Cross-Column Keyboard Navigation)
+- [x] Add left/right arrow-key navigation across L1, L2, and L3 columns while preserving existing up/down roving behavior.
+- [x] Ensure target focus selection is predictable (selected/active item first, then sensible fallback).
+- [x] Strengthen focus-visible styling so focused menu items are clearly visible during keyboard navigation.
+- [x] Run syntax/selector verification and record results.
+
+## Review / Results (FDICnet Main Menu Cross-Column Keyboard Navigation)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added cross-column navigation via `ArrowLeft` / `ArrowRight` inside `.mega-menu`.
+  - added focus-target helpers so cross-column moves land on selected/active items first:
+    - L1 target: selected item (`aria-current="true"`)
+    - L2 target: active item (`data-active="true"`) then roving focus item fallback
+    - L3 target: current roving focus item (when L3 list is visible)
+  - added `data-column="l2"` metadata to L2 overview link so left/right navigation works consistently from all L2 options.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added visible focus ring to `.l1-item:focus-visible` (`2px #005ea2`) so keyboard focus is obvious in L1.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - grep checks for cross-column key handlers and focus-visible selectors
+
+## Current Task (FDICnet Main Menu High-Priority Accessibility Issues #1-#4)
+- [x] Create a dedicated branch for issues #1, #2, #3, and #4.
+- [x] Post implementation-plan comments on each GitHub issue with acceptance criteria and verification notes.
+- [x] Fix issue #1 by converting L2 selection controls from links-with-preventDefault semantics to button semantics.
+- [x] Fix issue #2 by setting L1 roving tabindex initial focus target to the currently selected L1 item.
+- [x] Fix issue #3 by adding a clearly visible focus indicator for `.overview-link:focus-visible`.
+- [x] Fix issue #4 by adding a full-element focus indicator for `.fdic-nav-item:focus-visible` (without removing existing selected/hover behavior).
+- [x] Run verification checks (`node --check`, targeted source grep, and basic interaction sanity validation).
+- [x] Commit changes, push branch, and open a PR that references all four issues.
+
+## Review / Results (FDICnet Main Menu High-Priority Accessibility Issues #1-#4)
+- Branch created: `fix/fdicnet-main-menu-a11y-issues-1-4`.
+- Posted issue plan comments on:
+  - `#1`: `issuecomment-4020102598`
+  - `#2`: `issuecomment-4020102597`
+  - `#3`: `issuecomment-4020102600`
+  - `#4`: `issuecomment-4020102599`
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - L2 interactive items now render as `<button type="button">` controls.
+  - L1 roving tabindex now gives `tabIndex=0` to the selected L1 item.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `.fdic-nav-item:focus-visible` now has a full-element 2px focus ring.
+  - `.fdic-nav-item--selected:focus-visible` keeps ring visibility on selected state.
+  - `.overview-link:focus-visible` now has a clear 2px focus ring.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - grep checks for L2 button rendering and focus selector presence in CSS
+- PR: `https://github.com/jflamb/pens-github-test/pull/21`
+
 ## Current Task (FDICnet Main Menu Accessibility Fixes)
 - [x] Ensure mega menu is removed from accessibility tree and tab order when closed.
 - [x] Preserve L3 preview when keyboard focus moves from L2 into the L3 column.

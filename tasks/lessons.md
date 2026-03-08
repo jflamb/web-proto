@@ -35,3 +35,15 @@ Use this file to record correction-driven learning.
 - Root cause: Interaction logic prioritized visual state/hover behavior but did not enforce equivalent keyboard and assistive-technology state management.
 - Prevention rule: For any expandable nav/menu work, treat `hidden` state and focus-visible styling as required acceptance criteria, not optional polish.
 - Actionable check for future tasks: Before completion, run a keyboard-only pass (`Tab`, `Shift+Tab`, arrow keys, `Escape`) and verify closed content is not reachable by tab or screen-reader tree.
+
+- Date: 2026-03-08
+- Trigger / correction: User reported first-column arrow navigation did not reach Overview and right-arrow into L2 had no visible focus transition.
+- Root cause: Roving arrow scope was limited to `.l1-item` and did not include the first-column overview control; focus-triggered L2 re-renders replaced the focused node without restoring focus.
+- Prevention rule: For composite menu keyboard work, include all focusable controls in roving sets and preserve focus identity across any render cycle triggered by focus events.
+- Actionable check for future tasks: Run a keyboard path test for each column (`Down` from first item to final control, `Right`/`Left` column hops) and verify the focused element remains visibly focused after each keypress.
+
+- Date: 2026-03-08
+- Trigger / correction: User requested top header nav items to behave as one tab stop with arrow-key navigation and keyboard toggle behavior for menu visibility.
+- Root cause: Header navigation used default tab sequence across multiple items and lacked roving keyboard semantics at the top-nav level.
+- Prevention rule: For horizontal header navigation, implement roving tabindex by default and wire `ArrowLeft`/`ArrowRight` plus key activation (`Enter`/`Space`) for interactive toggles.
+- Actionable check for future tasks: In keyboard QA, verify only one top-nav item is tabbable at a time and that `ArrowLeft`/`ArrowRight` moves focus across all top-level items without adding extra tab stops.
