@@ -1,5 +1,22 @@
 # TODO
 
+## Current Task (FDICnet Main Menu Low-Priority Issues #11-#17, #19, #20)
+- [x] Create a dedicated branch for low-priority issues #11-#17, #19, and #20 (excluding #18).
+- [x] Review each low-priority issue in scope and post an implementation-plan comment on each open issue (#11, #12, #13, #14, #15, #16, #17, #19, #20).
+- [x] Implement responsive/mobile nav behavior for issue #11 with a compact hamburger toggle pattern and keyboard-accessible expanded/collapsed state.
+- [x] Implement security/robustness/documentation fixes:
+- [x] Issue #12: add SRI + `crossorigin` to CDN script/style resources where practical.
+- [x] Issue #13: add `<noscript>` fallback content for JS-disabled scenarios.
+- [x] Issue #19: replace hardcoded panel-specific `aria-label` in static HTML with a generic initialization-safe label.
+- [x] Implement interaction/layout and maintainability fixes:
+- [x] Issue #14: replace `max-height` transition hack with predictable open/close animation behavior.
+- [x] Issue #15: remove potential horizontal overflow from L1 full-bleed background treatment.
+- [x] Issue #16: encapsulate module-level mutable menu state in a dedicated state object.
+- [x] Issue #17: simplify overlapping selected-nav CSS selectors and remove redundant border override patterns.
+- [x] Issue #20: remove dead L2 active-state font-weight CSS rule (or make active state intentional and distinct).
+- [x] Verify behavior with syntax checks and targeted regression checks (top-nav keyboard roving, mega-menu open/close, column keyboard navigation, responsive menu interaction).
+- [ ] Commit, push, and open a PR documenting issue-by-issue implementation and verification.
+
 ## Current Task (FDICnet Header Click-Off Menu Close Behavior)
 - [x] Reproduce click-off behavior where header clicks outside top-level menu items fail to close open mega menu.
 - [x] Update pointer handler to close menu for non-menu-button header clicks while preserving menu-button and mega-panel interactions.

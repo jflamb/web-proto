@@ -10,10 +10,21 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,opsz,wght@0,8..60,200..900&display=swap"
     />
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"
+      integrity="sha384-6p9AefaqUhEVheRlj1mpAkbngHXy9mbYMrIdcIt4Jlc9lOLIablJq3bBsLOjGwZ7"
+      crossorigin="anonymous"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <noscript>
+      <div class="noscript-notice" role="status" aria-live="polite">
+        JavaScript is required to use the FDICnet main menu prototype. Please enable JavaScript and reload this
+        page.
+      </div>
+    </noscript>
     <header class="fdic-header" id="fdicHeader">
       <div class="fdic-masthead">
         <div class="fdic-shell">
@@ -35,11 +46,15 @@
 
       <nav class="fdic-nav" aria-label="Primary navigation">
         <div class="fdic-shell">
+          <button id="fdicNavToggle" class="fdic-nav-toggle" type="button" aria-controls="fdicNavList" aria-expanded="false">
+            <i class="ph ph-list" aria-hidden="true"></i>
+            <span>Menu</span>
+          </button>
           <ul id="fdicNavList" class="fdic-nav-list"></ul>
         </div>
       </nav>
 
-      <section id="megaMenu" class="mega-menu" aria-label="News and Events menu">
+      <section id="megaMenu" class="mega-menu" aria-label="Main menu">
         <div class="fdic-shell mega-menu-inner">
           <section class="mega-col mega-col--l1" aria-labelledby="l1Heading">
             <h2 id="l1Heading" class="sr-only">Level 1</h2>
@@ -70,7 +85,11 @@
       </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"
+      integrity="sha384-+pxiN6T7yvpryuJmE1gM9PX7yQit15auDb+ZwwvJOd/4be2Cie5/IuVXgQb/S9du"
+      crossorigin="anonymous"
+    ></script>
     <script src="script.js"></script>
   </body>
 </html>
