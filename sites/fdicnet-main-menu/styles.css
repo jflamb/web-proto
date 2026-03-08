@@ -13,6 +13,9 @@
   --menu-divider: #bdbdbf;
   --menu-text-primary: #212123;
   --menu-link: #1278b0;
+  --menu-link-hover: #0d6191;
+  --menu-link-hover-underline: #70b6f1;
+  --menu-focus-ring: #0c5a88;
   --menu-bottom-accent: #84dbff;
 }
 
@@ -322,8 +325,6 @@ body {
   padding-right: 16px;
   color: var(--menu-text-primary);
   font-weight: 600;
-  font-variation-settings: "wght" 600;
-  font-synthesis: none;
   justify-content: space-between;
 }
 
@@ -376,16 +377,11 @@ body {
   opacity: 1;
 }
 
-.l2-item:hover,
-.l3-item:hover {
-  background: transparent;
-}
-
 .l2-item:focus-visible,
 .l3-item:focus-visible {
-  outline: 2px solid #005ea2;
-  outline-offset: -2px;
-  background: #ffffff;
+  outline: 2px solid var(--menu-focus-ring);
+  outline-offset: 2px;
+  background: transparent;
 }
 
 .l2-item {
@@ -393,6 +389,17 @@ body {
   padding-right: 16px;
   color: var(--menu-link);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.l2-item:hover,
+.l3-item:hover,
+.overview-link:hover {
+  background: transparent;
+  color: var(--menu-link-hover);
+  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-thickness: 2px;
 }
 
 .l2-separator-item {
@@ -415,16 +422,14 @@ body {
   padding-right: 16px;
   color: var(--menu-link);
   text-decoration: underline;
-}
-
-.overview-link:hover,
-.overview-link:focus-visible {
-  background: var(--fdic-blue-100);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .overview-link:focus-visible {
-  outline: 2px solid #005ea2;
-  outline-offset: -2px;
+  outline: 2px solid var(--menu-focus-ring);
+  outline-offset: 2px;
+  background: transparent;
 }
 
 .menu-description {
@@ -441,6 +446,8 @@ body {
   padding-right: 8px;
   color: var(--menu-link);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .page-content {

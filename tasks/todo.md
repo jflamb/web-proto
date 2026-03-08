@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (FDICnet Fit & Finish: Link States + L1 Weight)
+- [x] Align menu link default/hover/focus styles to requested Figma interaction states.
+- [x] Reduce first-column item text heaviness to Source Sans 3, 18px, semibold treatment.
+- [x] Run quick verification (CSS state grep + script syntax check) and update PR.
+
+## Review / Results (FDICnet Fit & Finish: Link States + L1 Weight)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - normalized link states for `.l2-item`, `.l3-item`, and `.overview-link`:
+    - default: underlined link styling with consistent underline offset/thickness.
+    - hover: darker link color and emphasized underline color/thickness.
+    - focus-visible: consistent focus ring treatment with transparent background.
+  - reduced L1 text heaviness by removing variable-font weight override while keeping semibold (`font-weight: 600`) at 18px.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - style grep checks for new link-state tokens/selectors and removal of L1 variable-weight override.
+
 ## Current Task (FDICnet Main Menu Low-Priority Issues #11-#17, #19, #20)
 - [x] Create a dedicated branch for low-priority issues #11-#17, #19, and #20 (excluding #18).
 - [x] Review each low-priority issue in scope and post an implementation-plan comment on each open issue (#11, #12, #13, #14, #15, #16, #17, #19, #20).
