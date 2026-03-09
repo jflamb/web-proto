@@ -16,9 +16,7 @@ const menuState = {
   suppressL2HoverPreview: false,
   moveFocusIntoMenuOnOpen: false,
   closeHideTimer: null,
-  mobileExpandedPanelKey: null,
-  mobileExpandedL1ByPanel: {},
-  mobileExpandedL2ByPath: {},
+  mobileDrillPath: [],
 };
 
 const MOBILE_NAV_BREAKPOINT = "(max-width: 768px)";
@@ -262,7 +260,11 @@ function syncMobileNavState() {
 }
 
 function setMobileNavOpen(isOpen) {
-  menuState.mobileNavOpen = Boolean(isOpen);
+  const nextOpen = Boolean(isOpen);
+  if (nextOpen && !menuState.mobileNavOpen) {
+    menuState.mobileDrillPath = [];
+  }
+  menuState.mobileNavOpen = nextOpen;
   syncMobileNavState();
 }
 
@@ -322,9 +324,7 @@ function resetPanelSelection() {
   menuState.previewingOverview = false;
   menuState.l1FocusIndex = 0;
   menuState.suppressL2HoverPreview = false;
-  menuState.mobileExpandedPanelKey = null;
-  menuState.mobileExpandedL1ByPanel = {};
-  menuState.mobileExpandedL2ByPath = {};
+  menuState.mobileDrillPath = [];
 }
 
 function renderTopNav() {
@@ -408,155 +408,158 @@ function removeMobileDrawerPanel() {
   if (existing) existing.remove();
 }
 
-function getMobileL1PanelId(panelKey, index) {
-  return `mobileL1Panel-${panelKey}-${index}`.replace(/[^a-zA-Z0-9_-]/g, "-");
-}
+function renderMobileDrillHeader(targetContainer, backLabel, onBack, currentLink) {
+  const header = document.createElement("div");
+  header.className = "mobile-drill-header";
 
-function getMobileL2PanelId(panelKey, l1Index, l2Index) {
-  return `mobileL2Panel-${panelKey}-${l1Index}-${l2Index}`.replace(/[^a-zA-Z0-9_-]/g, "-");
-}
-
-function getExpandedL1Index(panelKey, l1Items) {
-  const current = menuState.mobileExpandedL1ByPanel[panelKey];
-  if (typeof current === "number") {
-    if (current === -2 || current === -1) return current;
-    if (current >= 0 && current < l1Items.length) return current;
-  }
-  return -1;
-}
-
-function setExpandedL1Index(panelKey, nextValue) {
-  menuState.mobileExpandedL1ByPanel[panelKey] = nextValue;
-}
-
-function getL2ExpansionKey(panelKey, l1Index, l2Index) {
-  return `${panelKey}:${l1Index}:${l2Index}`;
-}
-
-function renderMobilePanelContent(targetContainer, panelKey) {
-  const panelConfig = getPanelConfigByKey(panelKey);
-  const l1Items = panelConfig?.l1 || [];
-  if (l1Items.length === 0) return;
-
-  const expandedL1 = getExpandedL1Index(panelKey, l1Items);
-  const groupList = document.createElement("div");
-  groupList.className = "mobile-accordion-group-list";
-  targetContainer.appendChild(groupList);
-
-  l1Items.forEach((l1Item, l1Index) => {
-    const section = document.createElement("section");
-    section.className = "mobile-l1-section";
-
-    const trigger = document.createElement("button");
-    trigger.type = "button";
-    trigger.className = "mobile-l1-trigger";
-    trigger.dataset.panelKey = panelKey;
-    trigger.dataset.index = String(l1Index);
-
-    const panelId = getMobileL1PanelId(panelKey, l1Index);
-    const expanded = expandedL1 === -2 || expandedL1 === l1Index;
-    trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-    trigger.setAttribute("aria-controls", panelId);
-
-    const label = document.createElement("span");
-    label.className = "mobile-l1-label";
-    label.textContent = l1Item.label || "Section";
+  if (onBack) {
+    const backButton = document.createElement("button");
+    backButton.type = "button";
+    backButton.className = "mobile-drill-back";
+    backButton.setAttribute("aria-label", `Back to ${backLabel}`);
 
     const icon = document.createElement("span");
-    icon.className = "mobile-l1-caret";
-    icon.textContent = expanded ? "−" : "+";
+    icon.className = "mobile-drill-back-icon";
+    icon.textContent = "‹";
     icon.setAttribute("aria-hidden", "true");
-    trigger.append(label, icon);
 
-    trigger.addEventListener("click", () => {
-      const currentExpanded = getExpandedL1Index(panelKey, l1Items);
-      if (currentExpanded === -2) {
-        setExpandedL1Index(panelKey, l1Index);
-      } else {
-        setExpandedL1Index(panelKey, currentExpanded === l1Index ? -1 : l1Index);
-      }
+    const text = document.createElement("span");
+    text.textContent = backLabel;
+
+    backButton.append(icon, text);
+    backButton.addEventListener("click", onBack);
+    header.appendChild(backButton);
+  }
+
+  if (currentLink) {
+    const link = document.createElement("a");
+    link.className = "mobile-drill-current-link";
+    link.href = currentLink.href || "#";
+    link.textContent = currentLink.label || "Overview";
+    header.appendChild(link);
+  }
+
+  if (header.childElementCount > 0) {
+    targetContainer.appendChild(header);
+  }
+}
+
+function createMobileDrillList() {
+  const list = document.createElement("ul");
+  list.className = "mobile-drill-list";
+  return list;
+}
+
+function appendMobileDrillItem(list, label, onClick) {
+  const li = document.createElement("li");
+  li.className = "mobile-drill-item";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "mobile-drill-trigger";
+
+  const text = document.createElement("span");
+  text.className = "mobile-drill-label";
+  text.textContent = label;
+
+  const icon = document.createElement("span");
+  icon.className = "mobile-drill-caret";
+  icon.textContent = "›";
+  icon.setAttribute("aria-hidden", "true");
+
+  button.append(text, icon);
+  button.addEventListener("click", onClick);
+  li.appendChild(button);
+  list.appendChild(li);
+}
+
+function renderMobileDrillRoot(panelContainer, panelKeys) {
+  const list = createMobileDrillList();
+  panelKeys.forEach((panelKey) => {
+    const panelMeta = (menuState.siteContent?.header?.nav || []).find(
+      (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
+    );
+    appendMobileDrillItem(list, panelMeta?.label || panelKey, () => {
+      menuState.activePanelKey = panelKey;
+      menuState.mobileDrillPath = [panelKey];
       renderMobileDrawerPanel();
     });
-
-    section.appendChild(trigger);
-
-    const panelEl = document.createElement("div");
-    panelEl.id = panelId;
-    panelEl.className = "mobile-l1-panel";
-    panelEl.hidden = !expanded;
-
-    (l1Item.l2 || []).forEach((l2Item, l2Index) => {
-      const group = document.createElement("div");
-      group.className = "mobile-l2-group";
-
-      const row = document.createElement("div");
-      row.className = "mobile-l2-row";
-
-      const l2Link = document.createElement("a");
-      l2Link.className = "mobile-l2-item";
-      l2Link.href = l2Item.href || "#";
-      l2Link.textContent = l2Item.label || "Link";
-      row.appendChild(l2Link);
-
-      const l3Items = l2Item.l3 || [];
-      if (l3Items.length > 0) {
-        const l2PanelId = getMobileL2PanelId(panelKey, l1Index, l2Index);
-        const l2ExpansionKey = getL2ExpansionKey(panelKey, l1Index, l2Index);
-        const l2Expanded = Boolean(menuState.mobileExpandedL2ByPath[l2ExpansionKey]);
-
-        const l2Toggle = document.createElement("button");
-        l2Toggle.type = "button";
-        l2Toggle.className = "mobile-l2-toggle";
-        l2Toggle.setAttribute("aria-expanded", l2Expanded ? "true" : "false");
-        l2Toggle.setAttribute("aria-controls", l2PanelId);
-        l2Toggle.setAttribute("aria-label", l2Expanded ? `Collapse ${l2Item.label}` : `Expand ${l2Item.label}`);
-
-        const l2ToggleIcon = document.createElement("span");
-        l2ToggleIcon.className = "mobile-l2-toggle-icon";
-        l2ToggleIcon.textContent = l2Expanded ? "−" : "+";
-        l2ToggleIcon.setAttribute("aria-hidden", "true");
-        l2Toggle.appendChild(l2ToggleIcon);
-        l2Toggle.addEventListener("click", () => {
-          menuState.mobileExpandedL2ByPath[l2ExpansionKey] = !l2Expanded;
-          renderMobileDrawerPanel();
-        });
-
-        row.appendChild(l2Toggle);
-
-        const l3ListMobile = document.createElement("ul");
-        l3ListMobile.id = l2PanelId;
-        l3ListMobile.className = "mobile-l3-list";
-        l3ListMobile.hidden = !l2Expanded;
-        l3Items.forEach((l3Item) => {
-          const l3Li = document.createElement("li");
-          const l3Link = document.createElement("a");
-          l3Link.className = "mobile-l3-item";
-          l3Link.href = l3Item.href || "#";
-          l3Link.textContent = l3Item.label || "Sub-link";
-          l3Li.appendChild(l3Link);
-          l3ListMobile.appendChild(l3Li);
-        });
-
-        group.append(row, l3ListMobile);
-      } else {
-        group.appendChild(row);
-      }
-
-      panelEl.appendChild(group);
-    });
-
-    const overview = getL2Overview(l1Item);
-    if (overview) {
-      const overviewLink = document.createElement("a");
-      overviewLink.className = "mobile-overview-link";
-      overviewLink.href = overview.href || "#";
-      overviewLink.textContent = overview.label || `${l1Item.label || "Section"} Overview`;
-      panelEl.appendChild(overviewLink);
-    }
-
-    section.appendChild(panelEl);
-    groupList.appendChild(section);
   });
+  panelContainer.appendChild(list);
+}
+
+function renderMobileDrillL1(panelContainer, panelKey, panelConfig) {
+  renderMobileDrillHeader(panelContainer, "Main menu", () => {
+    menuState.mobileDrillPath = [];
+    renderMobileDrawerPanel();
+  });
+
+  const list = createMobileDrillList();
+  (panelConfig.l1 || []).forEach((l1Item, l1Index) => {
+    appendMobileDrillItem(list, l1Item.label || "Section", () => {
+      menuState.mobileDrillPath = [panelKey, l1Index];
+      renderMobileDrawerPanel();
+    });
+  });
+  panelContainer.appendChild(list);
+}
+
+function renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index) {
+  const l1Item = (panelConfig.l1 || [])[l1Index];
+  if (!l1Item) return;
+
+  renderMobileDrillHeader(
+    panelContainer,
+    panelConfig?.overviewLabel || "Sections",
+    () => {
+      menuState.mobileDrillPath = [panelKey];
+      renderMobileDrawerPanel();
+    },
+    { href: l1Item.href || l1Item.overviewHref || "#", label: l1Item.label || "Section" }
+  );
+
+  const list = createMobileDrillList();
+  (l1Item.l2 || []).forEach((l2Item, l2Index) => {
+    appendMobileDrillItem(list, l2Item.label || "Link", () => {
+      menuState.mobileDrillPath = [panelKey, l1Index, l2Index];
+      renderMobileDrawerPanel();
+    });
+  });
+  panelContainer.appendChild(list);
+}
+
+function renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index) {
+  const l1Item = (panelConfig.l1 || [])[l1Index];
+  const l2Item = (l1Item?.l2 || [])[l2Index];
+  if (!l1Item || !l2Item) return;
+
+  renderMobileDrillHeader(
+    panelContainer,
+    l1Item.label || "Section",
+    () => {
+      menuState.mobileDrillPath = [panelKey, l1Index];
+      renderMobileDrawerPanel();
+    },
+    { href: l2Item.href || "#", label: l2Item.label || "Link" }
+  );
+
+  const list = document.createElement("ul");
+  list.className = "mobile-drill-link-list";
+
+  (l2Item.l3 || []).forEach((l3Item) => {
+    const li = document.createElement("li");
+    li.className = "mobile-drill-link-item";
+
+    const link = document.createElement("a");
+    link.className = "mobile-drill-link";
+    link.href = l3Item.href || "#";
+    link.textContent = l3Item.label || "Sub-link";
+
+    li.appendChild(link);
+    list.appendChild(li);
+  });
+
+  panelContainer.appendChild(list);
 }
 
 function renderMobileDrawerPanel() {
@@ -568,50 +571,32 @@ function renderMobileDrawerPanel() {
   panelContainer.innerHTML = "";
 
   const panelKeys = getMobilePanelKeys();
-  panelKeys.forEach((panelKey) => {
-    const panelMeta = (menuState.siteContent?.header?.nav || []).find(
-      (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
-    );
-    const section = document.createElement("section");
-    section.className = "mobile-panel-section";
+  if (panelKeys.length === 0) return;
 
-    const trigger = document.createElement("button");
-    trigger.type = "button";
-    trigger.className = "mobile-panel-trigger";
-    const panelId = `mobilePanel-${panelKey}`.replace(/[^a-zA-Z0-9_-]/g, "-");
-    const expanded = menuState.mobileExpandedPanelKey === panelKey;
-    trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-    trigger.setAttribute("aria-controls", panelId);
+  const [panelKey, l1Index, l2Index] = menuState.mobileDrillPath;
+  if (!panelKey) {
+    renderMobileDrillRoot(panelContainer, panelKeys);
+    return;
+  }
 
-    const label = document.createElement("span");
-    label.className = "mobile-panel-label";
-    label.textContent = panelMeta?.label || panelKey;
+  const panelConfig = getPanelConfigByKey(panelKey);
+  if (!panelConfig) {
+    menuState.mobileDrillPath = [];
+    renderMobileDrillRoot(panelContainer, panelKeys);
+    return;
+  }
 
-    const icon = document.createElement("span");
-    icon.className = "mobile-panel-caret";
-    icon.textContent = expanded ? "−" : "+";
-    icon.setAttribute("aria-hidden", "true");
+  if (typeof l1Index !== "number") {
+    renderMobileDrillL1(panelContainer, panelKey, panelConfig);
+    return;
+  }
 
-    trigger.append(label, icon);
-    trigger.addEventListener("click", () => {
-      menuState.mobileExpandedPanelKey = expanded ? null : panelKey;
-      menuState.activePanelKey = panelKey;
-      renderMobileDrawerPanel();
-    });
-    section.appendChild(trigger);
+  if (typeof l2Index !== "number") {
+    renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index);
+    return;
+  }
 
-    const body = document.createElement("div");
-    body.id = panelId;
-    body.className = "mobile-panel-body";
-    body.hidden = !expanded;
-    if (expanded) {
-      menuState.activePanelKey = panelKey;
-      renderMobilePanelContent(body, panelKey);
-    }
-    section.appendChild(body);
-
-    panelContainer.appendChild(section);
-  });
+  renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index);
 }
 
 function openMenu({ focusMenu = false } = {}) {
@@ -1209,16 +1194,11 @@ function setupEvents() {
       return;
     }
     if (isMobileViewport() && menuState.mobileNavOpen) {
-      const expandedPanels = [...navList.querySelectorAll(".mobile-l1-panel:not([hidden]), .mobile-l3-list:not([hidden])")];
-      const activeInExpandedPanel = expandedPanels.some((panelEl) => panelEl.contains(document.activeElement));
-      if (activeInExpandedPanel) {
+      if (menuState.mobileDrillPath.length > 0) {
         event.preventDefault();
-        const panelKey = menuState.activePanelKey;
-        if (panelKey) {
-          setExpandedL1Index(panelKey, -1);
-        }
+        menuState.mobileDrillPath = menuState.mobileDrillPath.slice(0, -1);
         renderMobileDrawerPanel();
-        const button = navList.querySelector(".mobile-l1-trigger");
+        const button = navList.querySelector(".mobile-drill-trigger");
         if (button) button.focus();
         return;
       }

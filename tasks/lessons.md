@@ -71,3 +71,9 @@ Use this file to record correction-driven learning.
 - Root cause: Mobile implementation optimized around the active panel only and retained interim group-header controls/styles that conflicted with the intended full-menu accordion IA.
 - Prevention rule: Validate mobile drawer information architecture against final interaction model before visual polish; do not leave transitional controls in production path.
 - Actionable check for future tasks: Add a QA checklist item requiring all top-level sections to be visible as first-level drawer accordions and verify edge-to-edge row alignment at target mobile viewport.
+
+- Date: 2026-03-09
+- Trigger / correction: User requested replacing nested accordion interactions with a drill-in hierarchy model for mobile drawer navigation.
+- Root cause: The previous architecture assumed accordion disclosure at each depth, which constrained link affordance and interaction clarity for multi-level navigation.
+- Prevention rule: Confirm interaction paradigm (accordion vs drill-in) before implementing component-level state to avoid rework across both JS state and CSS selectors.
+- Actionable check for future tasks: During first implementation pass, validate one concrete path (`Top level -> L1 -> L2 -> L3`) against UX expectation before finalizing state model.

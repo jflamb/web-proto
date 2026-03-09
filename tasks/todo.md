@@ -1,5 +1,28 @@
 # TODO
 
+## Current Task (Mobile Drawer Drill-In Navigation Model)
+- [x] Replace nested mobile accordion content with a drill-in interaction model.
+- [x] Render non-link drill targets for hierarchical steps (with right-caret affordance and DS hover/focus states).
+- [x] Render level header links in drill-in views (`L1` link at L2 step, `L2` link at L3 step).
+- [x] Ensure final L3 step renders link-only rows.
+- [x] Validate mobile drill path navigation + Escape-back behavior and desktop regression.
+
+## Review / Results (Mobile Drawer Drill-In Navigation Model)
+- Replaced mobile nested accordion rendering with a path-based drill-in system:
+  - root: top-level menu sections,
+  - step 1: L1 list,
+  - step 2: L2 list,
+  - step 3: L3 links.
+- Drill targets are now buttons (not hyperlinks) with DS-consistent hover/focus/pressed styling and right-caret affordances.
+- Each drilled view includes context navigation:
+  - back control to previous level,
+  - current-level link at top (`L1` on L2 view, `L2` on L3 view).
+- Escape behavior on mobile now steps back one drill level before closing menu.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright at `768x1366`: open menu, drill to `News & Events -> News -> FDICNews`, confirm L3 links render and `Escape` steps back.
+  - Playwright at `1280x900`: desktop mega-menu layout/behavior still renders.
+
 ## Current Task (Mobile Drawer Full-Menu Accordion Layout)
 - [x] Render full top-level menu in mobile drawer as accordion sections (not a single active panel).
 - [x] Remove mobile accordion-group heading and `Expand all` control.
