@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("assets/fonts/source-sans-3-latin-wght-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: italic;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("assets/fonts/source-sans-3-latin-wght-italic.woff2") format("woff2");
+}
+
 :root {
   --fdic-blue-900: #003256;
   --fdic-blue-800: #003256;
@@ -29,7 +45,6 @@ body {
   margin: 0;
   font-family: "Source Sans 3", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-optical-sizing: auto;
-  font-variation-settings: "wght" 400;
   font-synthesis: none;
   color: var(--fdic-text);
   background: var(--fdic-bg);
@@ -325,9 +340,7 @@ body {
   padding-left: 0;
   padding-right: 16px;
   color: var(--menu-text-primary);
-  font-weight: 550;
-  font-variation-settings: "wght" 550;
-  font-synthesis: none;
+  font-weight: 560;
   justify-content: space-between;
 }
 
