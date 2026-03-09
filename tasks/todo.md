@@ -1,5 +1,25 @@
 # TODO
 
+## Current Task (Mobile Drawer Accordion Regression Follow-up)
+- [x] Reproduce the reported local mobile issues (vertical tab list, non-working accordion toggles, split-button L2 behavior, drawer width/color mismatch).
+- [x] Remove any remaining legacy mobile top-nav rendering from the off-canvas drawer path.
+- [x] Fix mobile accordion interactions so top-level and nested split toggles collapse/expand reliably.
+- [x] Ensure L2 rows with L3 children render as true split controls (link action + independent expand/collapse button).
+- [x] Make drawer and accordion stack full-width with neutral design-system-aligned styling.
+- [ ] Run regression checks (mobile + desktop behavior, syntax) and commit with clear message.
+
+## Review / Results (Mobile Drawer Accordion Regression Follow-up)
+- Removed the redundant mobile top-level selector stack so the drawer renders a single accordion system for the active panel.
+- Changed mobile accordion defaults to collapsed (`News` no longer auto-expands when menu opens).
+- Kept L2 split-button behavior and corrected nested collapse/expand state rendering for L3 lists.
+- Switched mobile accordion iconography to explicit `+ / −` glyphs for deterministic DS-style affordance.
+- Confirmed neutral drawer styling and full-width accordion rows in the off-canvas panel.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright checks:
+    - mobile `768x1366`: menu closed on load, drawer opens, L1 expands/collapses, L2 split toggles show/hide L3.
+    - desktop `1280x900`: top-nav and 3-column menu render remains functional.
+
 ## Current Task (Mobile Menu Accordion Alignment to Design System)
 - [x] Audit current mobile accordion implementation in `sites/fdicnet-main-menu` against design-system Accordion + Accordion Group specs.
 - [x] Open a GitHub issue documenting gap analysis, implementation plan, and acceptance criteria.

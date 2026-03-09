@@ -16,7 +16,8 @@ const menuState = {
   suppressL2HoverPreview: false,
   moveFocusIntoMenuOnOpen: false,
   closeHideTimer: null,
-  mobileExpandedL1Index: 0,
+  mobileExpandedL1ByPanel: {},
+  mobileExpandedL2ByPath: {},
 };
 
 const MOBILE_NAV_BREAKPOINT = "(max-width: 768px)";
@@ -122,6 +123,13 @@ function getPanelConfig() {
 
 function getPanelConfigByKey(panelKey) {
   return menuState.siteContent?.menu?.panels?.[panelKey] || null;
+}
+
+function getMobilePanelKeys() {
+  return (menuState.siteContent?.header?.nav || [])
+    .filter((item) => item.kind === "menu")
+    .map((item) => item.panelKey || item.id)
+    .filter(Boolean);
 }
 
 function getPanelL1() {
@@ -233,6 +241,7 @@ function syncMobileNavState() {
     }
     if (reduceMotionMediaQuery.matches) {
       navList.hidden = true;
+      removeMobileDrawerPanel();
       return;
     }
     if (menuState.mobileNavCloseHandler) {
@@ -311,8 +320,9 @@ function resetPanelSelection() {
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
   menuState.l1FocusIndex = 0;
-  menuState.mobileExpandedL1Index = 0;
   menuState.suppressL2HoverPreview = false;
+  menuState.mobileExpandedL1ByPanel = {};
+  menuState.mobileExpandedL2ByPath = {};
 }
 
 function renderTopNav() {
@@ -322,9 +332,11 @@ function renderTopNav() {
 
   if (mobile) {
     navList.classList.add("fdic-nav-list--mobile-accordion");
-  } else {
-    navList.classList.remove("fdic-nav-list--mobile-accordion");
+    syncTopNavState();
+    return;
   }
+
+  navList.classList.remove("fdic-nav-list--mobile-accordion");
 
   navItems.forEach((item) => {
     const li = document.createElement("li");
@@ -343,16 +355,6 @@ function renderTopNav() {
         menuState.moveFocusIntoMenuOnOpen = false;
         menuState.topNavFocusIndex = Number(button.dataset.navIndex || 0);
         const nextPanel = button.dataset.panelKey;
-        if (mobile) {
-          if (menuState.activePanelKey !== nextPanel) {
-            menuState.activePanelKey = nextPanel;
-            resetPanelSelection();
-          }
-          renderMenuPanel();
-          syncTopNavState();
-          renderMobileDrawerPanel();
-          return;
-        }
         if (menuState.activePanelKey === nextPanel) {
           if (menuState.menuOpen) {
             closeMenu();
@@ -404,12 +406,204 @@ function removeMobileDrawerPanel() {
   if (existing) existing.remove();
 }
 
+function getMobileL1PanelId(panelKey, index) {
+  return `mobileL1Panel-${panelKey}-${index}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function getMobileL2PanelId(panelKey, l1Index, l2Index) {
+  return `mobileL2Panel-${panelKey}-${l1Index}-${l2Index}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function getExpandedL1Index(panelKey, l1Items) {
+  const current = menuState.mobileExpandedL1ByPanel[panelKey];
+  if (typeof current === "number") {
+    if (current === -2 || current === -1) return current;
+    if (current >= 0 && current < l1Items.length) return current;
+  }
+  return -1;
+}
+
+function setExpandedL1Index(panelKey, nextValue) {
+  menuState.mobileExpandedL1ByPanel[panelKey] = nextValue;
+}
+
+function getL2ExpansionKey(panelKey, l1Index, l2Index) {
+  return `${panelKey}:${l1Index}:${l2Index}`;
+}
+
+function renderMobilePanelContent(targetContainer, panelKey) {
+  const panelConfig = getPanelConfigByKey(panelKey);
+  const l1Items = panelConfig?.l1 || [];
+  if (l1Items.length === 0) return;
+
+  const controls = document.createElement("div");
+  controls.className = "mobile-accordion-group-header";
+
+  const title = document.createElement("h3");
+  title.className = "mobile-accordion-group-title";
+  title.textContent = panelConfig?.overviewLabel || "Sections";
+
+  const groupToggle = document.createElement("button");
+  groupToggle.type = "button";
+  groupToggle.className = "mobile-accordion-group-toggle";
+  const expandedL1 = getExpandedL1Index(panelKey, l1Items);
+  const allExpanded = expandedL1 === -2;
+  groupToggle.setAttribute("aria-label", allExpanded ? "Collapse all sections" : "Expand all sections");
+  groupToggle.setAttribute("aria-expanded", allExpanded ? "true" : "false");
+
+  const groupToggleIcon = document.createElement("span");
+  groupToggleIcon.className = "mobile-accordion-group-toggle-icon";
+  groupToggleIcon.textContent = allExpanded ? "−" : "+";
+  groupToggleIcon.setAttribute("aria-hidden", "true");
+
+  const groupToggleLabel = document.createElement("span");
+  groupToggleLabel.className = "mobile-accordion-group-toggle-label";
+  groupToggleLabel.textContent = allExpanded ? "Collapse all" : "Expand all";
+  groupToggle.append(groupToggleIcon, groupToggleLabel);
+  groupToggle.addEventListener("click", () => {
+    setExpandedL1Index(panelKey, allExpanded ? -1 : -2);
+    renderMobileDrawerPanel();
+  });
+
+  controls.append(title, groupToggle);
+  targetContainer.appendChild(controls);
+
+  const groupList = document.createElement("div");
+  groupList.className = "mobile-accordion-group-list";
+  targetContainer.appendChild(groupList);
+
+  l1Items.forEach((l1Item, l1Index) => {
+    const section = document.createElement("section");
+    section.className = "mobile-l1-section";
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "mobile-l1-trigger";
+    trigger.dataset.panelKey = panelKey;
+    trigger.dataset.index = String(l1Index);
+
+    const panelId = getMobileL1PanelId(panelKey, l1Index);
+    const expanded = expandedL1 === -2 || expandedL1 === l1Index;
+    trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
+    trigger.setAttribute("aria-controls", panelId);
+
+    const label = document.createElement("span");
+    label.className = "mobile-l1-label";
+    label.textContent = l1Item.label || "Section";
+
+    const icon = document.createElement("span");
+    icon.className = "mobile-l1-caret";
+    icon.textContent = expanded ? "−" : "+";
+    icon.setAttribute("aria-hidden", "true");
+    trigger.append(label, icon);
+
+    trigger.addEventListener("click", () => {
+      const currentExpanded = getExpandedL1Index(panelKey, l1Items);
+      if (currentExpanded === -2) {
+        setExpandedL1Index(panelKey, l1Index);
+      } else {
+        setExpandedL1Index(panelKey, currentExpanded === l1Index ? -1 : l1Index);
+      }
+      renderMobileDrawerPanel();
+    });
+
+    section.appendChild(trigger);
+
+    const panelEl = document.createElement("div");
+    panelEl.id = panelId;
+    panelEl.className = "mobile-l1-panel";
+    panelEl.hidden = !expanded;
+
+    (l1Item.l2 || []).forEach((l2Item, l2Index) => {
+      const group = document.createElement("div");
+      group.className = "mobile-l2-group";
+
+      const row = document.createElement("div");
+      row.className = "mobile-l2-row";
+
+      const l2Link = document.createElement("a");
+      l2Link.className = "mobile-l2-item";
+      l2Link.href = l2Item.href || "#";
+      l2Link.textContent = l2Item.label || "Link";
+      row.appendChild(l2Link);
+
+      const l3Items = l2Item.l3 || [];
+      if (l3Items.length > 0) {
+        const l2PanelId = getMobileL2PanelId(panelKey, l1Index, l2Index);
+        const l2ExpansionKey = getL2ExpansionKey(panelKey, l1Index, l2Index);
+        const l2Expanded = Boolean(menuState.mobileExpandedL2ByPath[l2ExpansionKey]);
+
+        const l2Toggle = document.createElement("button");
+        l2Toggle.type = "button";
+        l2Toggle.className = "mobile-l2-toggle";
+        l2Toggle.setAttribute("aria-expanded", l2Expanded ? "true" : "false");
+        l2Toggle.setAttribute("aria-controls", l2PanelId);
+        l2Toggle.setAttribute("aria-label", l2Expanded ? `Collapse ${l2Item.label}` : `Expand ${l2Item.label}`);
+
+        const l2ToggleIcon = document.createElement("span");
+        l2ToggleIcon.className = "mobile-l2-toggle-icon";
+        l2ToggleIcon.textContent = l2Expanded ? "−" : "+";
+        l2ToggleIcon.setAttribute("aria-hidden", "true");
+        l2Toggle.appendChild(l2ToggleIcon);
+        l2Toggle.addEventListener("click", () => {
+          menuState.mobileExpandedL2ByPath[l2ExpansionKey] = !l2Expanded;
+          renderMobileDrawerPanel();
+        });
+
+        row.appendChild(l2Toggle);
+
+        const l3ListMobile = document.createElement("ul");
+        l3ListMobile.id = l2PanelId;
+        l3ListMobile.className = "mobile-l3-list";
+        l3ListMobile.hidden = !l2Expanded;
+        l3Items.forEach((l3Item) => {
+          const l3Li = document.createElement("li");
+          const l3Link = document.createElement("a");
+          l3Link.className = "mobile-l3-item";
+          l3Link.href = l3Item.href || "#";
+          l3Link.textContent = l3Item.label || "Sub-link";
+          l3Li.appendChild(l3Link);
+          l3ListMobile.appendChild(l3Li);
+        });
+
+        group.append(row, l3ListMobile);
+      } else {
+        group.appendChild(row);
+      }
+
+      panelEl.appendChild(group);
+    });
+
+    const overview = getL2Overview(l1Item);
+    if (overview) {
+      const overviewLink = document.createElement("a");
+      overviewLink.className = "mobile-overview-link";
+      overviewLink.href = overview.href || "#";
+      overviewLink.textContent = overview.label || `${l1Item.label || "Section"} Overview`;
+      panelEl.appendChild(overviewLink);
+    }
+
+    section.appendChild(panelEl);
+    groupList.appendChild(section);
+  });
+}
+
 function renderMobileDrawerPanel() {
   if (!isMobileViewport()) return;
   if (!menuState.mobileNavOpen) return;
   const panelItem = ensureMobileDrawerPanel();
   const panelContainer = panelItem.querySelector(".mobile-drawer-panel");
-  renderMobileAccordion(panelContainer);
+  if (!panelContainer) return;
+  panelContainer.innerHTML = "";
+
+  const panelKeys = getMobilePanelKeys();
+  const panelKey = menuState.activePanelKey && panelKeys.includes(menuState.activePanelKey)
+    ? menuState.activePanelKey
+    : panelKeys[0];
+  if (!panelKey) return;
+  menuState.activePanelKey = panelKey;
+
+  renderMobilePanelContent(panelContainer, panelKey);
 }
 
 function openMenu({ focusMenu = false } = {}) {
@@ -428,10 +622,6 @@ function openMenu({ focusMenu = false } = {}) {
   window.requestAnimationFrame(() => {
     if (menuState.menuOpen) {
       header.classList.add("menu-open");
-      if (isMobileViewport()) {
-        menuState.mobileExpandedL1Index = Math.max(0, menuState.selectedL1Index);
-        renderMobileAccordion();
-      }
       if (focusMenu) {
         if (!focusSelectedL1()) {
           const fallbackTarget = megaMenu.querySelector(".l2-item, .overview-link, .l3-item");
@@ -443,10 +633,6 @@ function openMenu({ focusMenu = false } = {}) {
     }
   });
   if (isMobileViewport()) {
-    const l1Items = getPanelL1();
-    menuState.mobileExpandedL1Index = l1Items.length > 0
-      ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
-      : -1;
     renderL1();
     renderL2();
     renderL3();
@@ -503,10 +689,6 @@ function closeMenu() {
   syncTopNavState();
 }
 
-function getMobileL1PanelId(index) {
-  return `mobileL1Panel-${index}`;
-}
-
 function getSelectedL1() {
   return getPanelL1()[menuState.selectedL1Index] || null;
 }
@@ -540,7 +722,6 @@ function getL2Overview(selectedL1) {
 function setSelectedL1(index, { restoreFocus = false } = {}) {
   menuState.selectedL1Index = index;
   menuState.l1FocusIndex = index;
-  menuState.mobileExpandedL1Index = index;
   menuState.selectedL2Index = 0;
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
@@ -802,163 +983,6 @@ function renderL3() {
   });
 }
 
-function renderMobileAccordion(targetContainer = mobileMenu) {
-  if (!targetContainer) return;
-
-  const l1Items = getPanelL1();
-  const panel = getPanelConfig();
-  targetContainer.innerHTML = "";
-
-  if (!panel || l1Items.length === 0) {
-    return;
-  }
-
-  const activePanelLabel = (menuState.siteContent?.header?.nav || []).find((item) => {
-    if (item.kind !== "menu") return false;
-    return (item.panelKey || item.id) === menuState.activePanelKey;
-  })?.label || "Sections";
-
-  const maxIndex = l1Items.length - 1;
-  if (menuState.mobileExpandedL1Index > maxIndex && menuState.mobileExpandedL1Index !== -2) {
-    menuState.mobileExpandedL1Index = Math.max(0, Math.min(menuState.selectedL1Index, maxIndex));
-  }
-  if (menuState.mobileExpandedL1Index < -2) {
-    menuState.mobileExpandedL1Index = -1;
-  }
-
-  const groupHeader = document.createElement("div");
-  groupHeader.className = "mobile-accordion-group-header";
-
-  const groupTitle = document.createElement("h3");
-  groupTitle.className = "mobile-accordion-group-title";
-  groupTitle.textContent = activePanelLabel;
-
-  const groupToggle = document.createElement("button");
-  groupToggle.type = "button";
-  groupToggle.className = "mobile-accordion-group-toggle";
-  const allExpanded = menuState.mobileExpandedL1Index === -2;
-  groupToggle.setAttribute("aria-label", allExpanded ? "Collapse all sections" : "Expand all sections");
-  groupToggle.setAttribute("aria-expanded", allExpanded ? "true" : "false");
-
-  const groupToggleIcon = document.createElement("span");
-  groupToggleIcon.className = `mobile-accordion-group-toggle-icon ph ${allExpanded ? "ph-minus" : "ph-plus"}`;
-  groupToggleIcon.setAttribute("aria-hidden", "true");
-
-  const groupToggleLabel = document.createElement("span");
-  groupToggleLabel.className = "mobile-accordion-group-toggle-label";
-  groupToggleLabel.textContent = allExpanded ? "Collapse all" : "Expand all";
-
-  groupToggle.append(groupToggleIcon, groupToggleLabel);
-  groupToggle.addEventListener("click", () => {
-    menuState.mobileExpandedL1Index = allExpanded ? -1 : -2;
-    renderMobileAccordion();
-  });
-
-  groupHeader.append(groupTitle, groupToggle);
-  targetContainer.appendChild(groupHeader);
-
-  const groupList = document.createElement("div");
-  groupList.className = "mobile-accordion-group-list";
-  targetContainer.appendChild(groupList);
-
-  l1Items.forEach((l1Item, index) => {
-    const section = document.createElement("section");
-    section.className = "mobile-l1-section";
-
-    const trigger = document.createElement("button");
-    trigger.type = "button";
-    trigger.className = "mobile-l1-trigger";
-    trigger.dataset.index = String(index);
-
-    const panelId = getMobileL1PanelId(index);
-    const expanded = menuState.mobileExpandedL1Index === -2 || menuState.mobileExpandedL1Index === index;
-    trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-    trigger.setAttribute("aria-controls", panelId);
-
-    const label = document.createElement("span");
-    label.className = "mobile-l1-label";
-    label.textContent = l1Item.label || "Section";
-
-    const icon = document.createElement("span");
-    icon.className = `mobile-l1-caret ph ${expanded ? "ph-minus" : "ph-plus"}`;
-    icon.setAttribute("aria-hidden", "true");
-
-    trigger.append(label, icon);
-
-    const panelEl = document.createElement("div");
-    panelEl.id = panelId;
-    panelEl.className = "mobile-l1-panel";
-    panelEl.hidden = !expanded;
-
-    (l1Item.l2 || []).forEach((l2Item) => {
-      const group = document.createElement("div");
-      group.className = "mobile-l2-group";
-
-      const l2Link = document.createElement("a");
-      l2Link.className = "mobile-l2-item";
-      l2Link.href = l2Item.href || "#";
-      l2Link.textContent = l2Item.label || "Link";
-      group.appendChild(l2Link);
-
-      const l3Items = l2Item.l3 || [];
-      if (l3Items.length > 0) {
-        const l3ListMobile = document.createElement("ul");
-        l3ListMobile.className = "mobile-l3-list";
-        l3Items.forEach((l3Item) => {
-          const l3Li = document.createElement("li");
-          const l3Link = document.createElement("a");
-          l3Link.className = "mobile-l3-item";
-          l3Link.href = l3Item.href || "#";
-          l3Link.textContent = l3Item.label || "Sub-link";
-          l3Li.appendChild(l3Link);
-          l3ListMobile.appendChild(l3Li);
-        });
-        group.appendChild(l3ListMobile);
-      }
-
-      panelEl.appendChild(group);
-    });
-
-    const overview = getL2Overview(l1Item);
-    if (overview) {
-      const overviewLink = document.createElement("a");
-      overviewLink.className = "mobile-overview-link";
-      overviewLink.href = overview.href || "#";
-      overviewLink.textContent = overview.label || `${l1Item.label || "Section"} Overview`;
-      panelEl.appendChild(overviewLink);
-    }
-
-    trigger.addEventListener("click", () => {
-      if (menuState.mobileExpandedL1Index === -2) {
-        menuState.mobileExpandedL1Index = index;
-      } else {
-        menuState.mobileExpandedL1Index = menuState.mobileExpandedL1Index === index ? -1 : index;
-      }
-      menuState.selectedL1Index = index;
-      menuState.selectedL2Index = 0;
-      renderL1();
-      renderL2();
-      renderL3();
-      renderMobileAccordion();
-    });
-
-    panelEl.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      event.stopPropagation();
-      menuState.mobileExpandedL1Index = -1;
-      renderMobileAccordion(targetContainer);
-      const target = targetContainer.querySelector(`.mobile-l1-trigger[data-index="${index}"]`);
-      if (target instanceof HTMLElement) {
-        target.focus();
-      }
-    });
-
-    section.append(trigger, panelEl);
-    groupList.appendChild(section);
-  });
-}
-
 function renderMenuPanel() {
   const panel = getPanelConfig();
   if (!panel) {
@@ -983,7 +1007,6 @@ function renderMenuPanel() {
   renderL1();
   renderL2();
   renderL3();
-  renderMobileAccordion();
 }
 
 function setupColumnArrowNav(container, selector) {
@@ -1100,14 +1123,6 @@ function setupEvents() {
   }
 
   mobileNavMediaQuery.addEventListener("change", () => {
-    const mobile = isMobileViewport();
-    if (!mobile) {
-    } else {
-      const l1Items = getPanelL1();
-      menuState.mobileExpandedL1Index = l1Items.length > 0
-        ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
-        : -1;
-    }
     syncMobileNavState();
     renderTopNav();
     renderMenuPanel();
@@ -1115,7 +1130,7 @@ function setupEvents() {
 
   narrowHeaderMediaQuery.addEventListener("change", () => {
     syncMobileNavState();
-    renderMobileAccordion();
+    renderMobileDrawerPanel();
   });
 
   phoneSearchMediaQuery.addEventListener("change", () => {
@@ -1124,12 +1139,6 @@ function setupEvents() {
 
   navList.addEventListener("keydown", (event) => {
     if (isMobileViewport()) {
-      if ((event.key === "Enter" || event.key === " ") && event.target instanceof HTMLElement) {
-        if (event.target.classList.contains("fdic-nav-item--button")) {
-          event.preventDefault();
-          event.target.click();
-        }
-      }
       return;
     }
 
@@ -1191,14 +1200,17 @@ function setupEvents() {
       if (mobileSearchToggle) mobileSearchToggle.focus();
       return;
     }
-    if (isMobileViewport() && menuState.menuOpen) {
-      const expandedPanels = mobileMenu ? [...mobileMenu.querySelectorAll(".mobile-l1-panel:not([hidden])")] : [];
+    if (isMobileViewport() && menuState.mobileNavOpen) {
+      const expandedPanels = [...navList.querySelectorAll(".mobile-l1-panel:not([hidden]), .mobile-l3-list:not([hidden])")];
       const activeInExpandedPanel = expandedPanels.some((panelEl) => panelEl.contains(document.activeElement));
       if (activeInExpandedPanel) {
         event.preventDefault();
-        menuState.mobileExpandedL1Index = -1;
-        renderMobileAccordion();
-        const button = mobileMenu?.querySelector(".mobile-l1-trigger");
+        const panelKey = menuState.activePanelKey;
+        if (panelKey) {
+          setExpandedL1Index(panelKey, -1);
+        }
+        renderMobileDrawerPanel();
+        const button = navList.querySelector(".mobile-l1-trigger");
         if (button) button.focus();
         return;
       }

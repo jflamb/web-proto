@@ -59,3 +59,9 @@ Use this file to record correction-driven learning.
 - Root cause: Global pointer close logic only handled clicks outside the entire header, so in-header non-menu clicks were excluded.
 - Prevention rule: For click-off behavior, define explicit keep-open targets and close on all other pointer targets.
 - Actionable check for future tasks: Add a pointer regression pass covering four zones: top-nav button, mega-menu panel, header non-menu controls, and page body.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported mobile drawer regressions: redundant vertical selector stack above accordions, non-obvious/non-working accordion interactions, and mismatch with DS off-canvas treatment.
+- Root cause: Mobile implementation layered multiple navigation models (top-level panel selector + nested accordions) instead of one coherent accordion hierarchy, which increased state complexity and interaction ambiguity.
+- Prevention rule: On mobile off-canvas navigation, ship one hierarchy model only (single accordion system) and reject parallel selector patterns that duplicate IA levels.
+- Actionable check for future tasks: Add a mobile smoke test that validates initial closed state, single visible accordion hierarchy, default-collapsed sections, and functional L2 split-toggle expansion before sign-off.
