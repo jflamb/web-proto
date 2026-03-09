@@ -1,5 +1,12 @@
 # TODO
 
+## Current Task (Mobile L2 Split Button Accordion Follow-up)
+- [x] Refactor mobile top accordion content so each L2 row is a split control: L2 link + caret toggle button.
+- [x] Collapse L3 lists by default and expand/collapse per-L2 only.
+- [x] Reduce excess whitespace in mobile L3 list presentation.
+- [x] Verify narrow viewport interaction and accessibility attributes (`aria-expanded`, `aria-controls`, hidden panels).
+- [x] Run `node --check sites/fdicnet-main-menu/script.js`.
+
 ## Current Task (Issue #28: Fully Responsive FDICnet Main Menu, #30 Deferred)
 - [x] Create/update issue #28 notes on GitHub to defer "L2 must render as <a>" acceptance criterion to issue #30 while keeping all other #28 criteria in scope.
 - [x] Implement responsive shell and overflow fixes in `sites/fdicnet-main-menu/styles.css`:

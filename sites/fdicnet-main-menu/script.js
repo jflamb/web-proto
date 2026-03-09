@@ -11,6 +11,7 @@ const menuState = {
   mobileNavOpen: false,
   mobileAccordionOpenIndex: 0,
   mobileTopAccordionOpenKey: null,
+  mobileL2Expanded: {},
   closeTransitionHandler: null,
 };
 
@@ -177,6 +178,22 @@ function getMobileTopAccordionPanelId(panelKey) {
   return `mobileTopPanel-${panelKey}`.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
+function getMobileL2Key(panelKey, l1Id, l2Id, l2Index) {
+  return `${panelKey}__${l1Id || "l1"}__${l2Id || "l2"}__${l2Index}`;
+}
+
+function isMobileL2Expanded(key) {
+  return menuState.mobileL2Expanded[key] === true;
+}
+
+function setMobileL2Expanded(key, expanded) {
+  if (expanded) {
+    menuState.mobileL2Expanded[key] = true;
+  } else {
+    delete menuState.mobileL2Expanded[key];
+  }
+}
+
 function setMobileTopAccordionOpenKey(panelKey) {
   menuState.mobileTopAccordionOpenKey = panelKey;
   if (panelKey) {
@@ -198,16 +215,45 @@ function buildMobileTopAccordionContent(container, panelKey) {
     heading.textContent = l1Item.label;
     group.appendChild(heading);
 
-    (l1Item.l2 || []).forEach((l2Item) => {
+    (l1Item.l2 || []).forEach((l2Item, l2Index) => {
+      const l2Key = getMobileL2Key(panelKey, l1Item.id, l2Item.id, l2Index);
+      const l3PanelId = `mobileTopL3-${l2Key}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+      const l2Row = document.createElement("div");
+      l2Row.className = "mobile-top-l2-row";
+
       const l2Link = document.createElement("a");
       l2Link.className = "l2-item mobile-top-l2-link";
       l2Link.href = l2Item.href || "#";
       l2Link.textContent = l2Item.label;
-      group.appendChild(l2Link);
+      l2Row.appendChild(l2Link);
+
+      const l3Items = l2Item.l3 || [];
+      if (l3Items.length > 0) {
+        const toggle = document.createElement("button");
+        const expanded = isMobileL2Expanded(l2Key);
+        toggle.type = "button";
+        toggle.className = "mobile-top-l2-toggle";
+        toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+        toggle.setAttribute("aria-controls", l3PanelId);
+        toggle.setAttribute("aria-label", `Toggle ${l2Item.label} links`);
+
+        const icon = document.createElement("span");
+        icon.className = "mobile-top-l2-toggle-icon ph ph-caret-down";
+        icon.setAttribute("aria-hidden", "true");
+        toggle.appendChild(icon);
+        toggle.addEventListener("click", () => {
+          setMobileL2Expanded(l2Key, !expanded);
+          renderTopNav();
+        });
+        l2Row.appendChild(toggle);
+      }
+      group.appendChild(l2Row);
 
       const l3ListGroup = document.createElement("ul");
+      l3ListGroup.id = l3PanelId;
       l3ListGroup.className = "menu-list mobile-top-l3-list";
-      (l2Item.l3 || []).forEach((l3Item) => {
+      l3ListGroup.hidden = !isMobileL2Expanded(l2Key);
+      l3Items.forEach((l3Item) => {
         const l3ListItem = document.createElement("li");
         const l3Link = document.createElement("a");
         l3Link.className = "l3-item mobile-top-l3-link";
