@@ -742,7 +742,6 @@ function syncL2ActiveState() {
     const itemIndex = Number(item.dataset.index);
     const isActive = Number.isFinite(itemIndex) && itemIndex === activeIndex;
     item.dataset.active = isActive ? "true" : "false";
-    item.setAttribute("aria-selected", isActive ? "true" : "false");
   });
 }
 
@@ -823,10 +822,9 @@ function renderL1() {
 
     button.type = "button";
     button.className = "l1-item";
-    button.setAttribute("role", "option");
     button.dataset.column = "l1";
     button.dataset.index = String(index);
-    button.setAttribute("aria-selected", index === menuState.selectedL1Index ? "true" : "false");
+    button.dataset.selected = index === menuState.selectedL1Index ? "true" : "false";
     button.tabIndex = index === rovingIndex ? 0 : -1;
 
     label.className = "l1-label";
@@ -869,13 +867,11 @@ function renderL2() {
     const isActive = index === activeIndex;
 
     link.className = "l2-item";
-    link.setAttribute("role", "option");
     link.href = l2Item.href || "#";
     link.textContent = l2Item.label;
     link.dataset.column = "l2";
     link.dataset.index = String(index);
     link.dataset.active = isActive ? "true" : "false";
-    link.setAttribute("aria-selected", isActive ? "true" : "false");
     link.tabIndex = index === 0 ? 0 : -1;
 
     link.addEventListener("mouseenter", () => {
@@ -920,8 +916,6 @@ function renderL2() {
     const overviewLi = document.createElement("li");
     const overviewLink = document.createElement("a");
     overviewLink.className = "l2-item l2-item--overview";
-    overviewLink.setAttribute("role", "option");
-    overviewLink.setAttribute("aria-selected", "false");
     overviewLink.href = l2Overview.href || "#";
     overviewLink.textContent = l2Overview.label || "Overview";
     overviewLink.dataset.column = "l2";
@@ -1051,12 +1045,12 @@ function setColumnFocus(container, selector, target) {
 }
 
 function focusSelectedL1() {
-  const target = l1List.querySelector('.l1-item[aria-selected="true"]') || l1List.querySelector(".l1-item");
+  const target = l1List.querySelector('.l1-item[data-selected="true"]') || l1List.querySelector(".l1-item");
   return setColumnFocus(l1Column, ".l1-item, #l1OverviewLink", target);
 }
 
 function focusActiveL2() {
-  const target = l2List.querySelector('.l2-item[aria-selected="true"]')
+  const target = l2List.querySelector('.l2-item[data-active="true"]')
     || l2List.querySelector('.l2-item[tabindex="0"]')
     || l2List.querySelector(".l2-item");
   return setColumnFocus(l2List, ".l2-item", target);
