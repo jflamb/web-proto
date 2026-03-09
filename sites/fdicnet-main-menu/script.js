@@ -74,12 +74,46 @@ function getMissingRequiredElements() {
 }
 
 async function loadContent() {
-  const response = await fetch("content.yaml", { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Unable to load content.yaml (${response.status})`);
+  const scriptEl = document.querySelector('script[src$="script.js"]');
+  const scriptSrc = scriptEl?.getAttribute("src") || "script.js";
+  const candidateUrls = [
+    new URL("content.yaml", window.location.href).toString(),
+    new URL("content.yaml", window.location.origin + window.location.pathname.replace(/\/?$/, "/")).toString(),
+    new URL("content.yaml", new URL(scriptSrc, window.location.href)).toString(),
+  ];
+  const dedupedUrls = [...new Set(candidateUrls)];
+
+  let lastError = null;
+  for (const url of dedupedUrls) {
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) {
+        lastError = new Error(`Unable to load content.yaml from ${url} (${response.status})`);
+        continue;
+      }
+      const text = await response.text();
+      return window.jsyaml.load(text);
+    } catch (error) {
+      lastError = error;
+    }
   }
-  const text = await response.text();
-  return window.jsyaml.load(text);
+  throw lastError || new Error("Unable to load content.yaml from any known URL");
+}
+
+function renderContentLoadFallback() {
+  pageTitle.textContent = "FDICnet Main Menu Prototype";
+  pageIntro.innerHTML = "";
+  const fallbackLines = [
+    "Menu content is temporarily unavailable because the configuration file could not be loaded.",
+    "Try refreshing the page. If the issue persists, verify that content.yaml is reachable from this page URL.",
+  ];
+  fallbackLines.forEach((line) => {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = line;
+    pageIntro.appendChild(paragraph);
+  });
+  megaMenu.hidden = true;
+  megaMenu.setAttribute("aria-hidden", "true");
 }
 
 function getPanelConfig() {
@@ -1200,6 +1234,7 @@ async function init() {
     menuState.siteContent = await loadContent();
   } catch (error) {
     console.error("Failed to load site content:", error);
+    renderContentLoadFallback();
     return;
   }
 
