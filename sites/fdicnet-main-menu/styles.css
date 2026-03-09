@@ -873,7 +873,7 @@ body {
     gap: var(--ds-spacing-sm);
     line-height: 1.375;
     min-height: 44px;
-    padding: 10px var(--ds-spacing-md);
+    padding: 8px var(--ds-spacing-md);
     text-align: left;
     width: 100%;
   }
@@ -896,7 +896,7 @@ body {
     font-weight: 600;
     line-height: 1.375;
     min-height: 44px;
-    padding: 10px var(--ds-spacing-md);
+    padding: 8px var(--ds-spacing-md);
     text-decoration: underline;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
@@ -928,7 +928,7 @@ body {
     font-size: var(--ds-font-size-md);
     line-height: 1.375;
     min-height: 44px;
-    padding: 10px var(--ds-spacing-md);
+    padding: 8px var(--ds-spacing-md);
     text-align: left;
     text-decoration: none;
     width: 100%;
