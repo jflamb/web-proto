@@ -882,7 +882,7 @@ function renderL2() {
       if (menuState.suppressL2HoverPreview) return;
       setPreviewL2(index);
     });
-    link.addEventListener("focus", () => setPreviewL2(index));
+    link.addEventListener("focus", () => setPreviewL2(index, { fromFocus: true, restoreFocus: true }));
     link.addEventListener("click", (event) => {
       if (
         event.button !== 0
@@ -931,7 +931,7 @@ function renderL2() {
       if (menuState.suppressL2HoverPreview) return;
       setPreviewOverview();
     });
-    overviewLink.addEventListener("focus", () => setPreviewOverview());
+    overviewLink.addEventListener("focus", () => setPreviewOverview({ fromFocus: true, restoreFocus: true }));
     overviewLi.appendChild(overviewLink);
     l2List.appendChild(overviewLi);
   }

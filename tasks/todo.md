@@ -1,5 +1,17 @@
 # TODO
 
+## Current Task (Menu Keyboard Navigation Regression Recovery)
+- [x] Diagnose why arrow-key navigation within/across mega-menu columns is failing.
+- [x] Restore focus-preserving keyboard navigation for L1/L2/L3 (up/down, left/right).
+- [x] Verify keyboard movement and focus visibility behavior, then commit.
+
+## Review / Results (Menu Keyboard Navigation Regression Recovery)
+- Root cause: L2 focus handlers invoked preview updates that could re-render the column during focus transitions, causing focused elements to be replaced and focus to fall back to `body`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - L2 item `focus` handler now calls `setPreviewL2(index, { fromFocus: true, restoreFocus: true })`.
+  - L2 overview-link `focus` handler now calls `setPreviewOverview({ fromFocus: true, restoreFocus: true })`.
+- Effect: keyboard arrow navigation now preserves focus identity while updating preview state.
+
 ## Current Task (L2/L3 Link Background Cleanup)
 - [x] Remove gray background hover treatment from second/third-column hyperlinks.
 - [x] Preserve hyperlink color/underline hover styling without row background fill.
