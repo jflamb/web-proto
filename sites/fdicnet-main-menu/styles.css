@@ -630,8 +630,28 @@ body {
 }
 
 @media (min-width: 769px) and (max-width: 1049px) {
+  .fdic-nav-item {
+    padding: 0 10px;
+  }
+
+  .fdic-nav-list > li:first-child .fdic-nav-item {
+    margin-left: -10px;
+    padding-left: 10px;
+  }
+
   .mega-menu-inner {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  }
+}
+
+@media (min-width: 1050px) and (max-width: 1200px) {
+  .fdic-nav-item {
+    padding: 0 12px;
+  }
+
+  .fdic-nav-list > li:first-child .fdic-nav-item {
+    margin-left: -12px;
+    padding-left: 12px;
   }
 }
 
