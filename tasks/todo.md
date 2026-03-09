@@ -1,5 +1,35 @@
 # TODO
 
+## Current Task (Mobile Menu Accordion Alignment to Design System)
+- [x] Audit current mobile accordion implementation in `sites/fdicnet-main-menu` against design-system Accordion + Accordion Group specs.
+- [x] Open a GitHub issue documenting gap analysis, implementation plan, and acceptance criteria.
+- [x] Create and switch to a feature branch for implementation work.
+- [x] Refactor mobile accordion UI to a single DS-aligned pattern and remove legacy duplicate style path.
+- [x] Align mobile accordion/group styles to DS tokens and state treatments (default/hover/pressed/focus).
+- [x] Run regression checks for mobile/desktop menu interactions and script syntax.
+
+## Review / Results (Mobile Menu Accordion Alignment to Design System)
+- Scope expanded: include site style/token alignment to design-system tokens and interaction states (tracked in issue #54).
+- Opened issue: `#54`  
+  - `https://github.com/jflamb/pens-github-test/issues/54`
+- Issue includes:
+  - implementation-focused gap analysis (architecture, token fidelity, behavior, visual parity, accessibility alignment).
+  - detailed stepwise implementation plan.
+  - explicit acceptance criteria and verification matrix.
+- Created and switched branch:
+  - `feat/issue-54-mobile-accordion-ds-alignment`
+- Implemented:
+  - removed dead `mobileTopAccordion`/legacy state references in `script.js`.
+  - added mobile accordion-group heading + `Expand all` / `Collapse all` control and plus/minus glyph behavior.
+  - replaced duplicate mobile-top CSS path with one canonical mobile accordion style path.
+  - introduced DS token aliases in `:root` and applied them to mobile accordion/group styles.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright interaction pass on local server:
+    - mobile `375x900`: expand/collapse single section, expand all, collapse all, drawer open/close.
+    - desktop `1280x900`: top-nav/mega-menu baseline behavior intact.
+  - Console/network check: only non-blocking `favicon.ico` 404 from local static server.
+
 ## Current Task (Narrow Header Menu + Phone Search Toggle)
 - [x] Move narrow-width menu entry to icon-only masthead hamburger (left of FDIC wordmark).
 - [x] Hide `Menu` label in narrow mode while preserving accessible label.
