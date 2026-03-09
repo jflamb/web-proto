@@ -505,6 +505,28 @@ body {
   opacity: 1;
 }
 
+.l1-item:hover .l1-caret,
+.l1-item:focus-visible .l1-caret {
+  opacity: 1;
+}
+
+.l2-label {
+  flex: 1;
+  min-width: 0;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.l2-caret {
+  margin-left: auto;
+}
+
+.l2-item:hover .l2-caret,
+.l2-item:focus-visible .l2-caret {
+  opacity: 1;
+}
+
 .l2-item:focus-visible,
 .l3-item:focus-visible {
   outline: none;
@@ -518,15 +540,17 @@ body {
   max-width: none;
   padding: 8px 16px 8px 24px;
   color: var(--menu-link);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
 
 .l2-item:hover,
 .l3-item:hover {
   background: var(--menu-hover-overlay);
   color: var(--menu-link);
+}
+
+.l2-item:hover .l2-label,
+.l2-item:focus-visible .l2-label {
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;
 }

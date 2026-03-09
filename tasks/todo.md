@@ -1,5 +1,38 @@
 # TODO
 
+## Current Task (L2 Caret Underline Follow-up)
+- [x] Move L2 underline styling from the anchor wrapper to text label only.
+- [x] Ensure hover/focus underline emphasis still applies to the L2 label text.
+- [x] Verify caret glyph no longer receives underline decoration.
+
+## Review / Results (L2 Caret Underline Follow-up)
+- Root cause: L2 underline was applied on `.l2-item` (the anchor wrapper), so text decoration also rendered under the caret glyph.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - moved base underline styling to `.l2-label` only.
+  - set `.l2-item { text-decoration: none; }`.
+  - moved hover/focus underline emphasis to `.l2-item:hover .l2-label` and `.l2-item:focus-visible .l2-label`.
+- Verification:
+  - `rg -n "^\\.l2-item \\{|^\\.l2-label \\{|l2-item:hover \\.l2-label|l2-item:focus-visible \\.l2-label|\\.l2-caret" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css`
+
+## Current Task (Hover Carets in First + Second Columns)
+- [x] Show first-column caret on hover using the same size/position as the active-state caret.
+- [x] Add matching right-caret affordance to second-column items on hover.
+- [x] Verify caret behavior remains desktop-only and does not affect mobile drill navigation.
+
+## Review / Results (Hover Carets in First + Second Columns)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - L2 links now render structured content (`.l2-label` + right-caret span) using the same caret classes as L1 (`.l1-caret ph ph-caret-right`).
+  - L2 overview link uses the same structure and caret element.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - first-column carets now appear on hover/focus (`.l1-item:hover .l1-caret`, `.l1-item:focus-visible .l1-caret`) in addition to existing selected-state behavior.
+  - added `.l2-label` flex sizing so text wraps without overlapping the caret.
+  - added `.l2-caret` alignment and hover/focus visibility rules (`.l2-item:hover .l2-caret`, `.l2-item:focus-visible .l2-caret`).
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "l2-label|l2-caret|l1-item:hover \\.l1-caret|l2-item:hover \\.l2-caret|ph-caret-right" sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/styles.css`
+
 ## Current Task (Third-Column Highlight Extension to Viewport Edge)
 - [x] Extend third-column item hover/focus highlight fill to the right viewport edge.
 - [x] Preserve existing third-column underline/focus-ring styling while adding edge extension.
