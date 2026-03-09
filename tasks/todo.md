@@ -1572,3 +1572,28 @@
     - keyboard open/focus return on Escape
     - responsive overflow across `375, 768, 769, 900, 1024, 1280, 1440`
     - mobile accordion open-state, single-open behavior, touch-target sizing, and Escape handling
+
+## Current Task (A11y Issues #57, #58, #60)
+- [x] Create branch `fix/a11y-57-58-60-mega-menu` from `main`.
+- [x] Fix issue #57 by removing `aria-hidden` on mega-menu open while preserving `aria-hidden="true"` on close/init/fallback.
+- [x] Fix issue #58 by exposing intended labels via valid semantics (`role="group"` on header controls and `nav` landmark for mobile menu).
+- [x] Fix issue #60 by closing mega menu when keyboard focus leaves the menu system (top nav + mega menu) using `requestAnimationFrame` focus checks.
+- [x] Run syntax/source checks and document any environment-specific verification gaps.
+- [x] Open PR with implementation plan and validation matrix; include `Closes #57`, `Closes #58`, `Closes #60`.
+
+## Review / Results (A11y Issues #57, #58, #60)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - `openMenu()` now uses `megaMenu.removeAttribute("aria-hidden")`.
+  - Added `scheduleMenuSystemFocusExitCheck()` and wired `focusout` listeners on `#megaMenu` and `#fdicNavList`.
+  - Menu now closes when focus leaves both mega menu and top-nav controls; column-to-column and nav<->menu transitions stay open.
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - `.fdic-controls` now has `role="group"` with existing `aria-label="Header controls"`.
+  - `#mobileMenu` changed from `<div>` to `<nav aria-label="Mobile menu">`.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "aria-hidden\", \"false\"|removeAttribute\(\"aria-hidden\"\)|setAttribute\(\"aria-hidden\", \"true\"\)|scheduleMenuSystemFocusExitCheck|addEventListener\(\"focusout\"" sites/fdicnet-main-menu/script.js -S`
+  - `rg -n "fdic-controls|mobileMenu" sites/fdicnet-main-menu/index.html -S`
+- Environment gap:
+  - Attempted Playwright MCP browser validation against local static server, but MCP browser could not connect to `127.0.0.1` in this environment (`ERR_CONNECTION_REFUSED`), so VoiceOver/NVDA and cross-browser keyboard checks are documented for follow-up in PR.
+- PR:
+  - `https://github.com/jflamb/pens-github-test/pull/64`
