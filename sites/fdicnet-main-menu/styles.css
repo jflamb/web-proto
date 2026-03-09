@@ -757,6 +757,12 @@ body {
     z-index: 90;
   }
 
+  .fdic-nav-toggle--drill-hidden {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
   .mobile-menu-open .fdic-nav-toggle {
     position: relative;
     top: auto;

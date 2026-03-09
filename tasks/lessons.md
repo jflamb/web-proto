@@ -95,7 +95,6 @@ Use this file to record correction-driven learning.
 - Root cause: Focus indication was rendered as two independent rings (row box + extension layer), which visually split at the join.
 - Prevention rule: For split visual layers, draw focus ring via a single continuous overlay that spans the combined hit area.
 - Actionable check for future tasks: In visual QA at 100% zoom, inspect focused full-bleed rows for seam artifacts at extension boundaries.
-
 - Date: 2026-03-09
 - Trigger / correction: User reported the mobile drawer close control disappeared after drilling past top-level navigation.
 - Root cause: Mobile toggle sync logic hid the nav toggle whenever drill depth was greater than zero, removing the only persistent close affordance in deeper drawer states.

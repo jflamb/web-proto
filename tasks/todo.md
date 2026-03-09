@@ -33,7 +33,6 @@
 - Verification:
   - `rg -n "role=\"listbox\"|role=\"option\"|aria-selected" sites/fdicnet-main-menu -S` returns no matches.
   - `node --check sites/fdicnet-main-menu/script.js` passes.
-
 ## Current Task (First-Column Focus Seam Removal)
 - [x] Replace split focus-ring rendering with one continuous ring spanning left extension + row body.
 - [x] Preserve existing hover/selected background behavior while fixing focus seam artifact.
