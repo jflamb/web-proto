@@ -188,9 +188,7 @@ function syncMobileToggleButton() {
   const icon = navToggle.querySelector(".ph");
   const label = navToggle.querySelector("span");
   const isOpen = menuState.mobileNavOpen;
-  const hideInDrill = isOpen && menuState.mobileDrillPath.length > 0 && isMobileViewport();
   navToggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
-  navToggle.classList.toggle("fdic-nav-toggle--drill-hidden", hideInDrill);
   if (label) label.textContent = isOpen ? "Close" : "Menu";
   if (icon) {
     icon.classList.remove("ph-list", "ph-x");

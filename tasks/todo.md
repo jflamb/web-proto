@@ -1,5 +1,24 @@
 # TODO
 
+## Current Task (Mobile Drawer Close Button Regression on Drill-In)
+- [x] Remove mobile drill-depth toggle hiding so close control stays visible at all levels.
+- [x] Remove obsolete CSS class used only for drill-depth toggle hiding.
+- [x] Verify mobile drawer open/close + drill navigation still works and close is always available.
+
+## Review / Results (Mobile Drawer Close Button Regression on Drill-In)
+- Root cause: `syncMobileToggleButton()` on `main` still toggled `.fdic-nav-toggle--drill-hidden` when `mobileDrillPath.length > 0`, hiding the global close control after drill-in.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - removed drill-depth hide calculation from `syncMobileToggleButton()`.
+  - retained label/icon/ARIA updates tied to open/closed state only.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed `.fdic-nav-toggle--drill-hidden` rule (no longer referenced).
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "fdic-nav-toggle--drill-hidden|hideInDrill|mobileDrillPath.length > 0 && isMobileViewport" sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/styles.css -S` (no matches)
+  - Playwright mobile pass at `390x844`:
+    - open menu -> drill `News & Events` -> drill `News`.
+    - evaluated `.fdic-nav-toggle` state: `aria-label=Close menu`, `opacity=1`, `visibility=visible`, `pointer-events=auto`.
+
 ## Current Task (Mobile Drawer Close Control Persistence)
 - [x] Remove drill-depth-based hiding of the mobile nav toggle so close remains visible at all drill layers.
 - [x] Verify mobile drawer state transitions still update menu toggle label/icon/ARIA correctly.
