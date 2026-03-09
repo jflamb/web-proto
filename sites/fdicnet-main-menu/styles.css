@@ -384,7 +384,7 @@ body {
 .mega-col--l1 .menu-list {
   max-height: min(640px, calc(100vh - 220px));
   overflow-y: auto;
-  padding-right: 8px;
+  padding-right: 0;
 }
 
 .menu-list li {
