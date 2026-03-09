@@ -640,9 +640,9 @@ body {
   }
 
   .mobile-menu-open .fdic-nav-toggle {
-    position: fixed;
-    top: 12px;
-    left: 12px;
+    position: relative;
+    top: auto;
+    left: auto;
     z-index: 90;
     background: rgba(0, 50, 86, 0.96);
     border-color: rgba(255, 255, 255, 0.42);
