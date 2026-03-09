@@ -6,7 +6,7 @@
 - [x] Fix mobile accordion interactions so top-level and nested split toggles collapse/expand reliably.
 - [x] Ensure L2 rows with L3 children render as true split controls (link action + independent expand/collapse button).
 - [x] Make drawer and accordion stack full-width with neutral design-system-aligned styling.
-- [ ] Run regression checks (mobile + desktop behavior, syntax) and commit with clear message.
+- [x] Run regression checks (mobile + desktop behavior, syntax) and commit with clear message.
 
 ## Review / Results (Mobile Drawer Accordion Regression Follow-up)
 - Removed the redundant mobile top-level selector stack so the drawer renders a single accordion system for the active panel.
