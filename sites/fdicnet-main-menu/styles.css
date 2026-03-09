@@ -819,7 +819,7 @@ body {
 
   .mobile-drill-trigger,
   .mobile-drill-link {
-    align-items: center;
+    align-items: flex-start;
     background: var(--ds-background-base);
     border: 0;
     color: var(--ds-text-primary);
@@ -828,8 +828,8 @@ body {
     font-family: inherit;
     font-size: var(--ds-font-size-md);
     line-height: 1.375;
-    min-height: 52px;
-    padding: 0 var(--ds-spacing-md);
+    min-height: 44px;
+    padding: 10px var(--ds-spacing-md);
     text-align: left;
     text-decoration: none;
     width: 100%;
@@ -840,6 +840,11 @@ body {
     font-weight: 600;
     justify-content: space-between;
     position: relative;
+  }
+
+  .mobile-drill-label,
+  .mobile-drill-link {
+    white-space: normal;
   }
 
   .mobile-drill-caret {

@@ -77,3 +77,9 @@ Use this file to record correction-driven learning.
 - Root cause: The previous architecture assumed accordion disclosure at each depth, which constrained link affordance and interaction clarity for multi-level navigation.
 - Prevention rule: Confirm interaction paradigm (accordion vs drill-in) before implementing component-level state to avoid rework across both JS state and CSS selectors.
 - Actionable check for future tasks: During first implementation pass, validate one concrete path (`Top level -> L1 -> L2 -> L3`) against UX expectation before finalizing state model.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported mobile drill rows were visually equal-height even when content wrapped to multiple lines.
+- Root cause: Row styles used fixed-like vertical rhythm (`min-height` with no vertical padding), so two-line content often remained at the same visual height as one-line rows.
+- Prevention rule: For variable-length nav labels, use content-driven block sizing (`min-height` + vertical padding + wrapping), not fixed row heights.
+- Actionable check for future tasks: In mobile QA, verify at least one one-line and one wrapped two-line item have different rendered heights while preserving minimum touch target size.
