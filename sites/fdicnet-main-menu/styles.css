@@ -450,6 +450,7 @@ body {
   background: #fff;
   position: relative;
   outline: none;
+  box-shadow: inset 0 0 0 2px #005ea2;
 }
 
 .l1-item:hover::before,
@@ -557,6 +558,7 @@ body {
 .overview-link:focus-visible {
   background: #fff;
   outline: none;
+  box-shadow: inset 0 0 0 2px #005ea2;
   color: var(--menu-link);
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;

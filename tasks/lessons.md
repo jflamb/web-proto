@@ -83,3 +83,9 @@ Use this file to record correction-driven learning.
 - Root cause: Row styles used fixed-like vertical rhythm (`min-height` with no vertical padding), so two-line content often remained at the same visual height as one-line rows.
 - Prevention rule: For variable-length nav labels, use content-driven block sizing (`min-height` + vertical padding + wrapping), not fixed row heights.
 - Actionable check for future tasks: In mobile QA, verify at least one one-line and one wrapped two-line item have different rendered heights while preserving minimum touch target size.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported first-column focus rectangle appeared only left of the label instead of covering the entire row.
+- Root cause: Focus ring was applied only to the full-bleed left extension pseudo-element and not the row element itself.
+- Prevention rule: For full-bleed row treatments, ensure focus indicators are applied to both extension and in-column item regions.
+- Actionable check for future tasks: In keyboard QA, verify focus ring continuity from viewport-edge extension through the full clickable row width in first-column items.

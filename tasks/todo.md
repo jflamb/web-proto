@@ -1,5 +1,17 @@
 # TODO
 
+## Current Task (First-Column Focus Ring Coverage Fix)
+- [x] Ensure first-column focus rectangle covers the full item area (left viewport edge through right edge of the row item).
+- [x] Keep hover/selected visual behavior unchanged while correcting focus-ring geometry.
+- [x] Verify and commit the focused CSS fix.
+
+## Review / Results (First-Column Focus Ring Coverage Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added inset focus ring on `.l1-item:focus-visible` so the item portion of the row is outlined.
+  - added inset focus ring on `.overview-link:focus-visible` for the same full-row coverage behavior.
+  - retained full-bleed pseudo-element focus ring for left-of-column extension.
+- Result: focus rectangle now spans from the viewport-left extension through the visible row item.
+
 ## Current Task (First-Column Focus Ring Full-Bleed Alignment)
 - [x] Update first-column focus indicators so ring extent matches full-bleed background highlight area.
 - [x] Apply same focus-ring extent behavior to first-column overview link row for consistency.
