@@ -5,6 +5,11 @@
 - [x] Add drawer top spacing/header treatment for stable button-to-content separation.
 - [x] Verify mobile open/close rendering and interaction remain correct.
 
+## Current Task (Mobile Interaction Regression Pass)
+- [x] Reproduce report that accordion interactions dismiss menu unexpectedly.
+- [x] Validate interaction matrix: open/close toggle, top-level accordion expand, L2 split toggle, outside click dismiss, Escape dismiss.
+- [x] Fix click-layer/stacking issue so accordion controls remain interactive while drawer is open.
+
 ## Current Task (Mobile Off-Canvas Menu Entry Point)
 - [x] Convert mobile nav list to off-canvas drawer behavior controlled by the Menu button.
 - [x] Update Menu button to switch between Menu and Close states (icon/text/ARIA) while drawer is open.

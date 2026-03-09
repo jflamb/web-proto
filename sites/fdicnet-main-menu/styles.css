@@ -557,8 +557,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    position: relative;
-    z-index: 30;
   }
 
   .fdic-nav-toggle {
