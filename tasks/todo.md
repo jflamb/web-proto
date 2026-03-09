@@ -1,5 +1,19 @@
 # TODO
 
+## Current Task (First-Column Overview Link Hit Target + States)
+- [x] Match first-column overview link row padding and target size to L1 row geometry.
+- [x] Apply first-column-equivalent hover/focus row styling while preserving hyperlink text treatment.
+- [x] Verify CSS diff scope and commit.
+
+## Review / Results (First-Column Overview Link Hit Target + States)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed `overview-link` from L2/L3 compact-row sizing rule.
+  - removed `overview-link` from L2/L3 overlay-hover rule.
+  - made `.overview-link` full-width, L1-sized row (`min-height: 41px`, row padding aligned to first column controls).
+  - added dedicated full-row hover/focus visuals for `.overview-link` to match first-column item affordance while keeping link underline/text styling.
+- Verification:
+  - `git diff -- sites/fdicnet-main-menu/styles.css`
+
 ## Current Task (Header Apps Button + Desktop Search Gap Alignment)
 - [x] Reduce wide-viewport spacing between header action icons and search to match smaller viewport spacing.
 - [x] Add new `Apps` icon button immediately left of the profile icon button with no extra inter-button gap.
