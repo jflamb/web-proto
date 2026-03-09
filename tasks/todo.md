@@ -1,5 +1,60 @@
 # TODO
 
+## Current Task (Issue #28: Fully Responsive FDICnet Main Menu, #30 Deferred)
+- [x] Create/update issue #28 notes on GitHub to defer "L2 must render as <a>" acceptance criterion to issue #30 while keeping all other #28 criteria in scope.
+- [x] Implement responsive shell and overflow fixes in `sites/fdicnet-main-menu/styles.css`:
+- [x] Add tablet breakpoint (`769px-1049px`) with `.fdic-shell` width `calc(100% - 64px)`.
+- [x] Keep desktop shell width `calc(100% - 128px)` for `>=1050px` and mobile width `calc(100% - 32px)` for `<=768px`.
+- [x] Make `.mega-menu-inner` tablet columns fluid to avoid horizontal scrolling at 769/900/1024 widths.
+- [x] Remove `white-space: nowrap` from `.l2-item`, `.overview-link`, `.l3-item` and add robust wrapping/readability styles.
+- [x] Preserve L1 full-bleed background behavior without introducing horizontal overflow.
+- [x] Implement mobile accordion behavior in `sites/fdicnet-main-menu/script.js`:
+- [x] Add separate mobile accordion state with single-open semantics.
+- [x] Default expanded mobile panel to `selectedL1Index` when menu opens on mobile.
+- [x] Render L1 accordion controls with `aria-expanded`/`aria-controls` and stable panel IDs.
+- [x] Render expanded mobile panel hierarchy as L2 rows + immediate L3 rows (always visible) + overview link at panel bottom.
+- [x] Add mobile `Escape` behavior: close expanded panel and return focus to trigger when focus is inside that panel; otherwise preserve global close behavior.
+- [x] Keep desktop (`>=769px`) three-column preview/roving interaction unchanged.
+- [x] Implement mobile hierarchy and target-size styling in `sites/fdicnet-main-menu/styles.css`:
+- [x] Add visual hierarchy/indentation for L1/L2/L3 content inside accordion panels.
+- [x] Add chevron indicator with expanded rotation state.
+- [x] Respect `prefers-reduced-motion` for accordion/menu transitions and chevron animation.
+- [x] Enforce minimum 44px interactive target height and >=8px separation between adjacent controls.
+- [x] Verification:
+- [x] Run `node --check sites/fdicnet-main-menu/script.js`.
+- [x] Confirm nowrap removal and new breakpoint blocks with selector/text checks.
+- [x] Validate no horizontal overflow at widths 375, 768, 769, 900, 1024, 1280, 1440 (document root and `.mega-menu-inner`).
+- [x] Verify desktop parity (`>=1050`) and tablet usability (`769-1049`) with no clipping.
+- [x] Verify mobile accordion behavior (`<=768`): one-open logic, default-open panel, visible L3 rows, overview placement, unchanged hamburger behavior.
+- [x] Verify accessibility/keyboard contract: `aria-expanded`/`aria-controls`, collapsed panel hidden, visual tab order parity, `Enter`/`Space` toggles, panel-level `Escape`, reduced-motion animation suppression.
+- [x] Commit, push branch, and open PR documenting implementation and verification details.
+
+## Review / Results (Issue #28: Fully Responsive FDICnet Main Menu, #30 Deferred)
+- Branch: `fix/issue-28-responsive-accordion-menu`.
+- GitHub issue updates completed before code changes:
+  - Updated issue `#28` acceptance criteria body to defer L2-as-`<a>` requirement to issue `#30`.
+  - Added scope-adjustment comment: `https://github.com/jflamb/pens-github-test/issues/28#issuecomment-4020663698`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added explicit `mobileAccordionOpenIndex` state separate from desktop preview state.
+  - added single-open mobile accordion rendering (L1 buttons with `aria-expanded`/`aria-controls` and stable panel IDs).
+  - default-open mobile accordion synced to current `selectedL1Index` whenever menu opens in mobile viewport.
+  - mobile panel now renders full hierarchy in one panel: L2 row labels, immediate L3 links, and bottom overview link.
+  - added panel-level mobile Escape handling that collapses current panel and restores focus to its L1 trigger.
+  - retained desktop interaction model and addressed L2 focus-preview stability.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added explicit shell widths for mobile/tablet/desktop breakpoints.
+  - added tablet fluid `grid-template-columns` for `.mega-menu-inner`.
+  - removed nowrap constraints and added wrapping safety/readability tuning.
+  - preserved full-bleed L1 background behavior with transform-based pseudo-element positioning to avoid overflow.
+  - added mobile accordion hierarchy, chevron rotation, and touch-target spacing/min-height styles.
+  - extended reduced-motion rules to suppress chevron animation.
+- Verification evidence:
+  - `node --check sites/fdicnet-main-menu/script.js` passed.
+  - selector checks confirmed target breakpoint blocks and nowrap removal.
+  - Playwright viewport matrix passed at `375, 768, 769, 900, 1024, 1280, 1440`: `documentElement.scrollWidth <= clientWidth` and `.mega-menu-inner.scrollWidth <= clientWidth` at each width.
+  - mobile keyboard/accessibility checks passed for `aria-expanded`/`aria-controls`, hidden collapsed panels, one-open accordion behavior, Enter/Space toggles, panel-level Escape focus return, and reduced-motion transition suppression.
+
+
 ## Current Task (FDICnet Fit & Finish: Link States + L1 Weight)
 - [x] Align menu link default/hover/focus styles to requested Figma interaction states.
 - [x] Reduce first-column item text heaviness to Source Sans 3, 18px, semibold treatment.

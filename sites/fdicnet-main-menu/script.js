@@ -9,6 +9,7 @@ const menuState = {
   previewClearTimer: null,
   topNavFocusIndex: 0,
   mobileNavOpen: false,
+  mobileAccordionOpenIndex: 0,
   closeTransitionHandler: null,
 };
 
@@ -153,6 +154,7 @@ function resetPanelSelection() {
   menuState.selectedL2Index = 0;
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
+  menuState.mobileAccordionOpenIndex = 0;
 }
 
 function renderTopNav() {
@@ -219,6 +221,15 @@ function openMenu() {
       header.classList.add("menu-open");
     }
   });
+  if (isMobileViewport()) {
+    const l1Items = getPanelL1();
+    menuState.mobileAccordionOpenIndex = l1Items.length > 0
+      ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
+      : null;
+    renderL1();
+    renderL2();
+    renderL3();
+  }
   syncTopNavState();
 }
 
@@ -247,6 +258,27 @@ function closeMenu() {
   renderL2();
   renderL3();
   syncTopNavState();
+}
+
+function getMobileAccordionPanelId(index) {
+  const panelKey = menuState.activePanelKey || "panel";
+  return `mobileAccordionPanel-${panelKey}-${index}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function setMobileAccordionOpenIndex(nextIndex) {
+  const l1Items = getPanelL1();
+  if (typeof nextIndex === "number" && nextIndex >= 0 && nextIndex < l1Items.length) {
+    menuState.mobileAccordionOpenIndex = nextIndex;
+    menuState.selectedL1Index = nextIndex;
+    menuState.selectedL2Index = 0;
+  } else {
+    menuState.mobileAccordionOpenIndex = null;
+  }
+  menuState.previewL2Index = null;
+  menuState.previewingOverview = false;
+  renderL1();
+  renderL2();
+  renderL3();
 }
 
 function getSelectedL1() {
@@ -293,12 +325,32 @@ function setSelectedL1(index, { restoreFocus = false } = {}) {
   }
 }
 
-function setPreviewL2(index, { restoreFocus = false } = {}) {
+function syncL2ActiveState() {
+  const activeIndex = getVisibleL2Index();
+  const l2Items = [...l2List.querySelectorAll('.l2-item[data-index]')];
+  l2Items.forEach((item) => {
+    const itemIndex = Number(item.dataset.index);
+    const isActive = Number.isFinite(itemIndex) && itemIndex === activeIndex;
+    item.dataset.active = isActive ? "true" : "false";
+    if (isActive) {
+      item.setAttribute("aria-current", "true");
+    } else {
+      item.removeAttribute("aria-current");
+    }
+  });
+}
+
+function setPreviewL2(index, { restoreFocus = false, fromFocus = false } = {}) {
   const previewChanged = menuState.previewL2Index !== index || menuState.previewingOverview;
   if (!previewChanged) return;
+  const fromOverviewPreview = menuState.previewingOverview;
   menuState.previewingOverview = false;
   menuState.previewL2Index = index;
-  renderL2();
+  if (fromFocus && !fromOverviewPreview) {
+    syncL2ActiveState();
+  } else {
+    renderL2();
+  }
   renderL3();
   if (restoreFocus) {
     const target = l2List.querySelector(`.l2-item[data-index="${index}"]`);
@@ -306,11 +358,15 @@ function setPreviewL2(index, { restoreFocus = false } = {}) {
   }
 }
 
-function setPreviewOverview({ restoreFocus = false } = {}) {
+function setPreviewOverview({ restoreFocus = false, fromFocus = false } = {}) {
   if (menuState.previewL2Index === null && menuState.previewingOverview) return;
   menuState.previewL2Index = null;
   menuState.previewingOverview = true;
-  renderL2();
+  if (fromFocus) {
+    syncL2ActiveState();
+  } else {
+    renderL2();
+  }
   renderL3();
   if (restoreFocus) {
     const target = l2List.querySelector(".l2-item--overview");
@@ -347,8 +403,91 @@ function renderL1() {
   const selected = getSelectedL1();
   const panel = getPanelConfig();
   l1List.innerHTML = "";
+  const l1Items = getPanelL1();
 
-  getPanelL1().forEach((l1Item, index) => {
+  if (isMobileViewport()) {
+    l1Items.forEach((l1Item, index) => {
+      const li = document.createElement("li");
+      const button = document.createElement("button");
+      const label = document.createElement("span");
+      const chevron = document.createElement("span");
+      const panelRegion = document.createElement("div");
+      const overview = getL2Overview(l1Item);
+      const panelId = getMobileAccordionPanelId(index);
+      const buttonId = `${panelId}-button`;
+      const isExpanded = menuState.mobileAccordionOpenIndex === index;
+
+      button.type = "button";
+      button.id = buttonId;
+      button.className = "l1-item l1-item--accordion";
+      button.dataset.column = "l1";
+      button.dataset.index = String(index);
+      button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+      button.setAttribute("aria-controls", panelId);
+      button.tabIndex = 0;
+
+      label.className = "l1-label";
+      label.textContent = l1Item.label;
+      chevron.className = "l1-accordion-chevron ph ph-caret-down";
+      chevron.setAttribute("aria-hidden", "true");
+      button.append(label, chevron);
+      button.addEventListener("click", () => {
+        const nextOpenIndex = isExpanded ? null : index;
+        setMobileAccordionOpenIndex(nextOpenIndex);
+      });
+      li.appendChild(button);
+
+      panelRegion.id = panelId;
+      panelRegion.className = "mobile-accordion-panel";
+      panelRegion.setAttribute("role", "region");
+      panelRegion.setAttribute("aria-labelledby", buttonId);
+      panelRegion.hidden = !isExpanded;
+
+      (l1Item.l2 || []).forEach((l2Item) => {
+        const l2Block = document.createElement("div");
+        l2Block.className = "mobile-l2-block";
+
+        const l2Label = document.createElement("p");
+        l2Label.className = "mobile-l2-label";
+        l2Label.textContent = l2Item.label;
+        l2Block.appendChild(l2Label);
+
+        const l3ListGroup = document.createElement("ul");
+        l3ListGroup.className = "menu-list mobile-l3-list";
+        (l2Item.l3 || []).forEach((l3Item) => {
+          const l3ListItem = document.createElement("li");
+          const l3Link = document.createElement("a");
+          l3Link.className = "l3-item mobile-l3-item";
+          l3Link.href = l3Item.href;
+          l3Link.textContent = l3Item.label;
+          l3ListItem.appendChild(l3Link);
+          l3ListGroup.appendChild(l3ListItem);
+        });
+        l2Block.appendChild(l3ListGroup);
+        panelRegion.appendChild(l2Block);
+      });
+
+      if (overview) {
+        const overviewLink = document.createElement("a");
+        overviewLink.className = "overview-link mobile-overview-link";
+        overviewLink.href = overview.href || "#";
+        overviewLink.textContent = overview.label || "Overview";
+        panelRegion.appendChild(overviewLink);
+      }
+
+      li.appendChild(panelRegion);
+      l1List.appendChild(li);
+    });
+
+    l1OverviewLink.textContent = panel?.overviewLabel || selected?.overviewLabel || "Overview";
+    l1OverviewLink.href = panel?.overviewHref || selected?.overviewHref || "#";
+    l1OverviewLink.dataset.column = "l1";
+    l1OverviewLink.dataset.index = String(l1Items.length);
+    l1OverviewLink.tabIndex = -1;
+    return;
+  }
+
+  l1Items.forEach((l1Item, index) => {
     const li = document.createElement("li");
     const button = document.createElement("button");
     const label = document.createElement("span");
@@ -384,11 +523,16 @@ function renderL1() {
   l1OverviewLink.textContent = panel?.overviewLabel || selected?.overviewLabel || "Overview";
   l1OverviewLink.href = panel?.overviewHref || selected?.overviewHref || "#";
   l1OverviewLink.dataset.column = "l1";
-  l1OverviewLink.dataset.index = String(getPanelL1().length);
-  l1OverviewLink.tabIndex = getPanelL1().length === 0 ? 0 : -1;
+  l1OverviewLink.dataset.index = String(l1Items.length);
+  l1OverviewLink.tabIndex = l1Items.length === 0 ? 0 : -1;
 }
 
 function renderL2() {
+  if (isMobileViewport()) {
+    l2List.innerHTML = "";
+    return;
+  }
+
   const selectedL1 = getSelectedL1();
   const l2Items = selectedL1?.l2 || [];
   const activeIndex = getVisibleL2Index();
@@ -413,7 +557,7 @@ function renderL2() {
     button.tabIndex = index === 0 ? 0 : -1;
 
     button.addEventListener("mouseenter", () => setPreviewL2(index));
-    button.addEventListener("focus", () => setPreviewL2(index, { restoreFocus: true }));
+    button.addEventListener("focus", () => setPreviewL2(index, { fromFocus: true }));
     button.addEventListener("click", () => {
       menuState.selectedL2Index = index;
       menuState.previewingOverview = false;
@@ -446,13 +590,21 @@ function renderL2() {
     overviewLink.dataset.index = String(l2Items.length);
     overviewLink.tabIndex = l2Items.length === 0 ? 0 : -1;
     overviewLink.addEventListener("mouseenter", () => setPreviewOverview());
-    overviewLink.addEventListener("focus", () => setPreviewOverview({ restoreFocus: true }));
+    overviewLink.addEventListener("focus", () => setPreviewOverview({ fromFocus: true }));
     overviewLi.appendChild(overviewLink);
     l2List.appendChild(overviewLi);
   }
 }
 
 function renderL3() {
+  if (isMobileViewport()) {
+    l3Description.textContent = "";
+    l3Description.hidden = true;
+    l3List.innerHTML = "";
+    l3List.hidden = true;
+    return;
+  }
+
   const showingPreview = menuState.previewL2Index !== null;
   const selectedL2 = getSelectedL1()?.l2?.[menuState.selectedL2Index] || null;
   const previewL2 = getVisibleL2();
@@ -506,6 +658,7 @@ function renderMenuPanel() {
 
 function setupColumnArrowNav(container, selector) {
   container.addEventListener("keydown", (event) => {
+    if (isMobileViewport()) return;
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     const items = [...container.querySelectorAll(selector)];
     const currentIndex = items.indexOf(document.activeElement);
@@ -557,6 +710,7 @@ function focusActiveL3() {
 
 function setupColumnCrossNav() {
   megaMenu.addEventListener("keydown", (event) => {
+    if (isMobileViewport()) return;
     if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
     const activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLElement)) return;
@@ -588,7 +742,17 @@ function setupEvents() {
   }
 
   mobileNavMediaQuery.addEventListener("change", () => {
+    const mobile = isMobileViewport();
+    if (!mobile) {
+      menuState.mobileAccordionOpenIndex = null;
+    } else {
+      const l1Items = getPanelL1();
+      menuState.mobileAccordionOpenIndex = l1Items.length > 0
+        ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
+        : null;
+    }
     syncMobileNavState();
+    renderMenuPanel();
   });
 
   navList.addEventListener("keydown", (event) => {
@@ -638,6 +802,17 @@ function setupEvents() {
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
+    if (isMobileViewport() && menuState.menuOpen && typeof menuState.mobileAccordionOpenIndex === "number") {
+      const openIndex = menuState.mobileAccordionOpenIndex;
+      const openPanel = document.getElementById(getMobileAccordionPanelId(openIndex));
+      if (openPanel && openPanel.contains(document.activeElement)) {
+        event.preventDefault();
+        setMobileAccordionOpenIndex(null);
+        const button = l1List.querySelector(`.l1-item[data-index="${openIndex}"]`);
+        if (button) button.focus();
+        return;
+      }
+    }
     closeMenu();
     closeMobileNav();
     const activeButton = navList.querySelector(
@@ -663,29 +838,31 @@ function setupEvents() {
       schedulePreviewClear();
     });
     l3Column.addEventListener("focusin", cancelPreviewClear);
-    l3Column.addEventListener("focusout", (event) => {
-      const nextFocusTarget = event.relatedTarget;
+    l3Column.addEventListener("focusout", () => {
+      window.requestAnimationFrame(() => {
+        const activeElement = document.activeElement;
+        if (
+          activeElement &&
+          (l3Column.contains(activeElement) || l2List.contains(activeElement))
+        ) {
+          return;
+        }
+        clearPreviewL2();
+      });
+    });
+  }
+
+  l2List.addEventListener("focusout", () => {
+    window.requestAnimationFrame(() => {
+      const activeElement = document.activeElement;
       if (
-        nextFocusTarget &&
-        (l3Column.contains(nextFocusTarget) || l2List.contains(nextFocusTarget))
+        activeElement &&
+        (l2List.contains(activeElement) || (l3Column && l3Column.contains(activeElement)))
       ) {
         return;
       }
       clearPreviewL2();
     });
-  }
-
-  l2List.addEventListener("focusout", (event) => {
-    const nextFocusTarget = event.relatedTarget;
-    if (
-      nextFocusTarget &&
-      (l2List.contains(nextFocusTarget) || (l3Column && l3Column.contains(nextFocusTarget)))
-    ) {
-      return;
-    }
-    if (!l2List.contains(nextFocusTarget)) {
-      clearPreviewL2();
-    }
   });
 
   if (l1Column) {
