@@ -764,31 +764,32 @@ body {
 
   .mobile-drill-header {
     display: grid;
-    gap: 8px;
-    padding: 8px var(--ds-spacing-md) 12px;
+    gap: 0;
+    padding: 0;
     border-bottom: 1px solid var(--ds-border-divider);
   }
 
   .mobile-drill-back {
-    align-items: center;
+    align-items: flex-start;
     appearance: none;
-    background: transparent;
+    background: var(--ds-background-base);
     border: 0;
-    color: var(--ds-text-secondary);
+    color: var(--ds-text-primary);
     cursor: pointer;
-    display: inline-flex;
+    display: flex;
     font-family: inherit;
-    font-size: 16px;
-    font-weight: 600;
-    gap: 4px;
+    font-size: var(--ds-font-size-md);
+    font-weight: 400;
+    gap: var(--ds-spacing-sm);
     line-height: 1.375;
-    min-height: 36px;
-    padding: 0;
-    width: fit-content;
+    min-height: 44px;
+    padding: 10px var(--ds-spacing-md);
+    text-align: left;
+    width: 100%;
   }
 
   .mobile-drill-back-icon {
-    font-size: 20px;
+    font-size: 24px;
     line-height: 1;
   }
 
@@ -848,7 +849,7 @@ body {
   }
 
   .mobile-drill-caret {
-    font-size: 18px;
+    font-size: 24px;
     line-height: 1;
   }
 
