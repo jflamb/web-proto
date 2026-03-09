@@ -1,5 +1,10 @@
 # TODO
 
+## Current Task (Mobile Drawer Toggle Rendering Fix)
+- [x] Fix mobile drawer toggle placement so `Close` does not overlap accordion rows.
+- [x] Add drawer top spacing/header treatment for stable button-to-content separation.
+- [x] Verify mobile open/close rendering and interaction remain correct.
+
 ## Current Task (Mobile Off-Canvas Menu Entry Point)
 - [x] Convert mobile nav list to off-canvas drawer behavior controlled by the Menu button.
 - [x] Update Menu button to switch between Menu and Close states (icon/text/ARIA) while drawer is open.
