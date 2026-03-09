@@ -201,7 +201,7 @@ function syncMobileToggleButton() {
 function syncMobileNavState() {
   if (!navToggle) return;
   const mobile = isMobileViewport();
-  navToggle.hidden = !narrowHeaderMediaQuery.matches;
+  navToggle.hidden = !mobile;
   if (!mobile) {
     menuState.mobileNavOpen = false;
     header.classList.remove("mobile-menu-open");
