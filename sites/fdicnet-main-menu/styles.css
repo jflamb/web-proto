@@ -138,7 +138,13 @@ body {
 .fdic-controls {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 12px;
+}
+
+.fdic-control-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
 }
 
 .icon-button {

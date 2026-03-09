@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (Header Apps Button + Desktop Search Gap Alignment)
+- [x] Reduce wide-viewport spacing between header action icons and search to match smaller viewport spacing.
+- [x] Add new `Apps` icon button immediately left of the profile icon button with no extra inter-button gap.
+- [x] Verify responsive header behavior in `fdicnet-main-menu` and commit.
+
+## Review / Results (Header Apps Button + Desktop Search Gap Alignment)
+- Updated header controls markup in `sites/fdicnet-main-menu/index.html`:
+  - inserted new `Apps` icon button (`ph-squares-four`) immediately left of `Profile`.
+  - grouped `Apps` + `Profile` buttons in a dedicated icon cluster.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.fdic-controls` gap from `32px` to `12px` (matching smaller viewport spacing intent).
+  - added `.fdic-control-icons` with `gap: 0` so no extra spacing exists between `Apps` and `Profile`.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - diff review confirmed only targeted header markup and spacing rules changed.
+
 ## Current Task (Mobile Drill Link Placement)
 - [x] Move previous-layer link rows from top header to bottom of L2 and L3 drill lists.
 - [x] Keep back control at top and preserve drill navigation behavior.
