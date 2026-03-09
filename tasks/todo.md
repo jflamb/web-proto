@@ -1,5 +1,14 @@
 # TODO
 
+## Current Task (L2/L3 Link Background Cleanup)
+- [x] Remove gray background hover treatment from second/third-column hyperlinks.
+- [x] Preserve hyperlink color/underline hover styling without row background fill.
+- [x] Commit focused style update.
+
+## Review / Results (L2/L3 Link Background Cleanup)
+- Updated `sites/fdicnet-main-menu/styles.css` to remove inset gray hover fill from `.l2-item:hover` and `.l3-item:hover`.
+- Kept existing link color and underline hover emphasis so interactivity remains clear without background shading.
+
 ## Current Task (First-Column Overview Link Hit Target + States)
 - [x] Match first-column overview link row padding and target size to L1 row geometry.
 - [x] Apply first-column-equivalent hover/focus row styling while preserving hyperlink text treatment.

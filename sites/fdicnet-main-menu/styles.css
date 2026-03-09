@@ -511,7 +511,6 @@ body {
 .l3-item:hover {
   background: transparent;
   color: var(--menu-link);
-  box-shadow: inset 0 0 0 999px var(--menu-hover-overlay);
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;
 }
