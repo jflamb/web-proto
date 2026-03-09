@@ -1,5 +1,16 @@
 # TODO
 
+## Current Task (First-Column Focus Ring Full-Bleed Alignment)
+- [x] Update first-column focus indicators so ring extent matches full-bleed background highlight area.
+- [x] Apply same focus-ring extent behavior to first-column overview link row for consistency.
+- [x] Verify CSS changes and commit.
+
+## Review / Results (First-Column Focus Ring Full-Bleed Alignment)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed element-box outline for `.l1-item:focus-visible` and `.overview-link:focus-visible`.
+  - added inset focus ring on full-bleed `::before` layer for both selectors.
+- Result: keyboard focus rectangle now follows the same full-width/edge-aligned area as first-column highlight treatment.
+
 ## Current Task (Menu Keyboard Navigation Regression Recovery)
 - [x] Diagnose why arrow-key navigation within/across mega-menu columns is failing.
 - [x] Restore focus-preserving keyboard navigation for L1/L2/L3 (up/down, left/right).

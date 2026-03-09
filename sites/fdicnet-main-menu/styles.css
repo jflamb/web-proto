@@ -449,8 +449,7 @@ body {
 .l1-item:focus-visible {
   background: #fff;
   position: relative;
-  outline: 2px solid #005ea2;
-  outline-offset: -2px;
+  outline: none;
 }
 
 .l1-item:hover::before,
@@ -464,6 +463,10 @@ body {
   width: 100vw;
   transform: translateX(-100%);
   background: #fff;
+}
+
+.l1-item:focus-visible::before {
+  box-shadow: inset 0 0 0 2px #005ea2;
 }
 
 .l1-item:hover > *,
@@ -553,8 +556,7 @@ body {
 
 .overview-link:focus-visible {
   background: #fff;
-  outline: 2px solid #005ea2;
-  outline-offset: -2px;
+  outline: none;
   color: var(--menu-link);
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;
@@ -570,6 +572,10 @@ body {
   width: 100vw;
   transform: translateX(-100%);
   background: #fff;
+}
+
+.overview-link:focus-visible::before {
+  box-shadow: inset 0 0 0 2px #005ea2;
 }
 
 .overview-link:hover > *,
