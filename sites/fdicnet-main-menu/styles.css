@@ -589,9 +589,13 @@ body {
 }
 
 @media (max-width: 1049px) {
-  .fdic-nav-toggle--masthead {
-    display: inline-flex;
-  }
+.fdic-nav-toggle--masthead {
+  display: inline-flex;
+}
+
+.fdic-nav-toggle[hidden] {
+  display: none !important;
+}
 
   .fdic-nav-toggle--masthead span {
     display: none;
