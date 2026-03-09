@@ -1,5 +1,38 @@
 # TODO
 
+## Current Task (Mobile Drawer Close Control Persistence)
+- [x] Remove drill-depth-based hiding of the mobile nav toggle so close remains visible at all drill layers.
+- [x] Verify mobile drawer state transitions still update menu toggle label/icon/ARIA correctly.
+- [x] Run targeted checks and document results.
+
+## Review / Results (Mobile Drawer Close Control Persistence)
+- Root cause: `syncMobileToggleButton()` hid the toggle when `mobileDrillPath.length > 0`, which removed the visible close affordance once users drilled deeper than the top layer.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - removed drill-depth conditional hide logic from `syncMobileToggleButton()`.
+  - kept icon/label/`aria-label` updates tied only to open/closed state.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed `.fdic-nav-toggle--drill-hidden` utility rule (no longer used).
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "fdic-nav-toggle--drill-hidden|mobileDrillPath.length > 0" sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/styles.css -S`
+
+## Current Task (Issue #40: Mega Menu ARIA Role/State Fix)
+- [x] Remove invalid `listbox` roles from L1/L2 mega menu list containers.
+- [x] Remove invalid `role="option"` usage from dynamically rendered L1/L2 controls.
+- [x] Replace `aria-selected`-driven state with neutral data attributes while preserving visual selected state and keyboard behavior.
+- [x] Run targeted verification scans and syntax checks.
+- [x] Update GitHub issue `#40` with implementation details and validation notes.
+
+## Review / Results (Issue #40: Mega Menu ARIA Role/State Fix)
+- Updated `sites/fdicnet-main-menu/index.html` to remove `role="listbox"` from `#l1List` and `#l2List`.
+- Updated `sites/fdicnet-main-menu/script.js` to remove invalid `role="option"` and `aria-selected` assignments from L1/L2 rendered controls.
+- Replaced ARIA-selected styling/state hooks with data attributes:
+  - L1 selected state now uses `data-selected`.
+  - L2 active/preview state now uses `data-active`.
+- Updated `sites/fdicnet-main-menu/styles.css` selectors from `[aria-selected="true"]` to `[data-selected="true"]` for first-column selected styling.
+- Verification:
+  - `rg -n "role=\"listbox\"|role=\"option\"|aria-selected" sites/fdicnet-main-menu -S` returns no matches.
+  - `node --check sites/fdicnet-main-menu/script.js` passes.
 ## Current Task (First-Column Focus Seam Removal)
 - [x] Replace split focus-ring rendering with one continuous ring spanning left extension + row body.
 - [x] Preserve existing hover/selected background behavior while fixing focus seam artifact.
