@@ -608,7 +608,7 @@ function renderMobileDrawerPanel() {
 function openMenu({ focusMenu = false } = {}) {
   if (menuState.menuOpen) return;
   menuState.menuOpen = true;
-  megaMenu.setAttribute("aria-hidden", "false");
+  megaMenu.removeAttribute("aria-hidden");
   if (menuState.closeTransitionHandler) {
     megaMenu.removeEventListener("transitionend", menuState.closeTransitionHandler);
     menuState.closeTransitionHandler = null;
@@ -637,6 +637,20 @@ function openMenu({ focusMenu = false } = {}) {
     renderL3();
   }
   syncTopNavState();
+}
+
+function scheduleMenuSystemFocusExitCheck() {
+  window.requestAnimationFrame(() => {
+    if (!menuState.menuOpen || isMobileViewport()) return;
+    const activeElement = document.activeElement;
+    if (
+      activeElement &&
+      (megaMenu.contains(activeElement) || navList.contains(activeElement))
+    ) {
+      return;
+    }
+    closeMenu();
+  });
 }
 
 function closeMenu() {
@@ -1269,6 +1283,9 @@ function setupEvents() {
       clearPreviewL2();
     });
   });
+
+  megaMenu.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);
+  navList.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);
 
   if (l1Column) {
     setupColumnArrowNav(l1Column, ".l1-item, #l1OverviewLink");
