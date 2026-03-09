@@ -10,9 +10,6 @@ const menuState = {
   topNavFocusIndex: 0,
   mobileNavOpen: false,
   mobileSearchOpen: false,
-  mobileAccordionOpenIndex: 0,
-  mobileTopAccordionOpenKey: null,
-  mobileL2Expanded: {},
   mobileNavCloseHandler: null,
   closeTransitionHandler: null,
   l1FocusIndex: 0,
@@ -375,9 +372,9 @@ function openMenu({ focusMenu = false } = {}) {
   });
   if (isMobileViewport()) {
     const l1Items = getPanelL1();
-    menuState.mobileAccordionOpenIndex = l1Items.length > 0
+    menuState.mobileExpandedL1Index = l1Items.length > 0
       ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
-      : null;
+      : -1;
     renderL1();
     renderL2();
     renderL3();
@@ -434,25 +431,8 @@ function closeMenu() {
   syncTopNavState();
 }
 
-function getMobileAccordionPanelId(index) {
-  const panelKey = menuState.activePanelKey || "panel";
-  return `mobileAccordionPanel-${panelKey}-${index}`.replace(/[^a-zA-Z0-9_-]/g, "-");
-}
-
-function setMobileAccordionOpenIndex(nextIndex) {
-  const l1Items = getPanelL1();
-  if (typeof nextIndex === "number" && nextIndex >= 0 && nextIndex < l1Items.length) {
-    menuState.mobileAccordionOpenIndex = nextIndex;
-    menuState.selectedL1Index = nextIndex;
-    menuState.selectedL2Index = 0;
-  } else {
-    menuState.mobileAccordionOpenIndex = null;
-  }
-  menuState.previewL2Index = null;
-  menuState.previewingOverview = false;
-  renderL1();
-  renderL2();
-  renderL3();
+function getMobileL1PanelId(index) {
+  return `mobileL1Panel-${index}`;
 }
 
 function getSelectedL1() {
@@ -761,13 +741,53 @@ function renderMobileAccordion() {
     return;
   }
 
+  const activePanelLabel = (menuState.siteContent?.header?.nav || []).find((item) => {
+    if (item.kind !== "menu") return false;
+    return (item.panelKey || item.id) === menuState.activePanelKey;
+  })?.label || "Sections";
+
   const maxIndex = l1Items.length - 1;
-  if (menuState.mobileExpandedL1Index > maxIndex) {
+  if (menuState.mobileExpandedL1Index > maxIndex && menuState.mobileExpandedL1Index !== -2) {
     menuState.mobileExpandedL1Index = Math.max(0, Math.min(menuState.selectedL1Index, maxIndex));
   }
-  if (menuState.mobileExpandedL1Index < -1) {
+  if (menuState.mobileExpandedL1Index < -2) {
     menuState.mobileExpandedL1Index = -1;
   }
+
+  const groupHeader = document.createElement("div");
+  groupHeader.className = "mobile-accordion-group-header";
+
+  const groupTitle = document.createElement("h3");
+  groupTitle.className = "mobile-accordion-group-title";
+  groupTitle.textContent = activePanelLabel;
+
+  const groupToggle = document.createElement("button");
+  groupToggle.type = "button";
+  groupToggle.className = "mobile-accordion-group-toggle";
+  const allExpanded = menuState.mobileExpandedL1Index === -2;
+  groupToggle.setAttribute("aria-label", allExpanded ? "Collapse all sections" : "Expand all sections");
+  groupToggle.setAttribute("aria-expanded", allExpanded ? "true" : "false");
+
+  const groupToggleIcon = document.createElement("span");
+  groupToggleIcon.className = `mobile-accordion-group-toggle-icon ph ${allExpanded ? "ph-minus" : "ph-plus"}`;
+  groupToggleIcon.setAttribute("aria-hidden", "true");
+
+  const groupToggleLabel = document.createElement("span");
+  groupToggleLabel.className = "mobile-accordion-group-toggle-label";
+  groupToggleLabel.textContent = allExpanded ? "Collapse all" : "Expand all";
+
+  groupToggle.append(groupToggleIcon, groupToggleLabel);
+  groupToggle.addEventListener("click", () => {
+    menuState.mobileExpandedL1Index = allExpanded ? -1 : -2;
+    renderMobileAccordion();
+  });
+
+  groupHeader.append(groupTitle, groupToggle);
+  mobileMenu.appendChild(groupHeader);
+
+  const groupList = document.createElement("div");
+  groupList.className = "mobile-accordion-group-list";
+  mobileMenu.appendChild(groupList);
 
   l1Items.forEach((l1Item, index) => {
     const section = document.createElement("section");
@@ -778,8 +798,8 @@ function renderMobileAccordion() {
     trigger.className = "mobile-l1-trigger";
     trigger.dataset.index = String(index);
 
-    const panelId = `mobileL1Panel-${index}`;
-    const expanded = menuState.mobileExpandedL1Index === index;
+    const panelId = getMobileL1PanelId(index);
+    const expanded = menuState.mobileExpandedL1Index === -2 || menuState.mobileExpandedL1Index === index;
     trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
     trigger.setAttribute("aria-controls", panelId);
 
@@ -788,7 +808,7 @@ function renderMobileAccordion() {
     label.textContent = l1Item.label || "Section";
 
     const icon = document.createElement("span");
-    icon.className = "mobile-l1-caret ph ph-caret-down";
+    icon.className = `mobile-l1-caret ph ${expanded ? "ph-minus" : "ph-plus"}`;
     icon.setAttribute("aria-hidden", "true");
 
     trigger.append(label, icon);
@@ -837,7 +857,11 @@ function renderMobileAccordion() {
     }
 
     trigger.addEventListener("click", () => {
-      menuState.mobileExpandedL1Index = menuState.mobileExpandedL1Index === index ? -1 : index;
+      if (menuState.mobileExpandedL1Index === -2) {
+        menuState.mobileExpandedL1Index = index;
+      } else {
+        menuState.mobileExpandedL1Index = menuState.mobileExpandedL1Index === index ? -1 : index;
+      }
       menuState.selectedL1Index = index;
       menuState.selectedL2Index = 0;
       renderL1();
@@ -859,7 +883,7 @@ function renderMobileAccordion() {
     });
 
     section.append(trigger, panelEl);
-    mobileMenu.appendChild(section);
+    groupList.appendChild(section);
   });
 }
 
@@ -999,14 +1023,11 @@ function setupEvents() {
   mobileNavMediaQuery.addEventListener("change", () => {
     const mobile = isMobileViewport();
     if (!mobile) {
-      menuState.mobileAccordionOpenIndex = null;
-      menuState.mobileTopAccordionOpenKey = null;
     } else {
-      menuState.mobileTopAccordionOpenKey = null;
       const l1Items = getPanelL1();
-      menuState.mobileAccordionOpenIndex = l1Items.length > 0
+      menuState.mobileExpandedL1Index = l1Items.length > 0
         ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
-        : null;
+        : -1;
     }
     syncMobileNavState();
     renderTopNav();
@@ -1091,24 +1112,14 @@ function setupEvents() {
       if (mobileSearchToggle) mobileSearchToggle.focus();
       return;
     }
-    if (isMobileViewport() && menuState.mobileNavOpen && menuState.mobileTopAccordionOpenKey) {
-      const openKey = menuState.mobileTopAccordionOpenKey;
-      const openPanel = document.getElementById(getMobileTopAccordionPanelId(openKey));
-      if (openPanel && openPanel.contains(document.activeElement)) {
+    if (isMobileViewport() && menuState.menuOpen) {
+      const expandedPanels = mobileMenu ? [...mobileMenu.querySelectorAll(".mobile-l1-panel:not([hidden])")] : [];
+      const activeInExpandedPanel = expandedPanels.some((panelEl) => panelEl.contains(document.activeElement));
+      if (activeInExpandedPanel) {
         event.preventDefault();
-        setMobileTopAccordionOpenKey(null);
-        const button = navList.querySelector(`.fdic-nav-item--button[data-panel-key="${openKey}"]`);
-        if (button) button.focus();
-        return;
-      }
-    }
-    if (isMobileViewport() && menuState.menuOpen && typeof menuState.mobileAccordionOpenIndex === "number") {
-      const openIndex = menuState.mobileAccordionOpenIndex;
-      const openPanel = document.getElementById(getMobileAccordionPanelId(openIndex));
-      if (openPanel && openPanel.contains(document.activeElement)) {
-        event.preventDefault();
-        setMobileAccordionOpenIndex(null);
-        const button = l1List.querySelector(`.l1-item[data-index="${openIndex}"]`);
+        menuState.mobileExpandedL1Index = -1;
+        renderMobileAccordion();
+        const button = mobileMenu?.querySelector(".mobile-l1-trigger");
         if (button) button.focus();
         return;
       }
@@ -1194,7 +1205,6 @@ async function init() {
 
   const navMenuItem = (menuState.siteContent.header?.nav || []).find((item) => item.kind === "menu");
   menuState.activePanelKey = menuState.siteContent.menu?.defaultPanel || navMenuItem?.panelKey || navMenuItem?.id || null;
-  menuState.mobileTopAccordionOpenKey = null;
 
   applyHeaderContent();
   renderTopNav();
