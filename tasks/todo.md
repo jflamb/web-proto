@@ -1,5 +1,12 @@
 # TODO
 
+## Current Task (Narrow Header Menu + Phone Search Toggle)
+- [x] Move narrow-width menu entry to icon-only masthead hamburger (left of FDIC wordmark).
+- [x] Hide `Menu` label in narrow mode while preserving accessible label.
+- [x] Collapse phone search input to icon button; toggle a full-width search row below masthead.
+- [x] Wire search toggle interactions (open/close, focus management, Escape/outside click behavior).
+- [x] Verify mobile/tablet/desktop menu and search interactions end-to-end.
+
 ## Current Task (Mobile Drawer Toggle Rendering Fix)
 - [x] Fix mobile drawer toggle placement so `Close` does not overlap accordion rows.
 - [x] Add drawer top spacing/header treatment for stable button-to-content separation.

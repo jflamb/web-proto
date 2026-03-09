@@ -22,28 +22,48 @@
     <header class="fdic-header" id="fdicHeader">
       <div class="fdic-masthead">
         <div class="fdic-shell">
-          <a class="fdic-wordmark" href="#" aria-label="FDICnet home">
-            <img src="assets/FDICnet.svg" width="140" height="35" alt="FDICnet" />
-          </a>
+          <div class="fdic-brand-row">
+            <button
+              id="fdicNavToggle"
+              class="fdic-nav-toggle fdic-nav-toggle--masthead"
+              type="button"
+              aria-controls="fdicNavList"
+              aria-expanded="false"
+            >
+              <i class="ph ph-list" aria-hidden="true"></i>
+              <span>Menu</span>
+            </button>
+            <a class="fdic-wordmark" href="#" aria-label="FDICnet home">
+              <img src="assets/FDICnet.svg" width="140" height="35" alt="FDICnet" />
+            </a>
+          </div>
           <div class="fdic-controls" aria-label="Header controls">
             <button class="icon-button" type="button" aria-label="Profile">
               <i class="ph ph-user-circle" aria-hidden="true"></i>
             </button>
+            <button id="mobileSearchToggle" class="icon-button icon-button--search-toggle" type="button" aria-expanded="false" aria-controls="mobileSearchRow" aria-label="Open search">
+              <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+            </button>
             <label class="search-input">
               <span class="sr-only">Search</span>
               <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-              <input type="search" placeholder="Search FDICnet" />
+              <input id="desktopSearchInput" type="search" placeholder="Search FDICnet" />
             </label>
           </div>
+        </div>
+      </div>
+      <div id="mobileSearchRow" class="mobile-search-row" hidden>
+        <div class="fdic-shell">
+          <label class="search-input search-input--mobile">
+            <span class="sr-only">Search</span>
+            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+            <input id="mobileSearchInput" type="search" placeholder="Search FDICnet" />
+          </label>
         </div>
       </div>
 
       <nav class="fdic-nav" aria-label="Primary navigation">
         <div class="fdic-shell">
-          <button id="fdicNavToggle" class="fdic-nav-toggle" type="button" aria-controls="fdicNavList" aria-expanded="false">
-            <i class="ph ph-list" aria-hidden="true"></i>
-            <span>Menu</span>
-          </button>
           <ul id="fdicNavList" class="fdic-nav-list"></ul>
         </div>
       </nav>

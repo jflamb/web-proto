@@ -9,6 +9,7 @@ const menuState = {
   previewClearTimer: null,
   topNavFocusIndex: 0,
   mobileNavOpen: false,
+  mobileSearchOpen: false,
   mobileAccordionOpenIndex: 0,
   mobileTopAccordionOpenKey: null,
   mobileL2Expanded: {},
@@ -17,8 +18,12 @@ const menuState = {
 };
 
 const MOBILE_NAV_BREAKPOINT = "(max-width: 768px)";
+const NARROW_HEADER_BREAKPOINT = "(max-width: 1049px)";
+const PHONE_SEARCH_BREAKPOINT = "(max-width: 640px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const mobileNavMediaQuery = window.matchMedia(MOBILE_NAV_BREAKPOINT);
+const narrowHeaderMediaQuery = window.matchMedia(NARROW_HEADER_BREAKPOINT);
+const phoneSearchMediaQuery = window.matchMedia(PHONE_SEARCH_BREAKPOINT);
 const reduceMotionMediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
 
 const header = document.getElementById("fdicHeader");
@@ -34,7 +39,10 @@ const l1Column = document.querySelector(".mega-col--l1");
 const l1OverviewLink = document.getElementById("l1OverviewLink");
 const pageTitle = document.getElementById("pageTitle");
 const pageIntro = document.getElementById("pageIntro");
-const searchInput = document.querySelector(".search-input input");
+const desktopSearchInput = document.getElementById("desktopSearchInput");
+const mobileSearchToggle = document.getElementById("mobileSearchToggle");
+const mobileSearchRow = document.getElementById("mobileSearchRow");
+const mobileSearchInput = document.getElementById("mobileSearchInput");
 const mobileNavBackdrop = document.getElementById("mobileNavBackdrop");
 
 function getMissingRequiredElements() {
@@ -50,6 +58,10 @@ function getMissingRequiredElements() {
     ["l1OverviewLink", l1OverviewLink],
     ["pageTitle", pageTitle],
     ["pageIntro", pageIntro],
+    ["desktopSearchInput", desktopSearchInput],
+    ["mobileSearchToggle", mobileSearchToggle],
+    ["mobileSearchRow", mobileSearchRow],
+    ["mobileSearchInput", mobileSearchInput],
     ["mobileNavBackdrop", mobileNavBackdrop],
   ];
   return requiredElements
@@ -79,9 +91,9 @@ function getPanelL1() {
 }
 
 function applyHeaderContent() {
-  if (searchInput) {
-    searchInput.placeholder = menuState.siteContent.header?.searchPlaceholder || "Search";
-  }
+  const placeholder = menuState.siteContent.header?.searchPlaceholder || "Search";
+  if (desktopSearchInput) desktopSearchInput.placeholder = placeholder;
+  if (mobileSearchInput) mobileSearchInput.placeholder = placeholder;
 }
 
 function renderPageContent() {
@@ -96,6 +108,34 @@ function renderPageContent() {
 
 function isMobileViewport() {
   return mobileNavMediaQuery.matches;
+}
+
+function isPhoneViewport() {
+  return phoneSearchMediaQuery.matches;
+}
+
+function syncMobileSearchState({ focus = false } = {}) {
+  if (!mobileSearchToggle || !mobileSearchRow) return;
+  const phone = isPhoneViewport();
+  mobileSearchToggle.hidden = !phone;
+  if (!phone) {
+    menuState.mobileSearchOpen = false;
+    mobileSearchToggle.setAttribute("aria-expanded", "false");
+    mobileSearchToggle.setAttribute("aria-label", "Open search");
+    mobileSearchRow.hidden = true;
+    return;
+  }
+  mobileSearchToggle.setAttribute("aria-expanded", menuState.mobileSearchOpen ? "true" : "false");
+  mobileSearchToggle.setAttribute("aria-label", menuState.mobileSearchOpen ? "Close search" : "Open search");
+  mobileSearchRow.hidden = !menuState.mobileSearchOpen;
+  if (focus && menuState.mobileSearchOpen && mobileSearchInput) {
+    mobileSearchInput.focus();
+  }
+}
+
+function setMobileSearchOpen(isOpen, { focus = false } = {}) {
+  menuState.mobileSearchOpen = Boolean(isOpen);
+  syncMobileSearchState({ focus });
 }
 
 function syncMobileToggleButton() {
@@ -114,7 +154,7 @@ function syncMobileToggleButton() {
 function syncMobileNavState() {
   if (!navToggle) return;
   const mobile = isMobileViewport();
-  navToggle.hidden = !mobile;
+  navToggle.hidden = !narrowHeaderMediaQuery.matches;
   if (!mobile) {
     menuState.mobileNavOpen = false;
     header.classList.remove("mobile-menu-open");
@@ -963,7 +1003,29 @@ function setupColumnCrossNav() {
 function setupEvents() {
   if (navToggle) {
     navToggle.addEventListener("click", () => {
-      setMobileNavOpen(!menuState.mobileNavOpen);
+      if (isMobileViewport()) {
+        if (!menuState.mobileNavOpen) {
+          setMobileSearchOpen(false);
+        }
+        setMobileNavOpen(!menuState.mobileNavOpen);
+        return;
+      }
+      if (menuState.menuOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+  }
+
+  if (mobileSearchToggle) {
+    mobileSearchToggle.addEventListener("click", () => {
+      if (!isPhoneViewport()) return;
+      const nextOpen = !menuState.mobileSearchOpen;
+      if (nextOpen) {
+        closeMobileNav();
+      }
+      setMobileSearchOpen(nextOpen, { focus: nextOpen });
     });
   }
 
@@ -982,6 +1044,14 @@ function setupEvents() {
     syncMobileNavState();
     renderTopNav();
     renderMenuPanel();
+  });
+
+  narrowHeaderMediaQuery.addEventListener("change", () => {
+    syncMobileNavState();
+  });
+
+  phoneSearchMediaQuery.addEventListener("change", () => {
+    syncMobileSearchState();
   });
 
   navList.addEventListener("keydown", (event) => {
@@ -1023,6 +1093,7 @@ function setupEvents() {
 
   document.addEventListener("pointerdown", (event) => {
     if (!(event.target instanceof HTMLElement)) return;
+    if (navToggle && navToggle.contains(event.target)) return;
 
     if (menuState.menuOpen) {
       if (megaMenu.contains(event.target)) return;
@@ -1034,13 +1105,23 @@ function setupEvents() {
     }
 
     if (menuState.mobileNavOpen && navToggle) {
-      if (navToggle.contains(event.target) || navList.contains(event.target)) return;
+      if (navList.contains(event.target)) return;
       closeMobileNav();
+    }
+
+    if (menuState.mobileSearchOpen && mobileSearchToggle && mobileSearchRow) {
+      if (mobileSearchToggle.contains(event.target) || mobileSearchRow.contains(event.target)) return;
+      setMobileSearchOpen(false);
     }
   });
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
+    if (menuState.mobileSearchOpen) {
+      setMobileSearchOpen(false);
+      if (mobileSearchToggle) mobileSearchToggle.focus();
+      return;
+    }
     if (isMobileViewport() && menuState.mobileNavOpen && menuState.mobileTopAccordionOpenKey) {
       const openKey = menuState.mobileTopAccordionOpenKey;
       const openPanel = document.getElementById(getMobileTopAccordionPanelId(openKey));
@@ -1146,6 +1227,7 @@ async function init() {
   applyHeaderContent();
   renderTopNav();
   syncMobileNavState();
+  syncMobileSearchState();
   renderPageContent();
   renderMenuPanel();
   setupEvents();
