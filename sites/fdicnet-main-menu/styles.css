@@ -689,7 +689,7 @@ body {
   .fdic-nav-list {
     flex-direction: column;
     align-items: stretch;
-    padding: 72px 0 18px;
+    padding: 92px 0 18px;
     position: fixed;
     top: 0;
     left: 0;
@@ -719,7 +719,7 @@ body {
     top: 0;
     left: 0;
     width: min(88vw, 360px);
-    height: 56px;
+    height: 92px;
     background: var(--ds-background-base);
     border-right: 1px solid var(--ds-border-divider);
     pointer-events: none;
@@ -770,7 +770,7 @@ body {
   }
 
   .mobile-drill-back {
-    align-items: flex-start;
+    align-items: center;
     appearance: none;
     background: var(--ds-background-base);
     border: 0;
@@ -789,20 +789,28 @@ body {
   }
 
   .mobile-drill-back-icon {
-    font-size: 24px;
+    align-items: center;
+    display: inline-flex;
+    font-size: 1.5em;
+    font-weight: 600;
     line-height: 1;
   }
 
   .mobile-drill-current-link {
+    align-items: center;
+    background: var(--ds-background-base);
+    border-top: 1px solid var(--ds-border-divider);
     color: var(--menu-link);
-    display: inline-flex;
+    display: flex;
     font-size: var(--ds-font-size-md);
     font-weight: 600;
     line-height: 1.375;
+    min-height: 44px;
+    padding: 10px var(--ds-spacing-md);
     text-decoration: underline;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
-    width: fit-content;
+    width: 100%;
   }
 
   .mobile-drill-list,
@@ -820,7 +828,7 @@ body {
 
   .mobile-drill-trigger,
   .mobile-drill-link {
-    align-items: flex-start;
+    align-items: center;
     background: var(--ds-background-base);
     border: 0;
     color: var(--ds-text-primary);
@@ -849,7 +857,10 @@ body {
   }
 
   .mobile-drill-caret {
-    font-size: 24px;
+    align-items: center;
+    display: inline-flex;
+    font-size: 1.5em;
+    font-weight: 600;
     line-height: 1;
   }
 
