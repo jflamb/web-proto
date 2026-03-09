@@ -1,8 +1,25 @@
-let siteContent = null;
-let activePanelKey = null;
+const menuState = {
+  siteContent: null,
+  activePanelKey: null,
+  menuOpen: false,
+  selectedL1Index: 0,
+  selectedL2Index: 0,
+  previewL2Index: null,
+  previewingOverview: false,
+  previewClearTimer: null,
+  topNavFocusIndex: 0,
+  mobileNavOpen: false,
+  closeTransitionHandler: null,
+};
+
+const MOBILE_NAV_BREAKPOINT = "(max-width: 768px)";
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+const mobileNavMediaQuery = window.matchMedia(MOBILE_NAV_BREAKPOINT);
+const reduceMotionMediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
 
 const header = document.getElementById("fdicHeader");
 const navList = document.getElementById("fdicNavList");
+const navToggle = document.getElementById("fdicNavToggle");
 const megaMenu = document.getElementById("megaMenu");
 const l1List = document.getElementById("l1List");
 const l2List = document.getElementById("l2List");
@@ -15,18 +32,11 @@ const pageTitle = document.getElementById("pageTitle");
 const pageIntro = document.getElementById("pageIntro");
 const searchInput = document.querySelector(".search-input input");
 
-let menuOpen = false;
-let selectedL1Index = 0;
-let selectedL2Index = 0;
-let previewL2Index = null;
-let previewingOverview = false;
-let previewClearTimer = null;
-let topNavFocusIndex = 0;
-
 function getMissingRequiredElements() {
   const requiredElements = [
     ["fdicHeader", header],
     ["fdicNavList", navList],
+    ["fdicNavToggle", navToggle],
     ["megaMenu", megaMenu],
     ["l1List", l1List],
     ["l2List", l2List],
@@ -51,7 +61,7 @@ async function loadContent() {
 }
 
 function getPanelConfig() {
-  return siteContent?.menu?.panels?.[activePanelKey] || null;
+  return menuState.siteContent?.menu?.panels?.[menuState.activePanelKey] || null;
 }
 
 function getPanelL1() {
@@ -60,26 +70,53 @@ function getPanelL1() {
 
 function applyHeaderContent() {
   if (searchInput) {
-    searchInput.placeholder = siteContent.header?.searchPlaceholder || "Search";
+    searchInput.placeholder = menuState.siteContent.header?.searchPlaceholder || "Search";
   }
 }
 
 function renderPageContent() {
-  pageTitle.textContent = siteContent.page?.title || "";
+  pageTitle.textContent = menuState.siteContent.page?.title || "";
   pageIntro.innerHTML = "";
-  (siteContent.page?.intro || []).forEach((line) => {
+  (menuState.siteContent.page?.intro || []).forEach((line) => {
     const paragraph = document.createElement("p");
     paragraph.textContent = line;
     pageIntro.appendChild(paragraph);
   });
 }
 
+function isMobileViewport() {
+  return mobileNavMediaQuery.matches;
+}
+
+function syncMobileNavState() {
+  if (!navToggle) return;
+  const mobile = isMobileViewport();
+  navToggle.hidden = !mobile;
+  if (!mobile) {
+    menuState.mobileNavOpen = false;
+    navList.hidden = false;
+    navToggle.setAttribute("aria-expanded", "false");
+    return;
+  }
+  navList.hidden = !menuState.mobileNavOpen;
+  navToggle.setAttribute("aria-expanded", menuState.mobileNavOpen ? "true" : "false");
+}
+
+function setMobileNavOpen(isOpen) {
+  menuState.mobileNavOpen = Boolean(isOpen);
+  syncMobileNavState();
+}
+
+function closeMobileNav() {
+  setMobileNavOpen(false);
+}
+
 function syncTopNavState() {
   const buttons = navList.querySelectorAll(".fdic-nav-item--button");
   buttons.forEach((button) => {
-    const isActive = button.dataset.panelKey === activePanelKey;
+    const isActive = button.dataset.panelKey === menuState.activePanelKey;
     button.classList.toggle("fdic-nav-item--selected", isActive);
-    button.setAttribute("aria-expanded", isActive && menuOpen ? "true" : "false");
+    button.setAttribute("aria-expanded", isActive && menuState.menuOpen ? "true" : "false");
   });
 }
 
@@ -89,7 +126,7 @@ function getTopNavItems() {
 
 function getActiveTopNavIndex(items = getTopNavItems()) {
   return items.findIndex(
-    (item) => item.classList.contains("fdic-nav-item--button") && item.dataset.panelKey === activePanelKey
+    (item) => item.classList.contains("fdic-nav-item--button") && item.dataset.panelKey === menuState.activePanelKey
   );
 }
 
@@ -98,29 +135,29 @@ function applyTopNavRoving({ focus = false } = {}) {
   if (items.length === 0) return;
 
   const activeIndex = getActiveTopNavIndex(items);
-  if (topNavFocusIndex < 0 || topNavFocusIndex >= items.length) {
-    topNavFocusIndex = activeIndex >= 0 ? activeIndex : 0;
+  if (menuState.topNavFocusIndex < 0 || menuState.topNavFocusIndex >= items.length) {
+    menuState.topNavFocusIndex = activeIndex >= 0 ? activeIndex : 0;
   }
 
   items.forEach((item, index) => {
-    item.tabIndex = index === topNavFocusIndex ? 0 : -1;
+    item.tabIndex = index === menuState.topNavFocusIndex ? 0 : -1;
   });
 
   if (focus) {
-    items[topNavFocusIndex].focus();
+    items[menuState.topNavFocusIndex].focus();
   }
 }
 
 function resetPanelSelection() {
-  selectedL1Index = 0;
-  selectedL2Index = 0;
-  previewL2Index = null;
-  previewingOverview = false;
+  menuState.selectedL1Index = 0;
+  menuState.selectedL2Index = 0;
+  menuState.previewL2Index = null;
+  menuState.previewingOverview = false;
 }
 
 function renderTopNav() {
   navList.innerHTML = "";
-  const navItems = siteContent.header?.nav || [];
+  const navItems = menuState.siteContent.header?.nav || [];
 
   navItems.forEach((item) => {
     const li = document.createElement("li");
@@ -133,22 +170,24 @@ function renderTopNav() {
       button.setAttribute("aria-controls", "megaMenu");
       button.textContent = item.label;
       button.addEventListener("click", () => {
-        topNavFocusIndex = Number(button.dataset.navIndex || 0);
+        menuState.topNavFocusIndex = Number(button.dataset.navIndex || 0);
         const nextPanel = button.dataset.panelKey;
-        if (activePanelKey === nextPanel) {
-          if (menuOpen) {
+        if (menuState.activePanelKey === nextPanel) {
+          if (menuState.menuOpen) {
             closeMenu();
           } else {
             openMenu();
           }
+          closeMobileNav();
           return;
         }
-        activePanelKey = nextPanel;
+        menuState.activePanelKey = nextPanel;
         resetPanelSelection();
         syncTopNavState();
         applyTopNavRoving();
         renderMenuPanel();
         openMenu();
+        closeMobileNav();
       });
       li.appendChild(button);
     } else {
@@ -157,6 +196,7 @@ function renderTopNav() {
       link.dataset.navIndex = String(navList.children.length);
       link.href = item.href || "#";
       link.textContent = item.label;
+      link.addEventListener("click", closeMobileNav);
       li.appendChild(link);
     }
     navList.appendChild(li);
@@ -167,34 +207,57 @@ function renderTopNav() {
 }
 
 function openMenu() {
-  if (menuOpen) return;
-  menuOpen = true;
+  if (menuState.menuOpen) return;
+  menuState.menuOpen = true;
+  if (menuState.closeTransitionHandler) {
+    megaMenu.removeEventListener("transitionend", menuState.closeTransitionHandler);
+    menuState.closeTransitionHandler = null;
+  }
   megaMenu.hidden = false;
-  header.classList.add("menu-open");
+  window.requestAnimationFrame(() => {
+    if (menuState.menuOpen) {
+      header.classList.add("menu-open");
+    }
+  });
   syncTopNavState();
 }
 
 function closeMenu() {
-  if (!menuOpen) return;
-  menuOpen = false;
+  if (!menuState.menuOpen) return;
+  menuState.menuOpen = false;
   header.classList.remove("menu-open");
-  megaMenu.hidden = true;
-  previewL2Index = null;
-  previewingOverview = false;
+  if (reduceMotionMediaQuery.matches) {
+    megaMenu.hidden = true;
+  } else {
+    if (menuState.closeTransitionHandler) {
+      megaMenu.removeEventListener("transitionend", menuState.closeTransitionHandler);
+    }
+    menuState.closeTransitionHandler = (event) => {
+      if (event.target !== megaMenu) return;
+      megaMenu.removeEventListener("transitionend", menuState.closeTransitionHandler);
+      menuState.closeTransitionHandler = null;
+      if (!menuState.menuOpen) {
+        megaMenu.hidden = true;
+      }
+    };
+    megaMenu.addEventListener("transitionend", menuState.closeTransitionHandler);
+  }
+  menuState.previewL2Index = null;
+  menuState.previewingOverview = false;
   renderL2();
   renderL3();
   syncTopNavState();
 }
 
 function getSelectedL1() {
-  return getPanelL1()[selectedL1Index] || null;
+  return getPanelL1()[menuState.selectedL1Index] || null;
 }
 
 function getVisibleL2Index() {
-  if (previewL2Index !== null) {
-    return previewL2Index;
+  if (menuState.previewL2Index !== null) {
+    return menuState.previewL2Index;
   }
-  return selectedL2Index;
+  return menuState.selectedL2Index;
 }
 
 function getVisibleL2() {
@@ -217,10 +280,10 @@ function getL2Overview(selectedL1) {
 }
 
 function setSelectedL1(index, { restoreFocus = false } = {}) {
-  selectedL1Index = index;
-  selectedL2Index = 0;
-  previewL2Index = null;
-  previewingOverview = false;
+  menuState.selectedL1Index = index;
+  menuState.selectedL2Index = 0;
+  menuState.previewL2Index = null;
+  menuState.previewingOverview = false;
   renderL1();
   renderL2();
   renderL3();
@@ -231,10 +294,10 @@ function setSelectedL1(index, { restoreFocus = false } = {}) {
 }
 
 function setPreviewL2(index, { restoreFocus = false } = {}) {
-  const previewChanged = previewL2Index !== index || previewingOverview;
+  const previewChanged = menuState.previewL2Index !== index || menuState.previewingOverview;
   if (!previewChanged) return;
-  previewingOverview = false;
-  previewL2Index = index;
+  menuState.previewingOverview = false;
+  menuState.previewL2Index = index;
   renderL2();
   renderL3();
   if (restoreFocus) {
@@ -244,9 +307,9 @@ function setPreviewL2(index, { restoreFocus = false } = {}) {
 }
 
 function setPreviewOverview({ restoreFocus = false } = {}) {
-  if (previewL2Index === null && previewingOverview) return;
-  previewL2Index = null;
-  previewingOverview = true;
+  if (menuState.previewL2Index === null && menuState.previewingOverview) return;
+  menuState.previewL2Index = null;
+  menuState.previewingOverview = true;
   renderL2();
   renderL3();
   if (restoreFocus) {
@@ -256,26 +319,26 @@ function setPreviewOverview({ restoreFocus = false } = {}) {
 }
 
 function clearPreviewL2() {
-  if (previewL2Index === null && !previewingOverview) {
+  if (menuState.previewL2Index === null && !menuState.previewingOverview) {
     return;
   }
-  previewL2Index = null;
-  previewingOverview = false;
+  menuState.previewL2Index = null;
+  menuState.previewingOverview = false;
   renderL2();
   renderL3();
 }
 
 function cancelPreviewClear() {
-  if (previewClearTimer) {
-    window.clearTimeout(previewClearTimer);
-    previewClearTimer = null;
+  if (menuState.previewClearTimer) {
+    window.clearTimeout(menuState.previewClearTimer);
+    menuState.previewClearTimer = null;
   }
 }
 
 function schedulePreviewClear() {
   cancelPreviewClear();
-  previewClearTimer = window.setTimeout(() => {
-    previewClearTimer = null;
+  menuState.previewClearTimer = window.setTimeout(() => {
+    menuState.previewClearTimer = null;
     clearPreviewL2();
   }, 120);
 }
@@ -295,12 +358,12 @@ function renderL1() {
     button.className = "l1-item";
     button.dataset.column = "l1";
     button.dataset.index = String(index);
-    if (index === selectedL1Index) {
+    if (index === menuState.selectedL1Index) {
       button.setAttribute("aria-current", "true");
     } else {
       button.removeAttribute("aria-current");
     }
-    button.tabIndex = index === selectedL1Index ? 0 : -1;
+    button.tabIndex = index === menuState.selectedL1Index ? 0 : -1;
 
     label.className = "l1-label";
     label.textContent = l1Item.label;
@@ -352,9 +415,9 @@ function renderL2() {
     button.addEventListener("mouseenter", () => setPreviewL2(index));
     button.addEventListener("focus", () => setPreviewL2(index, { restoreFocus: true }));
     button.addEventListener("click", () => {
-      selectedL2Index = index;
-      previewingOverview = false;
-      previewL2Index = index;
+      menuState.selectedL2Index = index;
+      menuState.previewingOverview = false;
+      menuState.previewL2Index = index;
       renderL2();
       renderL3();
     });
@@ -390,12 +453,12 @@ function renderL2() {
 }
 
 function renderL3() {
-  const showingPreview = previewL2Index !== null;
-  const selectedL2 = getSelectedL1()?.l2?.[selectedL2Index] || null;
+  const showingPreview = menuState.previewL2Index !== null;
+  const selectedL2 = getSelectedL1()?.l2?.[menuState.selectedL2Index] || null;
   const previewL2 = getVisibleL2();
   const selectedL1 = getSelectedL1();
   const l2Overview = getL2Overview(selectedL1);
-  const descriptionText = previewingOverview
+  const descriptionText = menuState.previewingOverview
     ? l2Overview?.description || ""
     : showingPreview
       ? ""
@@ -405,9 +468,9 @@ function renderL3() {
   l3Description.hidden = !descriptionText;
 
   l3List.innerHTML = "";
-  l3List.hidden = !showingPreview || previewingOverview;
+  l3List.hidden = !showingPreview || menuState.previewingOverview;
 
-  if (!showingPreview || previewingOverview) {
+  if (!showingPreview || menuState.previewingOverview) {
     return;
   }
 
@@ -518,6 +581,16 @@ function setupColumnCrossNav() {
 }
 
 function setupEvents() {
+  if (navToggle) {
+    navToggle.addEventListener("click", () => {
+      setMobileNavOpen(!menuState.mobileNavOpen);
+    });
+  }
+
+  mobileNavMediaQuery.addEventListener("change", () => {
+    syncMobileNavState();
+  });
+
   navList.addEventListener("keydown", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement) || !target.classList.contains("fdic-nav-item")) {
@@ -531,10 +604,10 @@ function setupEvents() {
 
     if (["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) {
       event.preventDefault();
-      if (event.key === "ArrowRight") topNavFocusIndex = (currentIndex + 1) % items.length;
-      if (event.key === "ArrowLeft") topNavFocusIndex = (currentIndex - 1 + items.length) % items.length;
-      if (event.key === "Home") topNavFocusIndex = 0;
-      if (event.key === "End") topNavFocusIndex = items.length - 1;
+      if (event.key === "ArrowRight") menuState.topNavFocusIndex = (currentIndex + 1) % items.length;
+      if (event.key === "ArrowLeft") menuState.topNavFocusIndex = (currentIndex - 1 + items.length) % items.length;
+      if (event.key === "Home") menuState.topNavFocusIndex = 0;
+      if (event.key === "End") menuState.topNavFocusIndex = items.length - 1;
       applyTopNavRoving({ focus: true });
       return;
     }
@@ -546,20 +619,29 @@ function setupEvents() {
   });
 
   document.addEventListener("pointerdown", (event) => {
-    if (!menuOpen || !(event.target instanceof HTMLElement)) return;
-    if (megaMenu.contains(event.target)) return;
+    if (!(event.target instanceof HTMLElement)) return;
 
-    const navButton = event.target.closest(".fdic-nav-item--button");
-    if (navButton && navList.contains(navButton)) return;
+    if (menuState.menuOpen) {
+      if (megaMenu.contains(event.target)) return;
 
-    closeMenu();
+      const navButton = event.target.closest(".fdic-nav-item--button");
+      if (navButton && navList.contains(navButton)) return;
+
+      closeMenu();
+    }
+
+    if (menuState.mobileNavOpen && navToggle) {
+      if (navToggle.contains(event.target) || navList.contains(event.target)) return;
+      closeMobileNav();
+    }
   });
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     closeMenu();
+    closeMobileNav();
     const activeButton = navList.querySelector(
-      `.fdic-nav-item--button[data-panel-key="${activePanelKey}"]`
+      `.fdic-nav-item--button[data-panel-key="${menuState.activePanelKey}"]`
     );
     if (activeButton) activeButton.focus();
   });
@@ -624,23 +706,24 @@ async function init() {
   }
 
   try {
-    siteContent = await loadContent();
+    menuState.siteContent = await loadContent();
   } catch (error) {
     console.error("Failed to load site content:", error);
     return;
   }
 
-  const navMenuItem = (siteContent.header?.nav || []).find((item) => item.kind === "menu");
-  activePanelKey = siteContent.menu?.defaultPanel || navMenuItem?.panelKey || navMenuItem?.id || null;
+  const navMenuItem = (menuState.siteContent.header?.nav || []).find((item) => item.kind === "menu");
+  menuState.activePanelKey = menuState.siteContent.menu?.defaultPanel || navMenuItem?.panelKey || navMenuItem?.id || null;
 
   applyHeaderContent();
   renderTopNav();
+  syncMobileNavState();
   renderPageContent();
   renderMenuPanel();
   setupEvents();
   megaMenu.hidden = true;
 
-  if (siteContent.menu?.openByDefault) {
+  if (menuState.siteContent.menu?.openByDefault) {
     openMenu();
   }
 }
