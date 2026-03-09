@@ -278,8 +278,8 @@ function syncTopNavState() {
   const buttons = navList.querySelectorAll(".fdic-nav-item--button");
   buttons.forEach((button) => {
     const isActive = button.dataset.panelKey === menuState.activePanelKey;
-    button.classList.toggle("fdic-nav-item--selected", isActive);
     const isExpanded = isMobileViewport() ? isActive && menuState.mobileNavOpen : isActive && menuState.menuOpen;
+    button.classList.toggle("fdic-nav-item--selected", isExpanded);
     button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
   });
 }
