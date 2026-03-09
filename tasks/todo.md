@@ -1,5 +1,10 @@
 # TODO
 
+## Current Task (Mobile Drill Link Placement)
+- [x] Move previous-layer link rows from top header to bottom of L2 and L3 drill lists.
+- [x] Keep back control at top and preserve drill navigation behavior.
+- [x] Verify mobile drill path rendering after repositioning.
+
 ## Current Task (Mobile Drawer Drill-In Navigation Model)
 - [x] Replace nested mobile accordion content with a drill-in interaction model.
 - [x] Render non-link drill targets for hierarchical steps (with right-caret affordance and DS hover/focus states).
