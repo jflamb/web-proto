@@ -10,16 +10,13 @@ const menuState = {
   topNavFocusIndex: 0,
   mobileNavOpen: false,
   mobileSearchOpen: false,
-  mobileAccordionOpenIndex: 0,
-  mobileTopAccordionOpenKey: null,
-  mobileL2Expanded: {},
   mobileNavCloseHandler: null,
   closeTransitionHandler: null,
   l1FocusIndex: 0,
   suppressL2HoverPreview: false,
   moveFocusIntoMenuOnOpen: false,
   closeHideTimer: null,
-  mobileExpandedL1Index: 0,
+  mobileDrillPath: [],
 };
 
 const MOBILE_NAV_BREAKPOINT = "(max-width: 768px)";
@@ -77,12 +74,46 @@ function getMissingRequiredElements() {
 }
 
 async function loadContent() {
-  const response = await fetch("content.yaml", { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Unable to load content.yaml (${response.status})`);
+  const scriptEl = document.querySelector('script[src$="script.js"]');
+  const scriptSrc = scriptEl?.getAttribute("src") || "script.js";
+  const candidateUrls = [
+    new URL("content.yaml", window.location.href).toString(),
+    new URL("content.yaml", window.location.origin + window.location.pathname.replace(/\/?$/, "/")).toString(),
+    new URL("content.yaml", new URL(scriptSrc, window.location.href)).toString(),
+  ];
+  const dedupedUrls = [...new Set(candidateUrls)];
+
+  let lastError = null;
+  for (const url of dedupedUrls) {
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) {
+        lastError = new Error(`Unable to load content.yaml from ${url} (${response.status})`);
+        continue;
+      }
+      const text = await response.text();
+      return window.jsyaml.load(text);
+    } catch (error) {
+      lastError = error;
+    }
   }
-  const text = await response.text();
-  return window.jsyaml.load(text);
+  throw lastError || new Error("Unable to load content.yaml from any known URL");
+}
+
+function renderContentLoadFallback() {
+  pageTitle.textContent = "FDICnet Main Menu Prototype";
+  pageIntro.innerHTML = "";
+  const fallbackLines = [
+    "Menu content is temporarily unavailable because the configuration file could not be loaded.",
+    "Try refreshing the page. If the issue persists, verify that content.yaml is reachable from this page URL.",
+  ];
+  fallbackLines.forEach((line) => {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = line;
+    pageIntro.appendChild(paragraph);
+  });
+  megaMenu.hidden = true;
+  megaMenu.setAttribute("aria-hidden", "true");
 }
 
 function getPanelConfig() {
@@ -91,6 +122,13 @@ function getPanelConfig() {
 
 function getPanelConfigByKey(panelKey) {
   return menuState.siteContent?.menu?.panels?.[panelKey] || null;
+}
+
+function getMobilePanelKeys() {
+  return (menuState.siteContent?.header?.nav || [])
+    .filter((item) => item.kind === "menu")
+    .map((item) => item.panelKey || item.id)
+    .filter(Boolean);
 }
 
 function getPanelL1() {
@@ -150,7 +188,9 @@ function syncMobileToggleButton() {
   const icon = navToggle.querySelector(".ph");
   const label = navToggle.querySelector("span");
   const isOpen = menuState.mobileNavOpen;
+  const hideInDrill = isOpen && menuState.mobileDrillPath.length > 0 && isMobileViewport();
   navToggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+  navToggle.classList.toggle("fdic-nav-toggle--drill-hidden", hideInDrill);
   if (label) label.textContent = isOpen ? "Close" : "Menu";
   if (icon) {
     icon.classList.remove("ph-list", "ph-x");
@@ -161,7 +201,7 @@ function syncMobileToggleButton() {
 function syncMobileNavState() {
   if (!navToggle) return;
   const mobile = isMobileViewport();
-  navToggle.hidden = !narrowHeaderMediaQuery.matches;
+  navToggle.hidden = !mobile;
   if (!mobile) {
     menuState.mobileNavOpen = false;
     header.classList.remove("mobile-menu-open");
@@ -190,16 +230,19 @@ function syncMobileNavState() {
     navList.hidden = false;
     window.requestAnimationFrame(() => {
       navList.classList.add("is-mobile-open");
+      renderMobileDrawerPanel();
     });
   } else {
     const wasOpen = navList.classList.contains("is-mobile-open");
     navList.classList.remove("is-mobile-open");
     if (!wasOpen) {
       navList.hidden = true;
+      removeMobileDrawerPanel();
       return;
     }
     if (reduceMotionMediaQuery.matches) {
       navList.hidden = true;
+      removeMobileDrawerPanel();
       return;
     }
     if (menuState.mobileNavCloseHandler) {
@@ -211,6 +254,7 @@ function syncMobileNavState() {
       menuState.mobileNavCloseHandler = null;
       if (!menuState.mobileNavOpen) {
         navList.hidden = true;
+        removeMobileDrawerPanel();
       }
     };
     navList.addEventListener("transitionend", menuState.mobileNavCloseHandler);
@@ -218,7 +262,11 @@ function syncMobileNavState() {
 }
 
 function setMobileNavOpen(isOpen) {
-  menuState.mobileNavOpen = Boolean(isOpen);
+  const nextOpen = Boolean(isOpen);
+  if (nextOpen && !menuState.mobileNavOpen) {
+    menuState.mobileDrillPath = [];
+  }
+  menuState.mobileNavOpen = nextOpen;
   syncMobileNavState();
 }
 
@@ -227,12 +275,12 @@ function closeMobileNav() {
 }
 
 function syncTopNavState() {
-  if (isMobileViewport()) return;
   const buttons = navList.querySelectorAll(".fdic-nav-item--button");
   buttons.forEach((button) => {
     const isActive = button.dataset.panelKey === menuState.activePanelKey;
-    button.classList.toggle("fdic-nav-item--selected", isActive);
-    button.setAttribute("aria-expanded", isActive && menuState.menuOpen ? "true" : "false");
+    const isExpanded = isMobileViewport() ? isActive && menuState.mobileNavOpen : isActive && menuState.menuOpen;
+    button.classList.toggle("fdic-nav-item--selected", isExpanded);
+    button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
   });
 }
 
@@ -277,8 +325,8 @@ function resetPanelSelection() {
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
   menuState.l1FocusIndex = 0;
-  menuState.mobileExpandedL1Index = 0;
   menuState.suppressL2HoverPreview = false;
+  menuState.mobileDrillPath = [];
 }
 
 function renderTopNav() {
@@ -288,9 +336,11 @@ function renderTopNav() {
 
   if (mobile) {
     navList.classList.add("fdic-nav-list--mobile-accordion");
-  } else {
-    navList.classList.remove("fdic-nav-list--mobile-accordion");
+    syncTopNavState();
+    return;
   }
+
+  navList.classList.remove("fdic-nav-list--mobile-accordion");
 
   navItems.forEach((item) => {
     const li = document.createElement("li");
@@ -343,6 +393,220 @@ function renderTopNav() {
   applyTopNavRoving();
 }
 
+function ensureMobileDrawerPanel() {
+  const existing = navList.querySelector(".mobile-drawer-panel-item");
+  if (existing) return existing;
+  const li = document.createElement("li");
+  li.className = "mobile-drawer-panel-item";
+  const container = document.createElement("div");
+  container.className = "mobile-drawer-panel";
+  li.appendChild(container);
+  navList.appendChild(li);
+  return li;
+}
+
+function removeMobileDrawerPanel() {
+  const existing = navList.querySelector(".mobile-drawer-panel-item");
+  if (existing) existing.remove();
+}
+
+function renderMobileDrillHeader(targetContainer, backLabel, onBack) {
+  const header = document.createElement("div");
+  header.className = "mobile-drill-header";
+
+  if (onBack) {
+    const backButton = document.createElement("button");
+    backButton.type = "button";
+    backButton.className = "mobile-drill-back";
+    backButton.setAttribute("aria-label", `Back to ${backLabel}`);
+
+    const icon = document.createElement("span");
+    icon.className = "mobile-drill-back-icon";
+    icon.textContent = "‹";
+    icon.setAttribute("aria-hidden", "true");
+
+    const text = document.createElement("span");
+    text.textContent = backLabel;
+
+    backButton.append(icon, text);
+    backButton.addEventListener("click", onBack);
+    header.appendChild(backButton);
+  }
+
+  if (header.childElementCount > 0) {
+    targetContainer.appendChild(header);
+  }
+}
+
+function createMobileDrillList() {
+  const list = document.createElement("ul");
+  list.className = "mobile-drill-list";
+  return list;
+}
+
+function appendMobileDrillItem(list, label, onClick) {
+  const li = document.createElement("li");
+  li.className = "mobile-drill-item";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "mobile-drill-trigger";
+
+  const text = document.createElement("span");
+  text.className = "mobile-drill-label";
+  text.textContent = label;
+
+  const icon = document.createElement("span");
+  icon.className = "mobile-drill-caret";
+  icon.textContent = "›";
+  icon.setAttribute("aria-hidden", "true");
+
+  button.append(text, icon);
+  button.addEventListener("click", onClick);
+  li.appendChild(button);
+  list.appendChild(li);
+}
+
+function appendMobileDrillLinkItem(list, label, href) {
+  const li = document.createElement("li");
+  li.className = "mobile-drill-link-item";
+
+  const link = document.createElement("a");
+  link.className = "mobile-drill-current-link";
+  link.href = href || "#";
+  link.textContent = label || "Overview";
+
+  li.appendChild(link);
+  list.appendChild(li);
+}
+
+function renderMobileDrillRoot(panelContainer, panelKeys) {
+  const list = createMobileDrillList();
+  panelKeys.forEach((panelKey) => {
+    const panelMeta = (menuState.siteContent?.header?.nav || []).find(
+      (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
+    );
+    appendMobileDrillItem(list, panelMeta?.label || panelKey, () => {
+      menuState.activePanelKey = panelKey;
+      menuState.mobileDrillPath = [panelKey];
+      renderMobileDrawerPanel();
+    });
+  });
+  panelContainer.appendChild(list);
+}
+
+function renderMobileDrillL1(panelContainer, panelKey, panelConfig) {
+  renderMobileDrillHeader(panelContainer, "Main menu", () => {
+    menuState.mobileDrillPath = [];
+    renderMobileDrawerPanel();
+  });
+
+  const list = createMobileDrillList();
+  (panelConfig.l1 || []).forEach((l1Item, l1Index) => {
+    appendMobileDrillItem(list, l1Item.label || "Section", () => {
+      menuState.mobileDrillPath = [panelKey, l1Index];
+      renderMobileDrawerPanel();
+    });
+  });
+  panelContainer.appendChild(list);
+}
+
+function renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index) {
+  const l1Item = (panelConfig.l1 || [])[l1Index];
+  if (!l1Item) return;
+
+  renderMobileDrillHeader(
+    panelContainer,
+    panelConfig?.overviewLabel || "Sections",
+    () => {
+      menuState.mobileDrillPath = [panelKey];
+      renderMobileDrawerPanel();
+    }
+  );
+
+  const list = createMobileDrillList();
+  (l1Item.l2 || []).forEach((l2Item, l2Index) => {
+    appendMobileDrillItem(list, l2Item.label || "Link", () => {
+      menuState.mobileDrillPath = [panelKey, l1Index, l2Index];
+      renderMobileDrawerPanel();
+    });
+  });
+  appendMobileDrillLinkItem(list, l1Item.label || "Section", l1Item.href || l1Item.overviewHref || "#");
+  panelContainer.appendChild(list);
+}
+
+function renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index) {
+  const l1Item = (panelConfig.l1 || [])[l1Index];
+  const l2Item = (l1Item?.l2 || [])[l2Index];
+  if (!l1Item || !l2Item) return;
+
+  renderMobileDrillHeader(
+    panelContainer,
+    l1Item.label || "Section",
+    () => {
+      menuState.mobileDrillPath = [panelKey, l1Index];
+      renderMobileDrawerPanel();
+    }
+  );
+
+  const list = document.createElement("ul");
+  list.className = "mobile-drill-link-list";
+
+  (l2Item.l3 || []).forEach((l3Item) => {
+    const li = document.createElement("li");
+    li.className = "mobile-drill-link-item";
+
+    const link = document.createElement("a");
+    link.className = "mobile-drill-link";
+    link.href = l3Item.href || "#";
+    link.textContent = l3Item.label || "Sub-link";
+
+    li.appendChild(link);
+    list.appendChild(li);
+  });
+
+  appendMobileDrillLinkItem(list, l2Item.label || "Link", l2Item.href || "#");
+  panelContainer.appendChild(list);
+}
+
+function renderMobileDrawerPanel() {
+  if (!isMobileViewport()) return;
+  if (!menuState.mobileNavOpen) return;
+  syncMobileToggleButton();
+  const panelItem = ensureMobileDrawerPanel();
+  const panelContainer = panelItem.querySelector(".mobile-drawer-panel");
+  if (!panelContainer) return;
+  panelContainer.innerHTML = "";
+
+  const panelKeys = getMobilePanelKeys();
+  if (panelKeys.length === 0) return;
+
+  const [panelKey, l1Index, l2Index] = menuState.mobileDrillPath;
+  if (!panelKey) {
+    renderMobileDrillRoot(panelContainer, panelKeys);
+    return;
+  }
+
+  const panelConfig = getPanelConfigByKey(panelKey);
+  if (!panelConfig) {
+    menuState.mobileDrillPath = [];
+    renderMobileDrillRoot(panelContainer, panelKeys);
+    return;
+  }
+
+  if (typeof l1Index !== "number") {
+    renderMobileDrillL1(panelContainer, panelKey, panelConfig);
+    return;
+  }
+
+  if (typeof l2Index !== "number") {
+    renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index);
+    return;
+  }
+
+  renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index);
+}
+
 function openMenu({ focusMenu = false } = {}) {
   if (menuState.menuOpen) return;
   menuState.menuOpen = true;
@@ -359,10 +623,6 @@ function openMenu({ focusMenu = false } = {}) {
   window.requestAnimationFrame(() => {
     if (menuState.menuOpen) {
       header.classList.add("menu-open");
-      if (isMobileViewport()) {
-        menuState.mobileExpandedL1Index = Math.max(0, menuState.selectedL1Index);
-        renderMobileAccordion();
-      }
       if (focusMenu) {
         if (!focusSelectedL1()) {
           const fallbackTarget = megaMenu.querySelector(".l2-item, .overview-link, .l3-item");
@@ -374,10 +634,6 @@ function openMenu({ focusMenu = false } = {}) {
     }
   });
   if (isMobileViewport()) {
-    const l1Items = getPanelL1();
-    menuState.mobileAccordionOpenIndex = l1Items.length > 0
-      ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
-      : null;
     renderL1();
     renderL2();
     renderL3();
@@ -434,27 +690,6 @@ function closeMenu() {
   syncTopNavState();
 }
 
-function getMobileAccordionPanelId(index) {
-  const panelKey = menuState.activePanelKey || "panel";
-  return `mobileAccordionPanel-${panelKey}-${index}`.replace(/[^a-zA-Z0-9_-]/g, "-");
-}
-
-function setMobileAccordionOpenIndex(nextIndex) {
-  const l1Items = getPanelL1();
-  if (typeof nextIndex === "number" && nextIndex >= 0 && nextIndex < l1Items.length) {
-    menuState.mobileAccordionOpenIndex = nextIndex;
-    menuState.selectedL1Index = nextIndex;
-    menuState.selectedL2Index = 0;
-  } else {
-    menuState.mobileAccordionOpenIndex = null;
-  }
-  menuState.previewL2Index = null;
-  menuState.previewingOverview = false;
-  renderL1();
-  renderL2();
-  renderL3();
-}
-
 function getSelectedL1() {
   return getPanelL1()[menuState.selectedL1Index] || null;
 }
@@ -488,7 +723,6 @@ function getL2Overview(selectedL1) {
 function setSelectedL1(index, { restoreFocus = false } = {}) {
   menuState.selectedL1Index = index;
   menuState.l1FocusIndex = index;
-  menuState.mobileExpandedL1Index = index;
   menuState.selectedL2Index = 0;
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
@@ -648,7 +882,7 @@ function renderL2() {
       if (menuState.suppressL2HoverPreview) return;
       setPreviewL2(index);
     });
-    link.addEventListener("focus", () => setPreviewL2(index));
+    link.addEventListener("focus", () => setPreviewL2(index, { fromFocus: true, restoreFocus: true }));
     link.addEventListener("click", (event) => {
       if (
         event.button !== 0
@@ -697,7 +931,7 @@ function renderL2() {
       if (menuState.suppressL2HoverPreview) return;
       setPreviewOverview();
     });
-    overviewLink.addEventListener("focus", () => setPreviewOverview());
+    overviewLink.addEventListener("focus", () => setPreviewOverview({ fromFocus: true, restoreFocus: true }));
     overviewLi.appendChild(overviewLink);
     l2List.appendChild(overviewLi);
   }
@@ -750,119 +984,6 @@ function renderL3() {
   });
 }
 
-function renderMobileAccordion() {
-  if (!mobileMenu) return;
-
-  const l1Items = getPanelL1();
-  const panel = getPanelConfig();
-  mobileMenu.innerHTML = "";
-
-  if (!panel || l1Items.length === 0) {
-    return;
-  }
-
-  const maxIndex = l1Items.length - 1;
-  if (menuState.mobileExpandedL1Index > maxIndex) {
-    menuState.mobileExpandedL1Index = Math.max(0, Math.min(menuState.selectedL1Index, maxIndex));
-  }
-  if (menuState.mobileExpandedL1Index < -1) {
-    menuState.mobileExpandedL1Index = -1;
-  }
-
-  l1Items.forEach((l1Item, index) => {
-    const section = document.createElement("section");
-    section.className = "mobile-l1-section";
-
-    const trigger = document.createElement("button");
-    trigger.type = "button";
-    trigger.className = "mobile-l1-trigger";
-    trigger.dataset.index = String(index);
-
-    const panelId = `mobileL1Panel-${index}`;
-    const expanded = menuState.mobileExpandedL1Index === index;
-    trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-    trigger.setAttribute("aria-controls", panelId);
-
-    const label = document.createElement("span");
-    label.className = "mobile-l1-label";
-    label.textContent = l1Item.label || "Section";
-
-    const icon = document.createElement("span");
-    icon.className = "mobile-l1-caret ph ph-caret-down";
-    icon.setAttribute("aria-hidden", "true");
-
-    trigger.append(label, icon);
-
-    const panelEl = document.createElement("div");
-    panelEl.id = panelId;
-    panelEl.className = "mobile-l1-panel";
-    panelEl.hidden = !expanded;
-
-    (l1Item.l2 || []).forEach((l2Item) => {
-      const group = document.createElement("div");
-      group.className = "mobile-l2-group";
-
-      const l2Link = document.createElement("a");
-      l2Link.className = "mobile-l2-item";
-      l2Link.href = l2Item.href || "#";
-      l2Link.textContent = l2Item.label || "Link";
-      group.appendChild(l2Link);
-
-      const l3Items = l2Item.l3 || [];
-      if (l3Items.length > 0) {
-        const l3ListMobile = document.createElement("ul");
-        l3ListMobile.className = "mobile-l3-list";
-        l3Items.forEach((l3Item) => {
-          const l3Li = document.createElement("li");
-          const l3Link = document.createElement("a");
-          l3Link.className = "mobile-l3-item";
-          l3Link.href = l3Item.href || "#";
-          l3Link.textContent = l3Item.label || "Sub-link";
-          l3Li.appendChild(l3Link);
-          l3ListMobile.appendChild(l3Li);
-        });
-        group.appendChild(l3ListMobile);
-      }
-
-      panelEl.appendChild(group);
-    });
-
-    const overview = getL2Overview(l1Item);
-    if (overview) {
-      const overviewLink = document.createElement("a");
-      overviewLink.className = "mobile-overview-link";
-      overviewLink.href = overview.href || "#";
-      overviewLink.textContent = overview.label || `${l1Item.label || "Section"} Overview`;
-      panelEl.appendChild(overviewLink);
-    }
-
-    trigger.addEventListener("click", () => {
-      menuState.mobileExpandedL1Index = menuState.mobileExpandedL1Index === index ? -1 : index;
-      menuState.selectedL1Index = index;
-      menuState.selectedL2Index = 0;
-      renderL1();
-      renderL2();
-      renderL3();
-      renderMobileAccordion();
-    });
-
-    panelEl.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      event.stopPropagation();
-      menuState.mobileExpandedL1Index = -1;
-      renderMobileAccordion();
-      const target = mobileMenu.querySelector(`.mobile-l1-trigger[data-index="${index}"]`);
-      if (target instanceof HTMLElement) {
-        target.focus();
-      }
-    });
-
-    section.append(trigger, panelEl);
-    mobileMenu.appendChild(section);
-  });
-}
-
 function renderMenuPanel() {
   const panel = getPanelConfig();
   if (!panel) {
@@ -877,10 +998,16 @@ function renderMenuPanel() {
   }
 
   megaMenu.setAttribute("aria-label", panel.ariaLabel || "Site menu");
+  if (isMobileViewport()) {
+    if (mobileMenu) {
+      mobileMenu.innerHTML = "";
+    }
+    renderMobileDrawerPanel();
+    return;
+  }
   renderL1();
   renderL2();
   renderL3();
-  renderMobileAccordion();
 }
 
 function setupColumnArrowNav(container, selector) {
@@ -997,17 +1124,6 @@ function setupEvents() {
   }
 
   mobileNavMediaQuery.addEventListener("change", () => {
-    const mobile = isMobileViewport();
-    if (!mobile) {
-      menuState.mobileAccordionOpenIndex = null;
-      menuState.mobileTopAccordionOpenKey = null;
-    } else {
-      menuState.mobileTopAccordionOpenKey = null;
-      const l1Items = getPanelL1();
-      menuState.mobileAccordionOpenIndex = l1Items.length > 0
-        ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
-        : null;
-    }
     syncMobileNavState();
     renderTopNav();
     renderMenuPanel();
@@ -1015,7 +1131,7 @@ function setupEvents() {
 
   narrowHeaderMediaQuery.addEventListener("change", () => {
     syncMobileNavState();
-    renderMobileAccordion();
+    renderMobileDrawerPanel();
   });
 
   phoneSearchMediaQuery.addEventListener("change", () => {
@@ -1024,12 +1140,6 @@ function setupEvents() {
 
   navList.addEventListener("keydown", (event) => {
     if (isMobileViewport()) {
-      if ((event.key === "Enter" || event.key === " ") && event.target instanceof HTMLElement) {
-        if (event.target.classList.contains("fdic-nav-item--button")) {
-          event.preventDefault();
-          event.target.click();
-        }
-      }
       return;
     }
 
@@ -1091,24 +1201,12 @@ function setupEvents() {
       if (mobileSearchToggle) mobileSearchToggle.focus();
       return;
     }
-    if (isMobileViewport() && menuState.mobileNavOpen && menuState.mobileTopAccordionOpenKey) {
-      const openKey = menuState.mobileTopAccordionOpenKey;
-      const openPanel = document.getElementById(getMobileTopAccordionPanelId(openKey));
-      if (openPanel && openPanel.contains(document.activeElement)) {
+    if (isMobileViewport() && menuState.mobileNavOpen) {
+      if (menuState.mobileDrillPath.length > 0) {
         event.preventDefault();
-        setMobileTopAccordionOpenKey(null);
-        const button = navList.querySelector(`.fdic-nav-item--button[data-panel-key="${openKey}"]`);
-        if (button) button.focus();
-        return;
-      }
-    }
-    if (isMobileViewport() && menuState.menuOpen && typeof menuState.mobileAccordionOpenIndex === "number") {
-      const openIndex = menuState.mobileAccordionOpenIndex;
-      const openPanel = document.getElementById(getMobileAccordionPanelId(openIndex));
-      if (openPanel && openPanel.contains(document.activeElement)) {
-        event.preventDefault();
-        setMobileAccordionOpenIndex(null);
-        const button = l1List.querySelector(`.l1-item[data-index="${openIndex}"]`);
+        menuState.mobileDrillPath = menuState.mobileDrillPath.slice(0, -1);
+        renderMobileDrawerPanel();
+        const button = navList.querySelector(".mobile-drill-trigger");
         if (button) button.focus();
         return;
       }
@@ -1189,12 +1287,12 @@ async function init() {
     menuState.siteContent = await loadContent();
   } catch (error) {
     console.error("Failed to load site content:", error);
+    renderContentLoadFallback();
     return;
   }
 
   const navMenuItem = (menuState.siteContent.header?.nav || []).find((item) => item.kind === "menu");
   menuState.activePanelKey = menuState.siteContent.menu?.defaultPanel || navMenuItem?.panelKey || navMenuItem?.id || null;
-  menuState.mobileTopAccordionOpenKey = null;
 
   applyHeaderContent();
   renderTopNav();
@@ -1206,7 +1304,7 @@ async function init() {
   megaMenu.hidden = true;
   megaMenu.setAttribute("aria-hidden", "true");
 
-  if (menuState.siteContent.menu?.openByDefault) {
+  if (menuState.siteContent.menu?.openByDefault && !isMobileViewport()) {
     openMenu();
   }
 }
