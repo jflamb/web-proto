@@ -49,10 +49,12 @@
       </nav>
 
       <section id="megaMenu" class="mega-menu" aria-label="Main menu">
+        <div id="mobileMenu" class="fdic-shell mega-mobile" aria-label="Mobile menu"></div>
+
         <div class="fdic-shell mega-menu-inner">
           <section class="mega-col mega-col--l1" aria-labelledby="l1Heading">
             <h2 id="l1Heading" class="sr-only">Level 1</h2>
-            <ul id="l1List" class="menu-list" role="list"></ul>
+            <ul id="l1List" class="menu-list" role="listbox" aria-labelledby="l1Heading"></ul>
             <div class="overview-link-wrap">
               <a id="l1OverviewLink" class="overview-link" href="#">Overview</a>
             </div>
@@ -60,7 +62,7 @@
 
           <section class="mega-col mega-col--l2" aria-labelledby="l2Heading">
             <h2 id="l2Heading" class="sr-only">Level 2</h2>
-            <ul id="l2List" class="menu-list" role="list"></ul>
+            <ul id="l2List" class="menu-list" role="listbox" aria-labelledby="l2Heading"></ul>
           </section>
 
           <section class="mega-col mega-col--l3" aria-labelledby="l3Heading">

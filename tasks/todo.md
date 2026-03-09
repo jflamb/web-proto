@@ -1089,3 +1089,62 @@
 - Verification:
   - `node --check sites/fdic-public-information-faq/components.js`
   - `node --check sites/fdic-public-information-faq/script.js`
+
+## Current Task (FDICnet Main Menu Remaining Open Issues #18, #24-#34)
+- [x] Create a dedicated branch for remaining open issues (#18, #24-#34).
+- [x] Post implementation-plan comments on each open issue before code changes.
+- [x] Implement and verify issue #24; post implementation/verification comment.
+- [x] Implement and verify issue #25; post implementation/verification comment.
+- [x] Implement and verify issue #26; post implementation/verification comment.
+- [x] Implement and verify issue #27; post implementation/verification comment.
+- [x] Implement and verify issue #28; post implementation/verification comment.
+- [x] Implement and verify issue #29; post implementation/verification comment.
+- [x] Implement and verify issue #30; post implementation/verification comment.
+- [x] Implement and verify issue #31; post implementation/verification comment.
+- [x] Implement and verify issue #32; post implementation/verification comment.
+- [x] Implement and verify issue #33; post implementation/verification comment.
+- [x] Implement and verify issue #34; post implementation/verification comment.
+- [x] Implement and verify issue #18; post implementation/verification comment.
+- [x] Run full regression checks (syntax + keyboard navigation + open/close + responsive + overflow).
+
+## Review / Results (FDICnet Main Menu Remaining Open Issues #18, #24-#34)
+- Branch created: `fix/fdicnet-main-menu-remaining-issues-18-24-34`.
+- Posted implementation-plan comments on all in-scope issues:
+  - `#18`: `issuecomment-4020888704`
+  - `#24`: `issuecomment-4020888737`
+  - `#25`: `issuecomment-4020888760`
+  - `#26`: `issuecomment-4020888789`
+  - `#27`: `issuecomment-4020888815`
+  - `#28`: `issuecomment-4020888843`
+  - `#29`: `issuecomment-4020888874`
+  - `#30`: `issuecomment-4020888905`
+  - `#31`: `issuecomment-4020888954`
+  - `#32`: `issuecomment-4020889012`
+  - `#33`: `issuecomment-4020889061`
+  - `#34`: `issuecomment-4020889114`
+- Posted per-issue implementation + verification updates:
+  - `#24`: `issuecomment-4020892854`
+  - `#25`: `issuecomment-4020895025`
+  - `#26`: `issuecomment-4020896761`
+  - `#27`: `issuecomment-4020897819`
+  - `#29`: `issuecomment-4020898645`
+  - `#34`: `issuecomment-4020900350`
+  - `#30`: `issuecomment-4020908258`
+  - `#31`: `issuecomment-4020912158`
+  - `#32`: `issuecomment-4020914033`
+  - `#33`: `issuecomment-4020916397`
+  - `#28`: `issuecomment-4020932328`
+  - `#18`: `issuecomment-4020932999`
+- Updated files:
+  - `sites/fdicnet-main-menu/index.html`
+  - `sites/fdicnet-main-menu/script.js`
+  - `sites/fdicnet-main-menu/styles.css`
+  - `sites/fdicnet-main-menu/content.yaml`
+  - `tasks/todo.md`
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright behavior checks for:
+    - issue-specific acceptance paths (#18, #24-#34)
+    - keyboard open/focus return on Escape
+    - responsive overflow across `375, 768, 769, 900, 1024, 1280, 1440`
+    - mobile accordion open-state, single-open behavior, touch-target sizing, and Escape handling

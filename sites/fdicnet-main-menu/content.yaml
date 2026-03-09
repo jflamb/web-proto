@@ -323,8 +323,8 @@ menu:
               l3:
                 - label: "Research Data Portal"
                   href: "#research-data-portal"
-        - id: "governanace"
-          label: "Governanace"
+        - id: "governance"
+          label: "Governance"
           overviewLabel: "Governance Overview"
           overviewHref: "#governance-overview"
           l2Overview:
