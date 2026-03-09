@@ -508,11 +508,7 @@ function syncL2ActiveState() {
     const itemIndex = Number(item.dataset.index);
     const isActive = Number.isFinite(itemIndex) && itemIndex === activeIndex;
     item.dataset.active = isActive ? "true" : "false";
-    if (isActive) {
-      item.setAttribute("aria-current", "true");
-    } else {
-      item.removeAttribute("aria-current");
-    }
+    item.setAttribute("aria-selected", isActive ? "true" : "false");
   });
 }
 
@@ -584,7 +580,6 @@ function renderL1() {
   const rovingIndex = Math.max(0, Math.min(menuState.l1FocusIndex, maxRovingIndex));
   menuState.l1FocusIndex = rovingIndex;
   l1List.innerHTML = "";
-  const l1Items = getPanelL1();
 
   l1Items.forEach((l1Item, index) => {
     const li = document.createElement("li");
