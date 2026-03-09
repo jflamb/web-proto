@@ -1,5 +1,24 @@
 # TODO
 
+## Current Task (Mobile Drawer Full-Menu Accordion Layout)
+- [x] Render full top-level menu in mobile drawer as accordion sections (not a single active panel).
+- [x] Remove mobile accordion-group heading and `Expand all` control.
+- [x] Keep nested L1/L2/L3 interactions functional under each top-level section.
+- [x] Make mobile accordion layout full-width within drawer (remove side gutters around accordion stack).
+- [x] Run mobile/desktop regression checks and commit.
+
+## Review / Results (Mobile Drawer Full-Menu Accordion Layout)
+- Mobile drawer now renders all top-level menu sections (`News & Events`, `Career Development & Training`, etc.) as accordion triggers.
+- Removed the mobile section heading + `Expand all` controls from the drawer.
+- Nested panel behavior preserved:
+  - top-level section expands to show panel L1 items,
+  - L1 expands to show L2 split rows,
+  - L2 split toggle expands/collapses L3 lists.
+- Drawer accordion stack is now edge-to-edge (removed left/right drawer padding around accordion rows).
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright at `768x1366`: full top-level accordion list visible, `News & Events` expands, `News` expands, nested split-toggle controls remain functional.
+
 ## Current Task (Mobile Drawer Accordion Regression Follow-up)
 - [x] Reproduce the reported local mobile issues (vertical tab list, non-working accordion toggles, split-button L2 behavior, drawer width/color mismatch).
 - [x] Remove any remaining legacy mobile top-nav rendering from the off-canvas drawer path.

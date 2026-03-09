@@ -16,6 +16,7 @@ const menuState = {
   suppressL2HoverPreview: false,
   moveFocusIntoMenuOnOpen: false,
   closeHideTimer: null,
+  mobileExpandedPanelKey: null,
   mobileExpandedL1ByPanel: {},
   mobileExpandedL2ByPath: {},
 };
@@ -321,6 +322,7 @@ function resetPanelSelection() {
   menuState.previewingOverview = false;
   menuState.l1FocusIndex = 0;
   menuState.suppressL2HoverPreview = false;
+  menuState.mobileExpandedPanelKey = null;
   menuState.mobileExpandedL1ByPanel = {};
   menuState.mobileExpandedL2ByPath = {};
 }
@@ -436,38 +438,7 @@ function renderMobilePanelContent(targetContainer, panelKey) {
   const l1Items = panelConfig?.l1 || [];
   if (l1Items.length === 0) return;
 
-  const controls = document.createElement("div");
-  controls.className = "mobile-accordion-group-header";
-
-  const title = document.createElement("h3");
-  title.className = "mobile-accordion-group-title";
-  title.textContent = panelConfig?.overviewLabel || "Sections";
-
-  const groupToggle = document.createElement("button");
-  groupToggle.type = "button";
-  groupToggle.className = "mobile-accordion-group-toggle";
   const expandedL1 = getExpandedL1Index(panelKey, l1Items);
-  const allExpanded = expandedL1 === -2;
-  groupToggle.setAttribute("aria-label", allExpanded ? "Collapse all sections" : "Expand all sections");
-  groupToggle.setAttribute("aria-expanded", allExpanded ? "true" : "false");
-
-  const groupToggleIcon = document.createElement("span");
-  groupToggleIcon.className = "mobile-accordion-group-toggle-icon";
-  groupToggleIcon.textContent = allExpanded ? "−" : "+";
-  groupToggleIcon.setAttribute("aria-hidden", "true");
-
-  const groupToggleLabel = document.createElement("span");
-  groupToggleLabel.className = "mobile-accordion-group-toggle-label";
-  groupToggleLabel.textContent = allExpanded ? "Collapse all" : "Expand all";
-  groupToggle.append(groupToggleIcon, groupToggleLabel);
-  groupToggle.addEventListener("click", () => {
-    setExpandedL1Index(panelKey, allExpanded ? -1 : -2);
-    renderMobileDrawerPanel();
-  });
-
-  controls.append(title, groupToggle);
-  targetContainer.appendChild(controls);
-
   const groupList = document.createElement("div");
   groupList.className = "mobile-accordion-group-list";
   targetContainer.appendChild(groupList);
@@ -597,13 +568,50 @@ function renderMobileDrawerPanel() {
   panelContainer.innerHTML = "";
 
   const panelKeys = getMobilePanelKeys();
-  const panelKey = menuState.activePanelKey && panelKeys.includes(menuState.activePanelKey)
-    ? menuState.activePanelKey
-    : panelKeys[0];
-  if (!panelKey) return;
-  menuState.activePanelKey = panelKey;
+  panelKeys.forEach((panelKey) => {
+    const panelMeta = (menuState.siteContent?.header?.nav || []).find(
+      (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
+    );
+    const section = document.createElement("section");
+    section.className = "mobile-panel-section";
 
-  renderMobilePanelContent(panelContainer, panelKey);
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "mobile-panel-trigger";
+    const panelId = `mobilePanel-${panelKey}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+    const expanded = menuState.mobileExpandedPanelKey === panelKey;
+    trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
+    trigger.setAttribute("aria-controls", panelId);
+
+    const label = document.createElement("span");
+    label.className = "mobile-panel-label";
+    label.textContent = panelMeta?.label || panelKey;
+
+    const icon = document.createElement("span");
+    icon.className = "mobile-panel-caret";
+    icon.textContent = expanded ? "−" : "+";
+    icon.setAttribute("aria-hidden", "true");
+
+    trigger.append(label, icon);
+    trigger.addEventListener("click", () => {
+      menuState.mobileExpandedPanelKey = expanded ? null : panelKey;
+      menuState.activePanelKey = panelKey;
+      renderMobileDrawerPanel();
+    });
+    section.appendChild(trigger);
+
+    const body = document.createElement("div");
+    body.id = panelId;
+    body.className = "mobile-panel-body";
+    body.hidden = !expanded;
+    if (expanded) {
+      menuState.activePanelKey = panelKey;
+      renderMobilePanelContent(body, panelKey);
+    }
+    section.appendChild(body);
+
+    panelContainer.appendChild(section);
+  });
 }
 
 function openMenu({ focusMenu = false } = {}) {

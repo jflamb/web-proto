@@ -65,3 +65,9 @@ Use this file to record correction-driven learning.
 - Root cause: Mobile implementation layered multiple navigation models (top-level panel selector + nested accordions) instead of one coherent accordion hierarchy, which increased state complexity and interaction ambiguity.
 - Prevention rule: On mobile off-canvas navigation, ship one hierarchy model only (single accordion system) and reject parallel selector patterns that duplicate IA levels.
 - Actionable check for future tasks: Add a mobile smoke test that validates initial closed state, single visible accordion hierarchy, default-collapsed sections, and functional L2 split-toggle expansion before sign-off.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported drawer IA mismatch: missing full top-level menu, lingering `Expand all`, and inset accordion stack not filling drawer width.
+- Root cause: Mobile implementation optimized around the active panel only and retained interim group-header controls/styles that conflicted with the intended full-menu accordion IA.
+- Prevention rule: Validate mobile drawer information architecture against final interaction model before visual polish; do not leave transitional controls in production path.
+- Actionable check for future tasks: Add a QA checklist item requiring all top-level sections to be visible as first-level drawer accordions and verify edge-to-edge row alignment at target mobile viewport.
