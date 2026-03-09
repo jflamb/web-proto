@@ -1,5 +1,77 @@
 # TODO
 
+## Current Task (Third-Column Highlight Extension to Viewport Edge)
+- [x] Extend third-column item hover/focus highlight fill to the right viewport edge.
+- [x] Preserve existing third-column underline/focus-ring styling while adding edge extension.
+- [x] Verify the change is scoped to L3 items only.
+
+## Review / Results (Third-Column Highlight Extension to Viewport Edge)
+- Updated `sites/fdicnet-main-menu/styles.css` for L3-only highlight extension:
+  - set `.menu-list--l3 .l3-item { position: relative; }`.
+  - replaced shadow extension with a dedicated edge-extension layer:
+    - `.menu-list--l3 .l3-item:hover::after`
+    - `.menu-list--l3 .l3-item:focus-visible::after`
+    - both draw an absolutely positioned `100vw` overlay from `left: 100%` to carry fill from the L3 column edge to the right viewport edge.
+- Existing L3 underline emphasis (`text-decoration-color` and thickness) remains intact.
+- Verification:
+  - `rg -n "menu-list--l3 \\.l3-item|::after|100vw" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css`
+
+## Current Task (First-Column Divider Padding Balance)
+- [x] Add matching post-divider spacing in first-column overview-link wrapper.
+- [x] Keep first-column overview link row sizing/hover/focus behavior unchanged.
+- [x] Verify the CSS change scope is limited to the first-column divider block.
+
+## Review / Results (First-Column Divider Padding Balance)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `padding-top: 8px` to `.overview-link-wrap`, preserving existing `margin-top: 8px` above the divider so spacing is balanced around the divider line.
+- Verification:
+  - `rg -n "overview-link-wrap" sites/fdicnet-main-menu/styles.css -A3 -B2`
+  - `git diff -- sites/fdicnet-main-menu/styles.css` (confirming first-column divider wrapper change)
+
+## Current Task (Desktop Link Row Full-Width Highlight Fill)
+- [x] Extend desktop L2/L3 hyperlink hover/focus background fill to full column row width.
+- [x] Preserve link text inset alignment while removing inset-only highlight clipping.
+- [x] Verify final selector cascade and changed CSS rules.
+
+## Review / Results (Desktop Link Row Full-Width Highlight Fill)
+- Updated `sites/fdicnet-main-menu/styles.css` so desktop link-row highlight fills the full row width:
+  - removed horizontal `margin`/`max-width` constraints on `.l2-item` and `.menu-list--l3 .l3-item`.
+  - moved horizontal insets into row `padding` (`L2: 24px left / 16px right`, `L3: 24px left / 8px right`) so text alignment remains unchanged while highlight extends edge-to-edge.
+- Existing row-level hover/focus fill (`background: var(--menu-hover-overlay)`) now renders across the full column row width for L2/L3 links.
+- Verification:
+  - `rg -n "^\\.l2-item \\{|^\\.menu-list--l3 \\.l3-item \\{|\\.l2-item:hover|\\.l3-item:hover|\\.l2-item:focus-visible|\\.l3-item:focus-visible" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css`
+
+## Current Task (Desktop Menu Link Hit-Area + Row Highlight Consistency)
+- [x] Increase desktop L2/L3 hyperlink row padding/height to better match non-link menu row targets.
+- [x] Apply row-level hover/focus background highlight to desktop L2/L3 hyperlinks for consistent interaction feedback.
+- [x] Verify updated selectors and changed rules via diff/scan.
+
+## Review / Results (Desktop Menu Link Hit-Area + Row Highlight Consistency)
+- Updated `sites/fdicnet-main-menu/styles.css` desktop menu link row geometry:
+  - `.l2-item` / `.l3-item` now use `min-height: 41px`, `padding: 8px 0`, and `align-items: center` for larger, button-like targets.
+  - compact link-row spacing is preserved by switching L2/L3 horizontal row margins to `margin-top/bottom: 0`.
+- Applied consistent row highlight treatment for link rows:
+  - `.l2-item:hover`, `.l3-item:hover`, and `.l2-item:focus-visible`, `.l3-item:focus-visible` now use `background: var(--menu-hover-overlay)`.
+  - existing underline emphasis on hover/focus remains intact.
+- Verification:
+  - `rg -n "\\.l2-item,|\\.l3-item,|\\.l2-item:hover|\\.l3-item:hover|\\.l2-item:focus-visible|\\.menu-list--l3 \\.l3-item" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css`
+
+## Current Task (Desktop L3 Link Hover Styling Parity)
+- [x] Restore third-column (`.l3-item`) hover styling parity with other desktop menu links.
+- [x] Ensure keyboard focus-visible styling for `.l3-item` is not regressed by the same specificity/cascade issue.
+- [x] Verify selector behavior with a targeted CSS scan.
+
+## Review / Results (Desktop L3 Link Hover Styling Parity)
+- Root cause: `.menu-list--l3 .l3-item` (later in file) reset `text-decoration-thickness: 1px`, overriding earlier `.l3-item:hover`/`.l3-item:focus-visible` thickness styles by equal specificity + later cascade.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.menu-list--l3 .l3-item:hover, .menu-list--l3 .l3-item:focus-visible` override to apply hover/focus underline emphasis (`text-decoration-thickness: 2px`, hover underline color token).
+- Verification:
+  - `rg -n "\\.l3-item:hover|\\.menu-list--l3 \\.l3-item|\\.l3-item:focus-visible" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css`
+
 ## Current Task (Mobile Drawer Close Button Regression on Drill-In)
 - [x] Remove mobile drill-depth toggle hiding so close control stays visible at all levels.
 - [x] Remove obsolete CSS class used only for drill-depth toggle hiding.
