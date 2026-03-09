@@ -1579,7 +1579,7 @@
 - [x] Fix issue #58 by exposing intended labels via valid semantics (`role="group"` on header controls and `nav` landmark for mobile menu).
 - [x] Fix issue #60 by closing mega menu when keyboard focus leaves the menu system (top nav + mega menu) using `requestAnimationFrame` focus checks.
 - [x] Run syntax/source checks and document any environment-specific verification gaps.
-- [ ] Open PR with implementation plan and validation matrix; include `Closes #57`, `Closes #58`, `Closes #60`.
+- [x] Open PR with implementation plan and validation matrix; include `Closes #57`, `Closes #58`, `Closes #60`.
 
 ## Review / Results (A11y Issues #57, #58, #60)
 - Updated `sites/fdicnet-main-menu/script.js`:
@@ -1595,3 +1595,5 @@
   - `rg -n "fdic-controls|mobileMenu" sites/fdicnet-main-menu/index.html -S`
 - Environment gap:
   - Attempted Playwright MCP browser validation against local static server, but MCP browser could not connect to `127.0.0.1` in this environment (`ERR_CONNECTION_REFUSED`), so VoiceOver/NVDA and cross-browser keyboard checks are documented for follow-up in PR.
+- PR:
+  - `https://github.com/jflamb/pens-github-test/pull/64`
