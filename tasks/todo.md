@@ -1,5 +1,186 @@
 # TODO
 
+## Current Task (First-Column Focus Seam Removal)
+- [x] Replace split focus-ring rendering with one continuous ring spanning left extension + row body.
+- [x] Preserve existing hover/selected background behavior while fixing focus seam artifact.
+- [x] Verify and commit.
+
+## Review / Results (First-Column Focus Seam Removal)
+- Updated `sites/fdicnet-main-menu/styles.css` to use a unified `:focus-visible::after` ring layer for `.l1-item` and `.overview-link`.
+- Removed dual-ring rendering from element box and `::before` extension that created the visible seam between two outlined regions.
+- Result: focus now renders as one continuous rectangle from viewport-left extension through row right edge.
+
+## Current Task (First-Column Focus Ring Coverage Fix)
+- [x] Ensure first-column focus rectangle covers the full item area (left viewport edge through right edge of the row item).
+- [x] Keep hover/selected visual behavior unchanged while correcting focus-ring geometry.
+- [x] Verify and commit the focused CSS fix.
+
+## Review / Results (First-Column Focus Ring Coverage Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added inset focus ring on `.l1-item:focus-visible` so the item portion of the row is outlined.
+  - added inset focus ring on `.overview-link:focus-visible` for the same full-row coverage behavior.
+  - retained full-bleed pseudo-element focus ring for left-of-column extension.
+- Result: focus rectangle now spans from the viewport-left extension through the visible row item.
+
+## Current Task (First-Column Focus Ring Full-Bleed Alignment)
+- [x] Update first-column focus indicators so ring extent matches full-bleed background highlight area.
+- [x] Apply same focus-ring extent behavior to first-column overview link row for consistency.
+- [x] Verify CSS changes and commit.
+
+## Review / Results (First-Column Focus Ring Full-Bleed Alignment)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed element-box outline for `.l1-item:focus-visible` and `.overview-link:focus-visible`.
+  - added inset focus ring on full-bleed `::before` layer for both selectors.
+- Result: keyboard focus rectangle now follows the same full-width/edge-aligned area as first-column highlight treatment.
+
+## Current Task (Menu Keyboard Navigation Regression Recovery)
+- [x] Diagnose why arrow-key navigation within/across mega-menu columns is failing.
+- [x] Restore focus-preserving keyboard navigation for L1/L2/L3 (up/down, left/right).
+- [x] Verify keyboard movement and focus visibility behavior, then commit.
+
+## Review / Results (Menu Keyboard Navigation Regression Recovery)
+- Root cause: L2 focus handlers invoked preview updates that could re-render the column during focus transitions, causing focused elements to be replaced and focus to fall back to `body`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - L2 item `focus` handler now calls `setPreviewL2(index, { fromFocus: true, restoreFocus: true })`.
+  - L2 overview-link `focus` handler now calls `setPreviewOverview({ fromFocus: true, restoreFocus: true })`.
+- Effect: keyboard arrow navigation now preserves focus identity while updating preview state.
+
+## Current Task (L2/L3 Link Background Cleanup)
+- [x] Remove gray background hover treatment from second/third-column hyperlinks.
+- [x] Preserve hyperlink color/underline hover styling without row background fill.
+- [x] Commit focused style update.
+
+## Review / Results (L2/L3 Link Background Cleanup)
+- Updated `sites/fdicnet-main-menu/styles.css` to remove inset gray hover fill from `.l2-item:hover` and `.l3-item:hover`.
+- Kept existing link color and underline hover emphasis so interactivity remains clear without background shading.
+
+## Current Task (First-Column Overview Link Hit Target + States)
+- [x] Match first-column overview link row padding and target size to L1 row geometry.
+- [x] Apply first-column-equivalent hover/focus row styling while preserving hyperlink text treatment.
+- [x] Verify CSS diff scope and commit.
+
+## Review / Results (First-Column Overview Link Hit Target + States)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed `overview-link` from L2/L3 compact-row sizing rule.
+  - removed `overview-link` from L2/L3 overlay-hover rule.
+  - made `.overview-link` full-width, L1-sized row (`min-height: 41px`, row padding aligned to first column controls).
+  - added dedicated full-row hover/focus visuals for `.overview-link` to match first-column item affordance while keeping link underline/text styling.
+- Verification:
+  - `git diff -- sites/fdicnet-main-menu/styles.css`
+
+## Current Task (Header Apps Button + Desktop Search Gap Alignment)
+- [x] Reduce wide-viewport spacing between header action icons and search to match smaller viewport spacing.
+- [x] Add new `Apps` icon button immediately left of the profile icon button with no extra inter-button gap.
+- [x] Verify responsive header behavior in `fdicnet-main-menu` and commit.
+
+## Review / Results (Header Apps Button + Desktop Search Gap Alignment)
+- Updated header controls markup in `sites/fdicnet-main-menu/index.html`:
+  - inserted new `Apps` icon button (`ph-squares-four`) immediately left of `Profile`.
+  - grouped `Apps` + `Profile` buttons in a dedicated icon cluster.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.fdic-controls` gap from `32px` to `12px` (matching smaller viewport spacing intent).
+  - added `.fdic-control-icons` with `gap: 0` so no extra spacing exists between `Apps` and `Profile`.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - diff review confirmed only targeted header markup and spacing rules changed.
+
+## Current Task (Mobile Drill Link Placement)
+- [x] Move previous-layer link rows from top header to bottom of L2 and L3 drill lists.
+- [x] Keep back control at top and preserve drill navigation behavior.
+- [x] Verify mobile drill path rendering after repositioning.
+
+## Current Task (Mobile Drawer Drill-In Navigation Model)
+- [x] Replace nested mobile accordion content with a drill-in interaction model.
+- [x] Render non-link drill targets for hierarchical steps (with right-caret affordance and DS hover/focus states).
+- [x] Render level header links in drill-in views (`L1` link at L2 step, `L2` link at L3 step).
+- [x] Ensure final L3 step renders link-only rows.
+- [x] Validate mobile drill path navigation + Escape-back behavior and desktop regression.
+
+## Review / Results (Mobile Drawer Drill-In Navigation Model)
+- Replaced mobile nested accordion rendering with a path-based drill-in system:
+  - root: top-level menu sections,
+  - step 1: L1 list,
+  - step 2: L2 list,
+  - step 3: L3 links.
+- Drill targets are now buttons (not hyperlinks) with DS-consistent hover/focus/pressed styling and right-caret affordances.
+- Each drilled view includes context navigation:
+  - back control to previous level,
+  - current-level link at top (`L1` on L2 view, `L2` on L3 view).
+- Escape behavior on mobile now steps back one drill level before closing menu.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright at `768x1366`: open menu, drill to `News & Events -> News -> FDICNews`, confirm L3 links render and `Escape` steps back.
+  - Playwright at `1280x900`: desktop mega-menu layout/behavior still renders.
+
+## Current Task (Mobile Drawer Full-Menu Accordion Layout)
+- [x] Render full top-level menu in mobile drawer as accordion sections (not a single active panel).
+- [x] Remove mobile accordion-group heading and `Expand all` control.
+- [x] Keep nested L1/L2/L3 interactions functional under each top-level section.
+- [x] Make mobile accordion layout full-width within drawer (remove side gutters around accordion stack).
+- [x] Run mobile/desktop regression checks and commit.
+
+## Review / Results (Mobile Drawer Full-Menu Accordion Layout)
+- Mobile drawer now renders all top-level menu sections (`News & Events`, `Career Development & Training`, etc.) as accordion triggers.
+- Removed the mobile section heading + `Expand all` controls from the drawer.
+- Nested panel behavior preserved:
+  - top-level section expands to show panel L1 items,
+  - L1 expands to show L2 split rows,
+  - L2 split toggle expands/collapses L3 lists.
+- Drawer accordion stack is now edge-to-edge (removed left/right drawer padding around accordion rows).
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright at `768x1366`: full top-level accordion list visible, `News & Events` expands, `News` expands, nested split-toggle controls remain functional.
+
+## Current Task (Mobile Drawer Accordion Regression Follow-up)
+- [x] Reproduce the reported local mobile issues (vertical tab list, non-working accordion toggles, split-button L2 behavior, drawer width/color mismatch).
+- [x] Remove any remaining legacy mobile top-nav rendering from the off-canvas drawer path.
+- [x] Fix mobile accordion interactions so top-level and nested split toggles collapse/expand reliably.
+- [x] Ensure L2 rows with L3 children render as true split controls (link action + independent expand/collapse button).
+- [x] Make drawer and accordion stack full-width with neutral design-system-aligned styling.
+- [x] Run regression checks (mobile + desktop behavior, syntax) and commit with clear message.
+
+## Review / Results (Mobile Drawer Accordion Regression Follow-up)
+- Removed the redundant mobile top-level selector stack so the drawer renders a single accordion system for the active panel.
+- Changed mobile accordion defaults to collapsed (`News` no longer auto-expands when menu opens).
+- Kept L2 split-button behavior and corrected nested collapse/expand state rendering for L3 lists.
+- Switched mobile accordion iconography to explicit `+ / −` glyphs for deterministic DS-style affordance.
+- Confirmed neutral drawer styling and full-width accordion rows in the off-canvas panel.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright checks:
+    - mobile `768x1366`: menu closed on load, drawer opens, L1 expands/collapses, L2 split toggles show/hide L3.
+    - desktop `1280x900`: top-nav and 3-column menu render remains functional.
+
+## Current Task (Mobile Menu Accordion Alignment to Design System)
+- [x] Audit current mobile accordion implementation in `sites/fdicnet-main-menu` against design-system Accordion + Accordion Group specs.
+- [x] Open a GitHub issue documenting gap analysis, implementation plan, and acceptance criteria.
+- [x] Create and switch to a feature branch for implementation work.
+- [x] Refactor mobile accordion UI to a single DS-aligned pattern and remove legacy duplicate style path.
+- [x] Align mobile accordion/group styles to DS tokens and state treatments (default/hover/pressed/focus).
+- [x] Run regression checks for mobile/desktop menu interactions and script syntax.
+
+## Review / Results (Mobile Menu Accordion Alignment to Design System)
+- Scope expanded: include site style/token alignment to design-system tokens and interaction states (tracked in issue #54).
+- Opened issue: `#54`  
+  - `https://github.com/jflamb/pens-github-test/issues/54`
+- Issue includes:
+  - implementation-focused gap analysis (architecture, token fidelity, behavior, visual parity, accessibility alignment).
+  - detailed stepwise implementation plan.
+  - explicit acceptance criteria and verification matrix.
+- Created and switched branch:
+  - `feat/issue-54-mobile-accordion-ds-alignment`
+- Implemented:
+  - removed dead `mobileTopAccordion`/legacy state references in `script.js`.
+  - added mobile accordion-group heading + `Expand all` / `Collapse all` control and plus/minus glyph behavior.
+  - replaced duplicate mobile-top CSS path with one canonical mobile accordion style path.
+  - introduced DS token aliases in `:root` and applied them to mobile accordion/group styles.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright interaction pass on local server:
+    - mobile `375x900`: expand/collapse single section, expand all, collapse all, drawer open/close.
+    - desktop `1280x900`: top-nav/mega-menu baseline behavior intact.
+  - Console/network check: only non-blocking `favicon.ico` 404 from local static server.
+
 ## Current Task (Narrow Header Menu + Phone Search Toggle)
 - [x] Move narrow-width menu entry to icon-only masthead hamburger (left of FDIC wordmark).
 - [x] Hide `Menu` label in narrow mode while preserving accessible label.

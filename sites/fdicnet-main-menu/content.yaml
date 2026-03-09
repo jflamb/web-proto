@@ -27,7 +27,7 @@ header:
       panelKey: "about"
 
 menu:
-  openByDefault: true
+  openByDefault: false
   defaultPanel: "news-events"
   panels:
     news-events:

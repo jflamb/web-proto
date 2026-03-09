@@ -59,3 +59,39 @@ Use this file to record correction-driven learning.
 - Root cause: Global pointer close logic only handled clicks outside the entire header, so in-header non-menu clicks were excluded.
 - Prevention rule: For click-off behavior, define explicit keep-open targets and close on all other pointer targets.
 - Actionable check for future tasks: Add a pointer regression pass covering four zones: top-nav button, mega-menu panel, header non-menu controls, and page body.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported mobile drawer regressions: redundant vertical selector stack above accordions, non-obvious/non-working accordion interactions, and mismatch with DS off-canvas treatment.
+- Root cause: Mobile implementation layered multiple navigation models (top-level panel selector + nested accordions) instead of one coherent accordion hierarchy, which increased state complexity and interaction ambiguity.
+- Prevention rule: On mobile off-canvas navigation, ship one hierarchy model only (single accordion system) and reject parallel selector patterns that duplicate IA levels.
+- Actionable check for future tasks: Add a mobile smoke test that validates initial closed state, single visible accordion hierarchy, default-collapsed sections, and functional L2 split-toggle expansion before sign-off.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported drawer IA mismatch: missing full top-level menu, lingering `Expand all`, and inset accordion stack not filling drawer width.
+- Root cause: Mobile implementation optimized around the active panel only and retained interim group-header controls/styles that conflicted with the intended full-menu accordion IA.
+- Prevention rule: Validate mobile drawer information architecture against final interaction model before visual polish; do not leave transitional controls in production path.
+- Actionable check for future tasks: Add a QA checklist item requiring all top-level sections to be visible as first-level drawer accordions and verify edge-to-edge row alignment at target mobile viewport.
+
+- Date: 2026-03-09
+- Trigger / correction: User requested replacing nested accordion interactions with a drill-in hierarchy model for mobile drawer navigation.
+- Root cause: The previous architecture assumed accordion disclosure at each depth, which constrained link affordance and interaction clarity for multi-level navigation.
+- Prevention rule: Confirm interaction paradigm (accordion vs drill-in) before implementing component-level state to avoid rework across both JS state and CSS selectors.
+- Actionable check for future tasks: During first implementation pass, validate one concrete path (`Top level -> L1 -> L2 -> L3`) against UX expectation before finalizing state model.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported mobile drill rows were visually equal-height even when content wrapped to multiple lines.
+- Root cause: Row styles used fixed-like vertical rhythm (`min-height` with no vertical padding), so two-line content often remained at the same visual height as one-line rows.
+- Prevention rule: For variable-length nav labels, use content-driven block sizing (`min-height` + vertical padding + wrapping), not fixed row heights.
+- Actionable check for future tasks: In mobile QA, verify at least one one-line and one wrapped two-line item have different rendered heights while preserving minimum touch target size.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported first-column focus rectangle appeared only left of the label instead of covering the entire row.
+- Root cause: Focus ring was applied only to the full-bleed left extension pseudo-element and not the row element itself.
+- Prevention rule: For full-bleed row treatments, ensure focus indicators are applied to both extension and in-column item regions.
+- Actionable check for future tasks: In keyboard QA, verify focus ring continuity from viewport-edge extension through the full clickable row width in first-column items.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported first-column focus appeared as two separately outlined regions with a seam.
+- Root cause: Focus indication was rendered as two independent rings (row box + extension layer), which visually split at the join.
+- Prevention rule: For split visual layers, draw focus ring via a single continuous overlay that spans the combined hit area.
+- Actionable check for future tasks: In visual QA at 100% zoom, inspect focused full-bleed rows for seam artifacts at extension boundaries.
