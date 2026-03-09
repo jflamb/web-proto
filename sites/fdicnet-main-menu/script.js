@@ -10,6 +10,7 @@ const menuState = {
   topNavFocusIndex: 0,
   mobileNavOpen: false,
   mobileAccordionOpenIndex: 0,
+  mobileTopAccordionOpenKey: null,
   closeTransitionHandler: null,
 };
 
@@ -65,6 +66,10 @@ function getPanelConfig() {
   return menuState.siteContent?.menu?.panels?.[menuState.activePanelKey] || null;
 }
 
+function getPanelConfigByKey(panelKey) {
+  return menuState.siteContent?.menu?.panels?.[panelKey] || null;
+}
+
 function getPanelL1() {
   return getPanelConfig()?.l1 || [];
 }
@@ -99,6 +104,9 @@ function syncMobileNavState() {
     navToggle.setAttribute("aria-expanded", "false");
     return;
   }
+  menuState.menuOpen = false;
+  header.classList.remove("menu-open");
+  megaMenu.hidden = true;
   navList.hidden = !menuState.mobileNavOpen;
   navToggle.setAttribute("aria-expanded", menuState.mobileNavOpen ? "true" : "false");
 }
@@ -113,6 +121,7 @@ function closeMobileNav() {
 }
 
 function syncTopNavState() {
+  if (isMobileViewport()) return;
   const buttons = navList.querySelectorAll(".fdic-nav-item--button");
   buttons.forEach((button) => {
     const isActive = button.dataset.panelKey === menuState.activePanelKey;
@@ -132,6 +141,13 @@ function getActiveTopNavIndex(items = getTopNavItems()) {
 }
 
 function applyTopNavRoving({ focus = false } = {}) {
+  if (isMobileViewport()) {
+    getTopNavItems().forEach((item) => {
+      item.tabIndex = 0;
+    });
+    return;
+  }
+
   const items = getTopNavItems();
   if (items.length === 0) return;
 
@@ -157,9 +173,74 @@ function resetPanelSelection() {
   menuState.mobileAccordionOpenIndex = 0;
 }
 
+function getMobileTopAccordionPanelId(panelKey) {
+  return `mobileTopPanel-${panelKey}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function setMobileTopAccordionOpenKey(panelKey) {
+  menuState.mobileTopAccordionOpenKey = panelKey;
+  if (panelKey) {
+    menuState.activePanelKey = panelKey;
+  }
+  renderTopNav();
+}
+
+function buildMobileTopAccordionContent(container, panelKey) {
+  const panel = getPanelConfigByKey(panelKey);
+  if (!panel) return;
+
+  (panel.l1 || []).forEach((l1Item) => {
+    const group = document.createElement("section");
+    group.className = "mobile-top-group";
+
+    const heading = document.createElement("h3");
+    heading.className = "mobile-top-group-heading";
+    heading.textContent = l1Item.label;
+    group.appendChild(heading);
+
+    (l1Item.l2 || []).forEach((l2Item) => {
+      const l2Link = document.createElement("a");
+      l2Link.className = "l2-item mobile-top-l2-link";
+      l2Link.href = l2Item.href || "#";
+      l2Link.textContent = l2Item.label;
+      group.appendChild(l2Link);
+
+      const l3ListGroup = document.createElement("ul");
+      l3ListGroup.className = "menu-list mobile-top-l3-list";
+      (l2Item.l3 || []).forEach((l3Item) => {
+        const l3ListItem = document.createElement("li");
+        const l3Link = document.createElement("a");
+        l3Link.className = "l3-item mobile-top-l3-link";
+        l3Link.href = l3Item.href || "#";
+        l3Link.textContent = l3Item.label;
+        l3ListItem.appendChild(l3Link);
+        l3ListGroup.appendChild(l3ListItem);
+      });
+      group.appendChild(l3ListGroup);
+    });
+
+    container.appendChild(group);
+  });
+
+  if (panel.overviewLabel || panel.overviewHref) {
+    const overview = document.createElement("a");
+    overview.className = "overview-link mobile-top-overview-link";
+    overview.href = panel.overviewHref || "#";
+    overview.textContent = panel.overviewLabel || "Overview";
+    container.appendChild(overview);
+  }
+}
+
 function renderTopNav() {
   navList.innerHTML = "";
   const navItems = menuState.siteContent.header?.nav || [];
+  const mobile = isMobileViewport();
+
+  if (mobile) {
+    navList.classList.add("fdic-nav-list--mobile-accordion");
+  } else {
+    navList.classList.remove("fdic-nav-list--mobile-accordion");
+  }
 
   navItems.forEach((item) => {
     const li = document.createElement("li");
@@ -169,29 +250,62 @@ function renderTopNav() {
       button.className = "fdic-nav-item fdic-nav-item--button";
       button.dataset.navIndex = String(navList.children.length);
       button.dataset.panelKey = item.panelKey || item.id;
-      button.setAttribute("aria-controls", "megaMenu");
+      if (!mobile) {
+        button.setAttribute("aria-controls", "megaMenu");
+      }
       button.textContent = item.label;
-      button.addEventListener("click", () => {
-        menuState.topNavFocusIndex = Number(button.dataset.navIndex || 0);
-        const nextPanel = button.dataset.panelKey;
-        if (menuState.activePanelKey === nextPanel) {
-          if (menuState.menuOpen) {
-            closeMenu();
-          } else {
-            openMenu();
-          }
-          closeMobileNav();
-          return;
+      if (mobile) {
+        const panelKey = button.dataset.panelKey;
+        const panelId = getMobileTopAccordionPanelId(panelKey);
+        const isExpanded = menuState.mobileTopAccordionOpenKey === panelKey;
+        button.classList.add("fdic-nav-item--mobile-accordion");
+        button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+        button.setAttribute("aria-controls", panelId);
+
+        const chevron = document.createElement("span");
+        chevron.className = "mobile-top-chevron ph ph-caret-down";
+        chevron.setAttribute("aria-hidden", "true");
+        button.appendChild(chevron);
+
+        button.addEventListener("click", () => {
+          const nextKey = isExpanded ? null : panelKey;
+          setMobileTopAccordionOpenKey(nextKey);
+        });
+
+        const panel = document.createElement("div");
+        panel.id = panelId;
+        panel.className = "mobile-top-accordion-panel";
+        panel.setAttribute("role", "region");
+        panel.setAttribute("aria-labelledby", `${panelId}-button`);
+        panel.hidden = !isExpanded;
+        button.id = `${panelId}-button`;
+        if (isExpanded) {
+          buildMobileTopAccordionContent(panel, panelKey);
         }
-        menuState.activePanelKey = nextPanel;
-        resetPanelSelection();
-        syncTopNavState();
-        applyTopNavRoving();
-        renderMenuPanel();
-        openMenu();
-        closeMobileNav();
-      });
-      li.appendChild(button);
+        li.append(button, panel);
+      } else {
+        button.addEventListener("click", () => {
+          menuState.topNavFocusIndex = Number(button.dataset.navIndex || 0);
+          const nextPanel = button.dataset.panelKey;
+          if (menuState.activePanelKey === nextPanel) {
+            if (menuState.menuOpen) {
+              closeMenu();
+            } else {
+              openMenu();
+            }
+            closeMobileNav();
+            return;
+          }
+          menuState.activePanelKey = nextPanel;
+          resetPanelSelection();
+          syncTopNavState();
+          applyTopNavRoving();
+          renderMenuPanel();
+          openMenu();
+          closeMobileNav();
+        });
+        li.appendChild(button);
+      }
     } else {
       const link = document.createElement("a");
       link.className = "fdic-nav-item";
@@ -209,6 +323,7 @@ function renderTopNav() {
 }
 
 function openMenu() {
+  if (isMobileViewport()) return;
   if (menuState.menuOpen) return;
   menuState.menuOpen = true;
   if (menuState.closeTransitionHandler) {
@@ -234,6 +349,13 @@ function openMenu() {
 }
 
 function closeMenu() {
+  if (isMobileViewport()) {
+    menuState.menuOpen = false;
+    header.classList.remove("menu-open");
+    megaMenu.hidden = true;
+    syncTopNavState();
+    return;
+  }
   if (!menuState.menuOpen) return;
   menuState.menuOpen = false;
   header.classList.remove("menu-open");
@@ -745,17 +867,30 @@ function setupEvents() {
     const mobile = isMobileViewport();
     if (!mobile) {
       menuState.mobileAccordionOpenIndex = null;
+      menuState.mobileTopAccordionOpenKey = null;
     } else {
+      menuState.mobileTopAccordionOpenKey = null;
       const l1Items = getPanelL1();
       menuState.mobileAccordionOpenIndex = l1Items.length > 0
         ? Math.min(menuState.selectedL1Index, l1Items.length - 1)
         : null;
     }
     syncMobileNavState();
+    renderTopNav();
     renderMenuPanel();
   });
 
   navList.addEventListener("keydown", (event) => {
+    if (isMobileViewport()) {
+      if ((event.key === "Enter" || event.key === " ") && event.target instanceof HTMLElement) {
+        if (event.target.classList.contains("fdic-nav-item--button")) {
+          event.preventDefault();
+          event.target.click();
+        }
+      }
+      return;
+    }
+
     const target = event.target;
     if (!(target instanceof HTMLElement) || !target.classList.contains("fdic-nav-item")) {
       return;
@@ -802,6 +937,17 @@ function setupEvents() {
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
+    if (isMobileViewport() && menuState.mobileNavOpen && menuState.mobileTopAccordionOpenKey) {
+      const openKey = menuState.mobileTopAccordionOpenKey;
+      const openPanel = document.getElementById(getMobileTopAccordionPanelId(openKey));
+      if (openPanel && openPanel.contains(document.activeElement)) {
+        event.preventDefault();
+        setMobileTopAccordionOpenKey(null);
+        const button = navList.querySelector(`.fdic-nav-item--button[data-panel-key="${openKey}"]`);
+        if (button) button.focus();
+        return;
+      }
+    }
     if (isMobileViewport() && menuState.menuOpen && typeof menuState.mobileAccordionOpenIndex === "number") {
       const openIndex = menuState.mobileAccordionOpenIndex;
       const openPanel = document.getElementById(getMobileAccordionPanelId(openIndex));
@@ -891,6 +1037,7 @@ async function init() {
 
   const navMenuItem = (menuState.siteContent.header?.nav || []).find((item) => item.kind === "menu");
   menuState.activePanelKey = menuState.siteContent.menu?.defaultPanel || navMenuItem?.panelKey || navMenuItem?.id || null;
+  menuState.mobileTopAccordionOpenKey = null;
 
   applyHeaderContent();
   renderTopNav();

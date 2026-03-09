@@ -586,6 +586,10 @@ body {
     padding-bottom: 10px;
   }
 
+  .fdic-nav-list--mobile-accordion > li + li {
+    margin-top: 8px;
+  }
+
   .fdic-nav-item {
     width: 100%;
     min-height: 48px;
@@ -594,9 +598,95 @@ body {
     border-bottom-width: 2px;
   }
 
+  .fdic-nav-item--mobile-accordion {
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 4px;
+    background: transparent;
+    color: #fff;
+    font-weight: 600;
+    border-bottom-width: 1px;
+  }
+
+  .fdic-nav-item--mobile-accordion[aria-expanded="true"] {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile-top-chevron {
+    font-size: 18px;
+    transition: transform 180ms ease;
+  }
+
+  .fdic-nav-item--mobile-accordion[aria-expanded="true"] .mobile-top-chevron {
+    transform: rotate(180deg);
+  }
+
+  .mobile-top-accordion-panel {
+    background: #fff;
+    border: 1px solid #d5dee8;
+    border-top: 0;
+    border-radius: 0 0 4px 4px;
+    padding: 8px 10px 10px;
+  }
+
+  .mobile-top-group + .mobile-top-group {
+    margin-top: 12px;
+  }
+
+  .mobile-top-group-heading {
+    margin: 0;
+    padding: 2px 0 6px;
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 700;
+    color: #1b2f46;
+  }
+
+  .mobile-top-l2-link {
+    margin: 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    color: #0f5f94;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .mobile-top-l3-list {
+    padding-left: 20px;
+    margin: 0;
+  }
+
+  .mobile-top-l3-list li + li {
+    margin-top: 8px;
+  }
+
+  .mobile-top-l3-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+    color: #1a6ea1;
+  }
+
+  .mobile-top-overview-link {
+    margin: 12px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid #d5dee8;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
   .fdic-nav-list > li:first-child .fdic-nav-item {
     margin-left: 0;
     padding-left: 12px;
+  }
+
+  .mega-menu {
+    display: none;
   }
 
   .mega-menu-inner {
@@ -719,6 +809,10 @@ body {
   }
 
   .l1-accordion-chevron {
+    transition: none;
+  }
+
+  .mobile-top-chevron {
     transition: none;
   }
 }
