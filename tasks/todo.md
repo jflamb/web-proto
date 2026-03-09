@@ -1,5 +1,12 @@
 # TODO
 
+## Current Task (Mobile Off-Canvas Menu Entry Point)
+- [x] Convert mobile nav list to off-canvas drawer behavior controlled by the Menu button.
+- [x] Update Menu button to switch between Menu and Close states (icon/text/ARIA) while drawer is open.
+- [x] Add backdrop and dismiss behavior (button, backdrop click, Escape).
+- [x] Ensure drawer remains hidden by default on mobile and desktop behavior is unchanged.
+- [x] Verify narrow viewport interactions and run `node --check sites/fdicnet-main-menu/script.js`.
+
 ## Current Task (Mobile L2 Split Button Accordion Follow-up)
 - [x] Refactor mobile top accordion content so each L2 row is a split control: L2 link + caret toggle button.
 - [x] Collapse L3 lists by default and expand/collapse per-L2 only.
