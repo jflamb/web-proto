@@ -197,7 +197,6 @@ body {
 
 .fdic-nav {
   background: var(--fdic-blue-900);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .fdic-nav-list {
