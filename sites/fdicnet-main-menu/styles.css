@@ -450,7 +450,6 @@ body {
   background: #fff;
   position: relative;
   outline: none;
-  box-shadow: inset 0 0 0 2px #005ea2;
 }
 
 .l1-item:hover::before,
@@ -467,7 +466,19 @@ body {
 }
 
 .l1-item:focus-visible::before {
+  box-shadow: none;
+}
+
+.l1-item:focus-visible::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -100vw;
+  right: 0;
   box-shadow: inset 0 0 0 2px #005ea2;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .l1-item:hover > *,
@@ -558,7 +569,6 @@ body {
 .overview-link:focus-visible {
   background: #fff;
   outline: none;
-  box-shadow: inset 0 0 0 2px #005ea2;
   color: var(--menu-link);
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;
@@ -577,7 +587,19 @@ body {
 }
 
 .overview-link:focus-visible::before {
+  box-shadow: none;
+}
+
+.overview-link:focus-visible::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -100vw;
+  right: 0;
   box-shadow: inset 0 0 0 2px #005ea2;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .overview-link:hover > *,

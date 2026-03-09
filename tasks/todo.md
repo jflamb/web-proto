@@ -1,5 +1,15 @@
 # TODO
 
+## Current Task (First-Column Focus Seam Removal)
+- [x] Replace split focus-ring rendering with one continuous ring spanning left extension + row body.
+- [x] Preserve existing hover/selected background behavior while fixing focus seam artifact.
+- [x] Verify and commit.
+
+## Review / Results (First-Column Focus Seam Removal)
+- Updated `sites/fdicnet-main-menu/styles.css` to use a unified `:focus-visible::after` ring layer for `.l1-item` and `.overview-link`.
+- Removed dual-ring rendering from element box and `::before` extension that created the visible seam between two outlined regions.
+- Result: focus now renders as one continuous rectangle from viewport-left extension through row right edge.
+
 ## Current Task (First-Column Focus Ring Coverage Fix)
 - [x] Ensure first-column focus rectangle covers the full item area (left viewport edge through right edge of the row item).
 - [x] Keep hover/selected visual behavior unchanged while correcting focus-ring geometry.

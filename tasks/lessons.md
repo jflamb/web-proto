@@ -89,3 +89,9 @@ Use this file to record correction-driven learning.
 - Root cause: Focus ring was applied only to the full-bleed left extension pseudo-element and not the row element itself.
 - Prevention rule: For full-bleed row treatments, ensure focus indicators are applied to both extension and in-column item regions.
 - Actionable check for future tasks: In keyboard QA, verify focus ring continuity from viewport-edge extension through the full clickable row width in first-column items.
+
+- Date: 2026-03-09
+- Trigger / correction: User reported first-column focus appeared as two separately outlined regions with a seam.
+- Root cause: Focus indication was rendered as two independent rings (row box + extension layer), which visually split at the join.
+- Prevention rule: For split visual layers, draw focus ring via a single continuous overlay that spans the combined hit area.
+- Actionable check for future tasks: In visual QA at 100% zoom, inspect focused full-bleed rows for seam artifacts at extension boundaries.
