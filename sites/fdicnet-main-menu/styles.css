@@ -441,7 +441,7 @@ body {
 }
 
 .l1-item:hover,
-.l1-item[aria-selected="true"] {
+.l1-item[data-selected="true"] {
   background: #fff;
   position: relative;
 }
@@ -454,7 +454,7 @@ body {
 
 .l1-item:hover::before,
 .l1-item:focus-visible::before,
-.l1-item[aria-selected="true"]::before {
+.l1-item[data-selected="true"]::before {
   content: "";
   position: absolute;
   top: 0;
@@ -483,7 +483,7 @@ body {
 
 .l1-item:hover > *,
 .l1-item:focus-visible > *,
-.l1-item[aria-selected="true"] > * {
+.l1-item[data-selected="true"] > * {
   position: relative;
   z-index: 1;
 }
@@ -501,7 +501,7 @@ body {
   opacity: 0;
 }
 
-.l1-item[aria-selected="true"] .l1-caret {
+.l1-item[data-selected="true"] .l1-caret {
   opacity: 1;
 }
 
@@ -755,12 +755,6 @@ body {
     font: inherit;
     position: relative;
     z-index: 90;
-  }
-
-  .fdic-nav-toggle--drill-hidden {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
   }
 
   .mobile-menu-open .fdic-nav-toggle {
