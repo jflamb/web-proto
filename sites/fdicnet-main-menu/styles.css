@@ -284,10 +284,14 @@ body {
 }
 
 .mega-menu-inner {
-  min-height: 237px;
+  min-height: 0;
   display: grid;
   grid-template-columns: 320px 320px minmax(280px, 1fr);
   min-width: 0;
+}
+
+.fdic-header.menu-open .mega-menu-inner {
+  min-height: 237px;
 }
 
 .mega-col {
@@ -597,6 +601,10 @@ body {
 
   .mega-menu-inner {
     grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .fdic-header.menu-open .mega-menu-inner {
     min-height: auto;
   }
 
