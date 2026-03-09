@@ -862,15 +862,21 @@ function renderL2() {
   l2Items.forEach((l2Item, index) => {
     const li = document.createElement("li");
     const link = document.createElement("a");
+    const label = document.createElement("span");
+    const caret = document.createElement("span");
     const isActive = index === activeIndex;
 
     link.className = "l2-item";
     link.href = l2Item.href || "#";
-    link.textContent = l2Item.label;
     link.dataset.column = "l2";
     link.dataset.index = String(index);
     link.dataset.active = isActive ? "true" : "false";
     link.tabIndex = index === 0 ? 0 : -1;
+    label.className = "l2-label";
+    label.textContent = l2Item.label;
+    caret.className = "l1-caret l2-caret ph ph-caret-right";
+    caret.setAttribute("aria-hidden", "true");
+    link.append(label, caret);
 
     link.addEventListener("mouseenter", () => {
       if (menuState.suppressL2HoverPreview) return;
@@ -913,12 +919,18 @@ function renderL2() {
 
     const overviewLi = document.createElement("li");
     const overviewLink = document.createElement("a");
+    const overviewLabel = document.createElement("span");
+    const overviewCaret = document.createElement("span");
     overviewLink.className = "l2-item l2-item--overview";
     overviewLink.href = l2Overview.href || "#";
-    overviewLink.textContent = l2Overview.label || "Overview";
     overviewLink.dataset.column = "l2";
     overviewLink.dataset.index = String(l2Items.length);
     overviewLink.tabIndex = l2Items.length === 0 ? 0 : -1;
+    overviewLabel.className = "l2-label";
+    overviewLabel.textContent = l2Overview.label || "Overview";
+    overviewCaret.className = "l1-caret l2-caret ph ph-caret-right";
+    overviewCaret.setAttribute("aria-hidden", "true");
+    overviewLink.append(overviewLabel, overviewCaret);
     overviewLink.addEventListener("mouseenter", () => {
       if (menuState.suppressL2HoverPreview) return;
       setPreviewOverview();
