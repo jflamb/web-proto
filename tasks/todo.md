@@ -1,5 +1,27 @@
 # TODO
 
+## Current Task (Implement Issues #59 #62 #63 per PR Plan)
+- [x] Implement `#59` by aligning L2 anchor behavior with true link navigation semantics.
+- [x] Implement `#62` by consolidating duplicate `769px-1049px` media-query rules and removing redundant/dead rules.
+- [x] Implement `#63` by renaming local shadowing variable in `renderMobileDrillHeader()`.
+- [x] Run targeted verification and record any validation gaps.
+
+## Review / Results (Implement Issues #59 #62 #63 per PR Plan)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - `#59`: removed L2 click interception logic in `renderL2()` so standard anchor activation navigates by `href` (pointer + keyboard `Enter` follow native link behavior).
+  - `#63`: renamed local `header` variable to `drillHeader` in `renderMobileDrillHeader()` to remove global-shadowing risk.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `#62`: removed redundant `@media (min-width: 1050px)` `.fdic-shell` block (duplicated base rule).
+  - `#62`: consolidated effective `769px-1049px` `.mega-menu-inner` declaration into the existing mid-file media block.
+  - `#62`: removed duplicate late-file `769px-1049px` media block for `.fdic-shell`/`.mega-menu-inner`.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js` (pass)
+  - `rg -n "renderMobileDrillHeader\\(|const drillHeader|const header = document.createElement\\(" sites/fdicnet-main-menu/script.js -S`
+  - `rg -n "@media \\(min-width: 769px\\) and \\(max-width: 1049px\\)|@media \\(min-width: 1050px\\)|\\.mega-menu-inner \\{" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/styles.css`
+- Validation gaps:
+  - Screen-reader live pass was not executed in this environment; semantic alignment for `#59` was validated by code path (`<a href>` with no click `preventDefault` interception).
+
 ## Current Task (Issue Bundle #59 #62 #63 Branch + PR Plan)
 - [x] Review issue scopes and acceptance criteria for `#59`, `#62`, and `#63`.
 - [x] Create a dedicated branch for this bundled work from `main`.

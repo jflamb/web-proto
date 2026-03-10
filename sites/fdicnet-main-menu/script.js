@@ -409,8 +409,8 @@ function removeMobileDrawerPanel() {
 }
 
 function renderMobileDrillHeader(targetContainer, backLabel, onBack) {
-  const header = document.createElement("div");
-  header.className = "mobile-drill-header";
+  const drillHeader = document.createElement("div");
+  drillHeader.className = "mobile-drill-header";
 
   if (onBack) {
     const backButton = document.createElement("button");
@@ -428,11 +428,11 @@ function renderMobileDrillHeader(targetContainer, backLabel, onBack) {
 
     backButton.append(icon, text);
     backButton.addEventListener("click", onBack);
-    header.appendChild(backButton);
+    drillHeader.appendChild(backButton);
   }
 
-  if (header.childElementCount > 0) {
-    targetContainer.appendChild(header);
+  if (drillHeader.childElementCount > 0) {
+    targetContainer.appendChild(drillHeader);
   }
 }
 
@@ -897,24 +897,6 @@ function renderL2() {
       setPreviewL2(index);
     });
     link.addEventListener("focus", () => setPreviewL2(index, { fromFocus: true, restoreFocus: true }));
-    link.addEventListener("click", (event) => {
-      if (
-        event.button !== 0
-        || event.metaKey
-        || event.ctrlKey
-        || event.shiftKey
-        || event.altKey
-      ) {
-        return;
-      }
-      event.preventDefault();
-      menuState.selectedL2Index = index;
-      menuState.previewingOverview = false;
-      menuState.previewL2Index = null;
-      menuState.suppressL2HoverPreview = true;
-      renderL2();
-      renderL3();
-    });
 
     li.appendChild(link);
     l2List.appendChild(li);
