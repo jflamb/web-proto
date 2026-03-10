@@ -2,9 +2,15 @@
 
 ## Current Task (Issue Bundle #59 #62 #63 Branch + PR Plan)
 - [x] Review issue scopes and acceptance criteria for `#59`, `#62`, and `#63`.
-- [ ] Create a dedicated branch for this bundled work from `main`.
-- [ ] Publish branch to GitHub and open a draft PR that links all three issues.
-- [ ] Include a clear implementation + verification plan in the PR description before coding starts.
+- [x] Create a dedicated branch for this bundled work from `main`.
+- [x] Publish branch to GitHub and open a draft PR that links all three issues.
+- [x] Include a clear implementation + verification plan in the PR description before coding starts.
+
+## Review / Results (Issue Bundle #59 #62 #63 Branch + PR Plan)
+- Created branch `issues/59-62-63-main-menu-followups` from updated `main`.
+- Reviewed issue acceptance criteria for `#59`, `#62`, `#63` via `gh issue view`.
+- Opened draft PR with implementation and verification plan:
+  - `https://github.com/jflamb/pens-github-test/pull/66`
 
 ## Current Task (L2 Caret Underline Follow-up)
 - [x] Move L2 underline styling from the anchor wrapper to text label only.
