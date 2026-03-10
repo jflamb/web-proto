@@ -1,5 +1,11 @@
 # TODO
 
+## Current Task (Issue Bundle #59 #62 #63 Branch + PR Plan)
+- [x] Review issue scopes and acceptance criteria for `#59`, `#62`, and `#63`.
+- [ ] Create a dedicated branch for this bundled work from `main`.
+- [ ] Publish branch to GitHub and open a draft PR that links all three issues.
+- [ ] Include a clear implementation + verification plan in the PR description before coding starts.
+
 ## Current Task (L2 Caret Underline Follow-up)
 - [x] Move L2 underline styling from the anchor wrapper to text label only.
 - [x] Ensure hover/focus underline emphasis still applies to the L2 label text.
