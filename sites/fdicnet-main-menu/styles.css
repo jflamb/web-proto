@@ -46,7 +46,7 @@
   --menu-text-primary: var(--ds-text-primary);
   --menu-link: #1278b0;
   --menu-link-hover-underline: #1278b0;
-  --menu-hover-overlay: var(--ds-overlay-emphasize-100);
+  --menu-hover-overlay: rgba(0, 50, 86, 0.08);
   --menu-focus-inner: #ffffff;
   --menu-focus-ring: var(--ds-border-input-focus);
   --menu-bottom-accent: #84dbff;
@@ -434,20 +434,34 @@ body {
   line-height: 1.4;
 }
 
-.l1-item:hover,
+.l1-item:hover {
+  background: var(--menu-hover-overlay);
+  position: relative;
+}
+
 .l1-item[data-selected="true"] {
   background: #fff;
   position: relative;
 }
 
 .l1-item:focus-visible {
-  background: #fff;
+  background: var(--menu-hover-overlay);
   position: relative;
   outline: none;
 }
 
 .l1-item:hover::before,
-.l1-item:focus-visible::before,
+.l1-item:focus-visible::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  transform: translateX(-100%);
+  background: var(--menu-hover-overlay);
+}
+
 .l1-item[data-selected="true"]::before {
   content: "";
   position: absolute;
@@ -580,14 +594,14 @@ body {
 }
 
 .overview-link:hover {
-  background: #fff;
+  background: var(--menu-hover-overlay);
   color: var(--menu-link);
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;
 }
 
 .overview-link:focus-visible {
-  background: #fff;
+  background: var(--menu-hover-overlay);
   outline: none;
   color: var(--menu-link);
   text-decoration-color: var(--menu-link-hover-underline);
@@ -603,7 +617,7 @@ body {
   left: 0;
   width: 100vw;
   transform: translateX(-100%);
-  background: #fff;
+  background: var(--menu-hover-overlay);
 }
 
 .overview-link:focus-visible::before {
