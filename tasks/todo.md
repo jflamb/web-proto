@@ -1597,3 +1597,22 @@
   - Attempted Playwright MCP browser validation against local static server, but MCP browser could not connect to `127.0.0.1` in this environment (`ERR_CONNECTION_REFUSED`), so VoiceOver/NVDA and cross-browser keyboard checks are documented for follow-up in PR.
 - PR:
   - `https://github.com/jflamb/pens-github-test/pull/64`
+
+## Current Task (Default Delivery Process Documentation)
+- [x] Create a reusable default workflow doc for bug fixes and feature development.
+- [x] Cover branch creation, implementation, verification, PR standards, and post-merge cleanup.
+- [x] Link the workflow doc from `AGENTS.md` so it is discoverable at session start.
+
+## Review / Results (Default Delivery Process Documentation)
+- Added `docs/delivery-workflow.md` with a standard 8-step process:
+  - intake/scope
+  - branching
+  - implementation standards
+  - required verification
+  - task-log updates
+  - PR standards
+  - post-merge cleanup
+  - corrections/lessons loop
+- Updated `AGENTS.md` Key Docs to include:
+  - `docs/delivery-workflow.md`
+- This establishes a standing default workflow so future requests do not need to restate these process expectations.
