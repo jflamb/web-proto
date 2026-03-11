@@ -1,5 +1,23 @@
 # TODO
 
+## Current Task (FDICnet Mega-Menu Overlay Layout)
+- [x] Change desktop/tablet mega-menu to overlay page content instead of affecting document flow.
+- [x] Preserve mobile drawer behavior and existing menu open/close interactions.
+- [x] Run runtime regression checks (desktop overlap + mobile sanity).
+
+## Review / Results (FDICnet Mega-Menu Overlay Layout)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - set `.fdic-header` to `position: relative` with stacking context.
+  - changed desktop/tablet `.mega-menu` to absolute positioning below masthead + top-nav:
+    - `position: absolute`
+    - `top: calc(var(--layout-masthead-height) + var(--layout-top-nav-item-height))`
+    - `left: 0`
+    - raised z-index so panel overlays page content.
+  - added mobile reset under `@media (max-width: 768px)` so mega-menu remains non-overlay (`position: static`) while the existing drawer model remains authoritative.
+- Verification:
+  - Desktop runtime: `main.page-content` top position remains unchanged when menu opens; computed mega-menu rect overlaps main content region.
+  - Mobile runtime: drawer opens/closes normally; `#megaMenu` computes to `position: static`.
+
 ## Current Task (FDICnet L1 Link-Style Navigation)
 - [x] Render desktop first-column (L1) rows as links to each L1 overview URL.
 - [x] Preserve L1 hover/focus preview behavior for column 2/3 content.

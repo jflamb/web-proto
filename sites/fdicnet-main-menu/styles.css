@@ -107,6 +107,8 @@ body {
 .fdic-header {
   background: #fff;
   border-bottom: 0;
+  position: relative;
+  z-index: 20;
 }
 
 .fdic-masthead {
@@ -326,6 +328,10 @@ body {
 .mega-menu {
   background: #fff;
   width: 100%;
+  position: absolute;
+  top: calc(var(--layout-masthead-height) + var(--layout-top-nav-item-height));
+  left: 0;
+  z-index: 60;
   display: grid;
   grid-template-rows: 0fr;
   overflow: clip;
@@ -750,6 +756,13 @@ body {
    Content inside uses a drill-down pattern: each tap pushes a
    deeper level onto menuState.mobileDrillPath in script.js. */
 @media (max-width: 768px) {
+  .mega-menu {
+    position: static;
+    top: auto;
+    left: auto;
+    z-index: auto;
+  }
+
   .fdic-shell {
     width: min(var(--shell-max), calc(100% - 32px));
   }
