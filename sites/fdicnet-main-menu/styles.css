@@ -1,3 +1,17 @@
+/* ================================================================
+   FDICnet Main Menu – Stylesheet
+   ================================================================
+   Responsive mega-menu with three interaction modes:
+     Desktop (≥1050px) — three-column mega-menu panel
+     Tablet  (769–1049px) — narrower columns, same mega-menu
+     Mobile  (≤768px) — slide-in drawer with drill-down navigation
+
+   Focus rings: all interactive items in the mega-menu use an
+   outset double-ring (white inner + accent outer) defined by
+   --menu-focus-inner and --menu-focus-ring. See the canonical
+   rule at .l2-item:focus-visible / .l3-item:focus-visible.
+   ================================================================ */
+
 @font-face {
   font-family: "Source Sans 3";
   font-style: normal;
@@ -41,14 +55,15 @@
   --fdic-bg: #f2f5f8;
   --fdic-accent: #38b6ff;
   --shell-max: 1440px;
+  /* Mega-menu tokens — used by L1, L2, L3, and overview-link */
   --menu-panel-bg: var(--ds-background-interactive);
   --menu-divider: var(--ds-border-divider);
   --menu-text-primary: var(--ds-text-primary);
   --menu-link: #1278b0;
   --menu-link-hover-underline: #1278b0;
-  --menu-hover-overlay: rgba(0, 50, 86, 0.08);
-  --menu-focus-inner: #ffffff;
-  --menu-focus-ring: var(--ds-border-input-focus);
+  --menu-hover-overlay: rgba(0, 50, 86, 0.08); /* Shared hover/focus bg */
+  --menu-focus-inner: #ffffff;                  /* Focus ring: white inner */
+  --menu-focus-ring: var(--ds-border-input-focus); /* Focus ring: accent outer */
   --menu-bottom-accent: #84dbff;
 }
 
@@ -88,11 +103,12 @@ body {
   border: 0;
 }
 
+/* overflow-x moved to .mega-menu-inner so outset focus rings on L1/L2
+   items are not clipped, while ::before/::after viewport-width bleeds
+   are still hidden. */
 .fdic-header {
   background: #fff;
   border-bottom: 0;
-  overflow-x: hidden;
-  overflow-x: clip;
 }
 
 .fdic-masthead {
@@ -306,6 +322,9 @@ body {
   outline-offset: -2px;
 }
 
+/* ── Desktop mega-menu panel ───────────────────────────────────────
+   Opens below the top nav bar via a CSS grid-template-rows animation
+   (0fr → 1fr). The .menu-open class on .fdic-header triggers it. */
 .mega-menu {
   background: #fff;
   width: 100%;
@@ -327,11 +346,15 @@ body {
   border-bottom-color: var(--menu-bottom-accent);
 }
 
+/* clip-path keeps the panel paint bounded while intentionally allowing
+   first-column left-bleed backgrounds/focus overlays to reach viewport
+   edge (left inset is expanded to -100vw). */
 .mega-menu-inner {
   min-height: 0;
   display: grid;
   grid-template-columns: 320px 320px minmax(280px, 1fr);
   min-width: 0;
+  clip-path: inset(-6px -6px -6px -100vw);
 }
 
 .fdic-header.menu-open .mega-menu-inner {
@@ -391,6 +414,7 @@ body {
   margin: 0;
 }
 
+/* ── Shared base styles for all mega-menu interactive items ──────── */
 .l1-item,
 .l2-item,
 .l3-item,
@@ -413,10 +437,11 @@ body {
   padding: 8px 24px;
   display: flex;
   align-items: center;
-  padding-left: 0;
+  padding-left: 16px;
   padding-right: 16px;
   color: var(--menu-text-primary);
   font-weight: 600;
+  line-height: 1.4;
   justify-content: space-between;
 }
 
@@ -444,24 +469,34 @@ body {
   position: relative;
 }
 
+/* Focus: uses the same outset double-ring as L2/L3 for consistency.
+   See .l2-item:focus-visible for the canonical pattern. */
 .l1-item:focus-visible {
   background: var(--menu-hover-overlay);
   position: relative;
+  z-index: 2;
   outline: none;
 }
 
-.l1-item:hover::before,
-.l1-item:focus-visible::before {
+/* Draw L1 focus ring on a top layer so selected-state left-bleed
+   background does not obscure the ring's left edge. */
+.l1-item:focus-visible::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 100vw;
-  transform: translateX(-100%);
-  background: var(--menu-hover-overlay);
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
 }
 
+/* Active/selected L1 item remains white when focused; focus is shown by
+   the ring only, not by adding hover-style gray fill. */
+.l1-item[data-selected="true"]:focus-visible {
+  background: #fff;
+}
+
+/* Selected state: same leftward bleed, but with a white bg to
+   visually "connect" the L1 item to the L2 column. */
 .l1-item[data-selected="true"]::before {
   content: "";
   position: absolute;
@@ -471,22 +506,6 @@ body {
   width: 100vw;
   transform: translateX(-100%);
   background: #fff;
-}
-
-.l1-item:focus-visible::before {
-  box-shadow: none;
-}
-
-.l1-item:focus-visible::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -100vw;
-  right: 0;
-  box-shadow: inset 0 0 0 2px #005ea2;
-  pointer-events: none;
-  z-index: 2;
 }
 
 .l1-item:hover > *,
@@ -535,8 +554,13 @@ body {
   opacity: 1;
 }
 
+/* Canonical focus ring for all mega-menu interactive items.
+   Double-ring: white inner (2px) + accent outer (4px).
+   L1 items and the overview-link reuse this same pattern. */
 .l2-item:focus-visible,
 .l3-item:focus-visible {
+  position: relative;
+  z-index: 2;
   outline: none;
   box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
   background: var(--menu-hover-overlay);
@@ -582,7 +606,7 @@ body {
   width: 100%;
   min-height: 41px;
   margin: 0;
-  padding: 8px 24px 8px 0;
+  padding: 8px 24px 8px 16px;
   padding-right: 16px;
   display: flex;
   align-items: center;
@@ -600,16 +624,18 @@ body {
   text-decoration-thickness: 2px;
 }
 
+/* Focus: same outset double-ring as L2/L3 items for consistency. */
 .overview-link:focus-visible {
   background: var(--menu-hover-overlay);
   outline: none;
   color: var(--menu-link);
   text-decoration-color: var(--menu-link-hover-underline);
   text-decoration-thickness: 2px;
+  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
 }
 
-.overview-link:hover::before,
-.overview-link:focus-visible::before {
+/* Hover: extend highlight leftward to viewport edge. */
+.overview-link:hover::before {
   content: "";
   position: absolute;
   top: 0;
@@ -620,24 +646,7 @@ body {
   background: var(--menu-hover-overlay);
 }
 
-.overview-link:focus-visible::before {
-  box-shadow: none;
-}
-
-.overview-link:focus-visible::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -100vw;
-  right: 0;
-  box-shadow: inset 0 0 0 2px #005ea2;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.overview-link:hover > *,
-.overview-link:focus-visible > * {
+.overview-link:hover > * {
   position: relative;
   z-index: 1;
 }
@@ -775,6 +784,10 @@ body {
   }
 }
 
+/* ── Mobile drawer & drill-down navigation (≤768px) ───────────────
+   The nav list becomes a fixed-position slide-in drawer.
+   Content inside uses a drill-down pattern: each tap pushes a
+   deeper level onto menuState.mobileDrillPath in script.js. */
 @media (max-width: 768px) {
   .fdic-shell {
     width: min(var(--shell-max), calc(100% - 32px));

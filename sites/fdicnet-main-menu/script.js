@@ -1,27 +1,39 @@
+/**
+ * Centralized state for the entire menu system.
+ *
+ * Desktop mega-menu: three-column layout (L1 → L2 → L3).
+ *   - "selected" indices represent the committed choice (click / keyboard).
+ *   - "preview" indices represent the transient hover/focus highlight.
+ *   - When preview is null the selected value is shown.
+ *
+ * Mobile: a drill-down drawer controlled by mobileDrillPath[].
+ *   Each entry pushes a deeper level: [panelKey] → [panelKey, l1Index] → etc.
+ */
 const menuState = {
-  siteContent: null,
-  activePanelKey: null,
-  menuOpen: false,
-  selectedL1Index: 0,
-  selectedL2Index: 0,
-  previewL2Index: null,
-  previewingOverview: false,
-  previewClearTimer: null,
-  topNavFocusIndex: 0,
-  mobileNavOpen: false,
-  mobileSearchOpen: false,
-  mobileNavCloseHandler: null,
-  closeTransitionHandler: null,
-  l1FocusIndex: 0,
-  suppressL2HoverPreview: false,
-  moveFocusIntoMenuOnOpen: false,
-  closeHideTimer: null,
-  mobileDrillPath: [],
+  siteContent: null,           // Parsed content.yaml
+  activePanelKey: null,        // Which top-nav panel is active (e.g. "banking")
+  menuOpen: false,             // Desktop mega-menu visibility
+  selectedL1Index: 0,          // Committed L1 selection
+  selectedL2Index: 0,          // Committed L2 selection
+  previewL2Index: null,        // Transient L2 hover/focus preview (null = none)
+  previewingOverview: false,   // True when the L2 "overview" link is previewed
+  previewClearTimer: null,     // setTimeout handle for delayed preview reset
+  topNavFocusIndex: 0,         // Roving tabindex position in the top nav bar
+  mobileNavOpen: false,        // Mobile drawer visibility
+  mobileSearchOpen: false,     // Phone-viewport search field visibility
+  mobileNavCloseHandler: null, // transitionend handler for drawer close animation
+  closeTransitionHandler: null,// transitionend handler for mega-menu close animation
+  l1FocusIndex: 0,             // Roving tabindex position within L1 column
+  moveFocusIntoMenuOnOpen: false, // When true, opening the menu moves focus into L1
+  closeHideTimer: null,        // Fallback timer that hides mega-menu if transitionend doesn't fire
+  mobileDrillPath: [],         // Current drill-down breadcrumb path
 };
 
-const MOBILE_NAV_BREAKPOINT = "(max-width: 768px)";
-const NARROW_HEADER_BREAKPOINT = "(max-width: 1049px)";
-const PHONE_SEARCH_BREAKPOINT = "(max-width: 640px)";
+/* ── Responsive breakpoints ──────────────────────────────────────────
+   These mirror the media queries in styles.css. Keep them in sync. */
+const MOBILE_NAV_BREAKPOINT = "(max-width: 768px)";       // Switches to mobile drawer
+const NARROW_HEADER_BREAKPOINT = "(max-width: 1049px)";   // Compact top-nav padding
+const PHONE_SEARCH_BREAKPOINT = "(max-width: 640px)";     // Collapses search into toggle
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const mobileNavMediaQuery = window.matchMedia(MOBILE_NAV_BREAKPOINT);
 const narrowHeaderMediaQuery = window.matchMedia(NARROW_HEADER_BREAKPOINT);
@@ -323,7 +335,6 @@ function resetPanelSelection() {
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
   menuState.l1FocusIndex = 0;
-  menuState.suppressL2HoverPreview = false;
   menuState.mobileDrillPath = [];
 }
 
@@ -797,11 +808,12 @@ function clearPreviewL2() {
   }
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
-  menuState.suppressL2HoverPreview = false;
   renderL2();
   renderL3();
 }
 
+/** Cancel any pending delayed preview reset. Called when the pointer
+ *  re-enters an adjacent column before the timer fires. */
 function cancelPreviewClear() {
   if (menuState.previewClearTimer) {
     window.clearTimeout(menuState.previewClearTimer);
@@ -809,6 +821,9 @@ function cancelPreviewClear() {
   }
 }
 
+/** Schedule a preview reset after a short delay (120 ms).
+ *  The delay lets the pointer briefly cross column boundaries
+ *  (e.g. L2 → L3) without flashing the preview on and off. */
 function schedulePreviewClear() {
   cancelPreviewClear();
   menuState.previewClearTimer = window.setTimeout(() => {
@@ -892,10 +907,7 @@ function renderL2() {
     caret.setAttribute("aria-hidden", "true");
     link.append(label, caret);
 
-    link.addEventListener("mouseenter", () => {
-      if (menuState.suppressL2HoverPreview) return;
-      setPreviewL2(index);
-    });
+    link.addEventListener("mouseenter", () => setPreviewL2(index));
     link.addEventListener("focus", () => setPreviewL2(index, { fromFocus: true, restoreFocus: true }));
 
     li.appendChild(link);
@@ -927,10 +939,7 @@ function renderL2() {
     overviewCaret.className = "l1-caret l2-caret ph ph-caret-right";
     overviewCaret.setAttribute("aria-hidden", "true");
     overviewLink.append(overviewLabel, overviewCaret);
-    overviewLink.addEventListener("mouseenter", () => {
-      if (menuState.suppressL2HoverPreview) return;
-      setPreviewOverview();
-    });
+    overviewLink.addEventListener("mouseenter", () => setPreviewOverview());
     overviewLink.addEventListener("focus", () => setPreviewOverview({ fromFocus: true, restoreFocus: true }));
     overviewLi.appendChild(overviewLink);
     l2List.appendChild(overviewLi);
@@ -1010,6 +1019,9 @@ function renderMenuPanel() {
   renderL3();
 }
 
+/** Wire up vertical arrow-key navigation within a single column.
+ *  Implements the WAI-ARIA "roving tabindex" pattern: only the
+ *  focused item has tabindex=0; the rest are set to -1. */
 function setupColumnArrowNav(container, selector) {
   container.addEventListener("keydown", (event) => {
     if (isMobileViewport()) return;
@@ -1068,6 +1080,8 @@ function focusActiveL3() {
   return setColumnFocus(l3List, ".l3-item", target);
 }
 
+/** Wire up horizontal arrow-key navigation across columns (L1 ↔ L2 ↔ L3).
+ *  ArrowRight moves deeper; ArrowLeft moves back toward L1. */
 function setupColumnCrossNav() {
   megaMenu.addEventListener("keydown", (event) => {
     if (isMobileViewport()) return;
@@ -1094,6 +1108,16 @@ function setupColumnCrossNav() {
   });
 }
 
+/* ── Event wiring ────────────────────────────────────────────────────
+   All DOM event listeners are registered here, during init().
+   Interaction patterns to be aware of:
+   - Desktop: pointer + keyboard, three-column preview model
+   - Mobile (<768px): touch-driven drill-down drawer
+   - Preview-clear coordination: L1, L2, and L3 columns share a
+     single debounced timer so the preview survives brief pointer
+     gaps between adjacent columns (see schedulePreviewClear).
+   - Focus management: roving tabindex within columns, cross-column
+     arrow keys, and focus-exit detection that auto-closes the menu. */
 function setupEvents() {
   if (navToggle) {
     navToggle.addEventListener("click", () => {
@@ -1219,16 +1243,31 @@ function setupEvents() {
     if (activeButton) activeButton.focus();
   });
 
+  /* Preview-clear coordination: L1, L2, and L3 columns cooperate so
+     that moving the pointer between adjacent columns keeps the L2→L3
+     preview alive, but leaving the column group clears it after a
+     short delay (PREVIEW_CLEAR_DELAY_MS in schedulePreviewClear). */
   l2List.addEventListener("mouseenter", cancelPreviewClear);
-  l2List.addEventListener("pointermove", () => {
-    menuState.suppressL2HoverPreview = false;
-  });
   l2List.addEventListener("mouseleave", (event) => {
     if (l3Column && l3Column.contains(event.relatedTarget)) {
       return;
     }
+    if (l1Column && l1Column.contains(event.relatedTarget)) {
+      schedulePreviewClear();
+      return;
+    }
     schedulePreviewClear();
   });
+
+  if (l1Column) {
+    l1Column.addEventListener("mouseleave", (event) => {
+      if (l2List.contains(event.relatedTarget)) {
+        cancelPreviewClear();
+        return;
+      }
+      schedulePreviewClear();
+    });
+  }
 
   if (l3Column) {
     l3Column.addEventListener("mouseenter", cancelPreviewClear);
