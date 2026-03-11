@@ -1,5 +1,23 @@
 # TODO
 
+## Current Task (FDICnet Mega-Menu Scrim Overlay)
+- [x] Add a subtle content scrim behind the open desktop/tablet mega-menu.
+- [x] Keep mobile drawer/backdrop behavior unchanged.
+- [x] Verify click-off close and runtime layering behavior.
+
+## Review / Results (FDICnet Mega-Menu Scrim Overlay)
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - added `<div id="megaMenuScrim" class="mega-menu-scrim" aria-hidden="true"></div>` directly after header.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.mega-menu-scrim` fixed overlay styling with subtle darkening (`rgba(0, 0, 0, 0.2)`).
+  - tied visibility to desktop/tablet open state via `.fdic-header.menu-open + .mega-menu-scrim`.
+  - set scrim layer below mega-menu but above page content.
+  - disabled scrim on mobile (`display: none`) so mobile drawer backdrop remains the only dim layer.
+- Verification:
+  - Desktop runtime: when menu is open, scrim is visible (`opacity: 1`, `pointer-events: auto`).
+  - Desktop click-off: pointer interaction on scrim closes the mega-menu.
+  - Mobile runtime: scrim is not rendered (`display: none`), mega-menu remains `position: static`, drawer flow remains active.
+
 ## Current Task (FDICnet Mega-Menu Overlay Layout)
 - [x] Change desktop/tablet mega-menu to overlay page content instead of affecting document flow.
 - [x] Preserve mobile drawer behavior and existing menu open/close interactions.
