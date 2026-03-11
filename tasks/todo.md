@@ -1,5 +1,23 @@
 # TODO
 
+## Current Task (FDICnet L1 Overview Row Placement)
+- [x] Move first L1 item to bottom of first-column list.
+- [x] Render bottom overview row without chevron.
+- [x] Add divider between standard L1 items and bottom overview row.
+- [x] Keep default panel selection on first non-overview L1 item.
+- [x] Run syntax + runtime regression checks.
+
+## Review / Results (FDICnet L1 Overview Row Placement)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - renders primary L1 items first (`l1[1..n]`), then appends a divider and `l1[0]` as a bottom overview row.
+  - overview row uses `.l1-item--overview` and no chevron.
+  - overview row is excluded from `fdic-mega-l1-preview` hover/focus preview events.
+- Updated `sites/fdicnet-main-menu/script.js` + `sites/fdicnet-main-menu/init.js`:
+  - default L1 selection/focus now starts at first non-overview item when available (`index 1`).
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.l1-separator-item` / `.l1-separator-line` divider styling.
+  - added `.l1-item--overview` layout rule.
+
 ## Current Task (FDICnet Remove L2 Overview Row)
 - [x] Remove the second-column bottom overview link and separator from mega-menu rendering.
 - [x] Keep existing L2 item rendering and keyboard behavior intact.

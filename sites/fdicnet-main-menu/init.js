@@ -125,6 +125,11 @@
 
       const navMenuItem = (menuState.siteContent.header?.nav || []).find((item) => item.kind === "menu");
       menuState.activePanelKey = menuState.siteContent.menu?.defaultPanel || navMenuItem?.panelKey || navMenuItem?.id || null;
+      const initialPanel = menuState.siteContent.menu?.panels?.[menuState.activePanelKey] || null;
+      const initialL1Count = initialPanel?.l1?.length || 0;
+      const initialL1Index = initialL1Count > 1 ? 1 : 0;
+      menuState.selectedL1Index = initialL1Index;
+      menuState.l1FocusIndex = initialL1Index;
 
       applyHeaderContent();
       renderTopNav();
