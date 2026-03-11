@@ -648,15 +648,14 @@ body {
   box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
 }
 
-/* Hover: extend highlight leftward to viewport edge. */
+/* Hover: extend highlight 16px left of label baseline. */
 .overview-link:hover::before {
   content: "";
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
-  width: 100vw;
-  transform: translateX(-100%);
+  left: -16px;
+  width: 16px;
   background: var(--menu-hover-overlay);
 }
 

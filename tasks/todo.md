@@ -1,5 +1,18 @@
 # TODO
 
+## Current Task (L1 Overview Hover Left Extension)
+- [x] Change bottom column-1 overview-link hover fill to extend only 16px left of text.
+- [x] Remove viewport-edge hover bleed behavior for overview-link.
+- [x] Verify selector-level diff scope and document result.
+
+## Review / Results (L1 Overview Hover Left Extension)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.overview-link:hover::before` from viewport-width bleed (`left: 0; width: 100vw; transform`) to local extension (`left: -16px; width: 16px`).
+- Result: bottom column-1 link hover treatment now matches the 16px left-extension pattern used in L1 items.
+- Verification:
+  - `rg -n "\\.overview-link:hover::before|left: -16px;|width: 16px;" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
 ## Current Task (L1 Focus Ring 16px Left Extension)
 - [x] Extend column-1 focus rectangle 16px left of label baseline.
 - [x] Keep hover/selected/focus left extension geometry consistent in L1.
