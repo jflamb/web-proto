@@ -560,6 +560,13 @@ body {
   text-underline-offset: 2px;
 }
 
+.l1-item[data-selected="true"] .l1-label {
+  text-decoration: underline;
+  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
 .l2-label {
   flex: 1;
   min-width: 0;
