@@ -1,5 +1,63 @@
 # TODO
 
+## Current Task (Hover Highlight Visibility Retune)
+- [x] Increase hover highlight visibility after over-lightening.
+- [x] Keep treatment subtle and consistent across menu columns.
+- [x] Record updated token for quick follow-up tuning.
+
+## Review / Results (Hover Highlight Visibility Retune)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `--menu-hover-overlay: rgba(0, 110, 190, 0.09);`
+  - previous value: `rgba(248, 253, 255, 0.40)`.
+- Result: hover highlight is visibly present again while remaining translucent.
+- Verification:
+  - `rg -n -e "--menu-hover-overlay" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (Accessible Hover Overlay Retune Without Link-Color Change)
+- [x] Retune hover overlay color to improve contrast while keeping link color unchanged.
+- [x] Keep overlay subtle and lightly tinted.
+- [x] Validate contrast target against normal-size link text on hover background.
+
+## Review / Results (Accessible Hover Overlay Retune Without Link-Color Change)
+- Constraint: link color remains `#1278b0`.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `--menu-hover-overlay: rgba(248, 253, 255, 0.40);`
+  - previous value: `rgba(0, 110, 190, 0.12)`.
+- Contrast check (computed):
+  - link text `#1278b0` vs hover background produced by the new token: ~`4.55:1` (meets WCAG AA 4.5:1 for normal text).
+- Verification:
+  - `rg -n -e "--menu-hover-overlay" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (Hover Color Retune: Brighter + Softer)
+- [x] Increase hover hue vibrancy further.
+- [x] Reduce alpha so overlay remains subtle.
+- [x] Verify updated token value in stylesheet.
+
+## Review / Results (Hover Color Retune: Brighter + Softer)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `--menu-hover-overlay: rgba(0, 110, 190, 0.12);`
+  - previous value: `rgba(0, 94, 162, 0.14)`.
+- Result: hover tone is more vivid blue, but with slightly lower opacity for a subtler wash.
+- Verification:
+  - `rg -n -e "--menu-hover-overlay" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (Hover Color Vibrancy Tuning)
+- [x] Increase hover fill vibrancy while keeping translucent treatment.
+- [x] Keep hover token centralized so all menu columns stay visually consistent.
+- [x] Record exact token change for future tuning.
+
+## Review / Results (Hover Color Vibrancy Tuning)
+- Updated `sites/fdicnet-main-menu/styles.css` hover token:
+  - `--menu-hover-overlay: rgba(0, 94, 162, 0.14);`
+  - previous value: `rgba(0, 50, 86, 0.08)`.
+- Result: hover/focus backgrounds are more blue/vibrant but remain translucent.
+- Verification:
+  - `rg -n "--menu-hover-overlay" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
 ## Current Task (L1 Overview Hover Left Extension)
 - [x] Change bottom column-1 overview-link hover fill to extend only 16px left of text.
 - [x] Remove viewport-edge hover bleed behavior for overview-link.
