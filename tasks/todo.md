@@ -1,5 +1,23 @@
 # TODO
 
+## Current Task (FDICnet Menu Content IA Refresh)
+- [x] Replace `sites/fdicnet-main-menu/content.yaml` menu taxonomy to match the provided IA outline.
+- [x] Keep YAML schema compatible with existing menu renderer.
+- [x] Run runtime load sanity checks and verify no content-load regressions.
+
+## Review / Results (FDICnet Menu Content IA Refresh)
+- Updated `sites/fdicnet-main-menu/content.yaml` to align panel/L1/L2 labels with the provided IA:
+  - `News & Events`
+  - `Career Development & Training`
+  - `Knowledge Base`
+  - `Benefits`
+  - `Employee Services`
+  - `About`
+- Preserved existing schema keys used by the renderer (`header.nav`, `menu.panels`, `l1`, `l2`, `overviewHref`, `href`, `description`).
+- Runtime verification:
+  - content loaded successfully (no console errors on reload).
+  - state inspection confirmed updated panel/L1 label sets are present in `window.FDICMenuState.menuState.siteContent`.
+
 ## Current Task (FDICnet Mega-Menu Scrim Overlay)
 - [x] Add a subtle content scrim behind the open desktop/tablet mega-menu.
 - [x] Keep mobile drawer/backdrop behavior unchanged.
