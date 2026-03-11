@@ -361,7 +361,7 @@ body {
   visibility: hidden;
   pointer-events: none;
   transition: opacity 180ms ease, visibility 180ms ease;
-  z-index: 40;
+  z-index: 10;
 }
 
 .fdic-header.menu-open + .mega-menu-scrim {
