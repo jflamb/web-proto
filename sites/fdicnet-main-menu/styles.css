@@ -443,9 +443,7 @@ body {
 .l1-label {
   flex: 1;
   min-width: 0;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
 
 .l2-item,
@@ -556,16 +554,16 @@ body {
 
 .l1-item:hover .l1-label,
 .l1-item:focus-visible .l1-label {
+  text-decoration: underline;
   text-decoration-color: var(--menu-link-hover-underline);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .l2-label {
   flex: 1;
   min-width: 0;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
 
 .l2-caret {
@@ -605,8 +603,10 @@ body {
 
 .l2-item:hover .l2-label,
 .l2-item:focus-visible .l2-label {
+  text-decoration: underline;
   text-decoration-color: var(--menu-link-hover-underline);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .l2-separator-item {
@@ -632,16 +632,16 @@ body {
   max-width: none;
   padding: 8px 8px 8px 24px;
   color: var(--menu-link);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration: none;
   position: relative;
 }
 
 .menu-list--l3 .l3-item:hover,
 .menu-list--l3 .l3-item:focus-visible {
+  text-decoration: underline;
   text-decoration-color: var(--menu-link-hover-underline);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .menu-list--l3 .l3-item:hover::after,
