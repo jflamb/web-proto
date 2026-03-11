@@ -1,5 +1,30 @@
 # TODO
 
+## Current Task (FDICnet Hover-Driven Top Nav + L1 Preview)
+- [x] Make desktop top-level menu items open/switch panels on hover preview.
+- [x] Make desktop first-column (L1) items preview L2/L3 on hover/focus, matching existing L2/L3 behavior.
+- [x] Keep click and keyboard activation paths intact.
+- [x] Run syntax checks and desktop/mobile runtime regression checks.
+
+## Review / Results (FDICnet Hover-Driven Top Nav + L1 Preview)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - `fdic-top-nav` now emits `fdic-top-nav-preview` on desktop pointer hover over top-level buttons.
+  - `fdic-mega-menu` now emits `fdic-mega-l1-preview` on L1 `mouseover` and `focusin`.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - bound `fdic-top-nav-preview` to orchestration callback `previewTopNavPanel(...)`.
+  - bound `fdic-mega-l1-preview` to `setSelectedL1(index, { restoreFocus })`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added `previewTopNavPanel(panelKey, navIndex)` to switch/open panel on hover without forcing menu focus movement.
+  - injected `previewTopNavPanel` into `bindFDICMenuEvents(...)`.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node --check sites/fdicnet-main-menu/events.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Runtime QA (Chrome DevTools MCP):
+    - desktop: top-nav hover switches open panel; L1 hover switches L2/L3 content.
+    - desktop keyboard: `ArrowRight` roving across top nav still functions.
+    - mobile: drawer open/drill/escape close path still restores focus to `#fdicNavToggle`.
+
 ## Current Task (Phase 4: Init/Bootstrap Module Extraction)
 - [x] Extract bootstrap + content-loading flow into `sites/fdicnet-main-menu/init.js`.
 - [x] Replace script-local `init()` with module-driven initializer.

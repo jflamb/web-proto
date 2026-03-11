@@ -98,6 +98,13 @@
     });
 
     if (topNav) {
+      topNav.addEventListener("fdic-top-nav-preview", (event) => {
+        if (isMobileViewport()) return;
+        const { panelKey, navIndex } = event.detail || {};
+        if (!panelKey) return;
+        deps.previewTopNavPanel(panelKey, Number(navIndex || 0));
+      });
+
       topNav.addEventListener("fdic-top-nav-activate", (event) => {
         const { panelKey, navIndex, focusMenu } = event.detail || {};
         if (!panelKey) return;
@@ -115,6 +122,13 @@
     }
 
     if (megaMenuHost) {
+      megaMenuHost.addEventListener("fdic-mega-l1-preview", (event) => {
+        if (isMobileViewport()) return;
+        const { index, fromFocus } = event.detail || {};
+        if (!Number.isFinite(index)) return;
+        deps.setSelectedL1(index, { restoreFocus: Boolean(fromFocus) });
+      });
+
       megaMenuHost.addEventListener("fdic-mega-l1-select", (event) => {
         if (isMobileViewport()) return;
         const { index } = event.detail || {};
