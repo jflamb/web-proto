@@ -1,5 +1,269 @@
 # TODO
 
+## Current Task (Phase 4: Init/Bootstrap Module Extraction)
+- [x] Extract bootstrap + content-loading flow into `sites/fdicnet-main-menu/init.js`.
+- [x] Replace script-local `init()` with module-driven initializer.
+- [x] Keep orchestration callbacks injected from `script.js`.
+- [x] Run syntax + desktop/mobile runtime regression checks.
+
+## Review / Results (Phase 4: Init/Bootstrap Module Extraction)
+- Added `sites/fdicnet-main-menu/init.js`:
+  - exported `createFDICMenuInitializer(deps)` on `window`
+  - moved bootstrap concerns:
+    - `loadContent()` fetch + YAML parse
+    - required DOM presence validation
+    - content-load fallback rendering
+    - primary init sequence (`state`, render, controller init, event wiring, open-by-default)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - removed monolithic local init/bootstrap implementation.
+  - added `getDom()` helper for injected bootstrap dependencies.
+  - now creates initializer via `createFDICMenuInitializer(...)` and calls `menuInitializer.init()`.
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - load `init.js` before `script.js`.
+- Regression checks:
+  - `node --check sites/fdicnet-main-menu/init.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright smoke (`desktop + mobile`): `3/3` pass
+  - Playwright full mobile keyboard matrix (`390x844`): `12/12` pass.
+
+## Current Task (Phase 3: Events Module Extraction)
+- [x] Extract event wiring into `sites/fdicnet-main-menu/events.js`.
+- [x] Replace in-file `setupEvents()` implementation with delegated module binder call.
+- [x] Keep orchestration callbacks injected from `script.js`.
+- [x] Run syntax + desktop/mobile runtime regression smoke.
+
+## Review / Results (Phase 3: Events Module Extraction)
+- Added `sites/fdicnet-main-menu/events.js`:
+  - exported `bindFDICMenuEvents(deps)` on `window`
+  - moved event wiring concerns:
+    - nav toggle/search toggle handlers
+    - media-query change handlers
+    - top-nav + mega-menu custom event listeners
+    - mobile nav key/click handling
+    - global pointerdown/escape handling
+    - preview-clear pointer/focus wiring
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - `setupEvents()` now delegates to `bindFDICMenuEvents(...)` with injected dependencies/callbacks.
+  - removed in-file monolithic event wiring body.
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - load `events.js` before `script.js`.
+- Regression checks:
+  - `node --check sites/fdicnet-main-menu/events.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright smoke (`desktop + mobile`): `3/3` pass.
+
+## Current Task (Phase 2: Mobile Drawer Module Extraction)
+- [x] Extract mobile drawer rendering/drill logic into `sites/fdicnet-main-menu/mobile-drawer.js`.
+- [x] Replace script-local mobile drill render stack with controller wrappers.
+- [x] Route delegated mobile drill click handling through module API.
+- [x] Run syntax + full mobile keyboard runtime regression.
+
+## Review / Results (Phase 2: Mobile Drawer Module Extraction)
+- Added `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - controller factory: `createFDICMobileDrawerController(...)`
+  - moved mobile drawer concerns:
+    - drill path encode/decode
+    - panel creation/removal
+    - L1/L2/L3 mobile drill rendering
+    - stagger reveal animation
+    - delegated drill-action click handling
+    - drawer panel render coordinator
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added `initializeMobileDrawerController()` with explicit dependency injection.
+  - replaced in-file mobile drill function stack with wrappers:
+    - `renderMobileDrawerPanel()`
+    - `removeMobileDrawerPanel()`
+  - delegated `navList` click handling now calls `mobileDrawerController.handleDelegatedMobileDrillClick(...)`.
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - load `mobile-drawer.js` before `script.js`.
+- Regression checks:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright full mobile keyboard matrix (`390x844`): `12/12` pass.
+
+## Current Task (Phase 1: State Module Extraction)
+- [x] Extract menu state and derived selectors into `sites/fdicnet-main-menu/state.js`.
+- [x] Wire `script.js` to consume state module APIs instead of local state/derived implementations.
+- [x] Load `state.js` before `script.js` in `index.html`.
+- [x] Run syntax + runtime regression smoke checks.
+
+## Review / Results (Phase 1: State Module Extraction)
+- Added `sites/fdicnet-main-menu/state.js` with:
+  - `menuState` single source of truth
+  - derived selectors/getters (`getPanelConfig`, `getPanelConfigByKey`, `getMobilePanelKeys`, `getPanelL1`, `getSelectedL1`, `getVisibleL2Index`, `getVisibleL2`, `getL2Overview`)
+  - exported on `window.FDICMenuState`
+- Updated `sites/fdicnet-main-menu/script.js` to consume state module functions via local adapter bindings.
+- Updated `sites/fdicnet-main-menu/index.html` to include `state.js` before `script.js`.
+- Regression checks:
+  - `node --check sites/fdicnet-main-menu/state.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright smoke (`desktop + mobile`): `3/3` pass.
+
+## Current Task (FDICnet Mobile Drill Event Delegation)
+- [x] Remove per-render inline click listeners from mobile drill render helpers.
+- [x] Encode mobile drill navigation intent as data attributes on controls.
+- [x] Add single delegated click handler for mobile drill actions.
+- [x] Re-run full mobile keyboard runtime QA matrix.
+
+## Review / Results (FDICnet Mobile Drill Event Delegation)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added path serialization helpers:
+    - `encodeMobilePath(...)`
+    - `decodeMobilePath(...)`
+  - updated mobile drill rendering helpers to emit action metadata instead of closure-bound listeners:
+    - `renderMobileDrillHeader(...)` now sets `data-mobile-drill-action="set-path"` + `data-mobile-drill-path`.
+    - `appendMobileDrillItem(...)` now sets `data-mobile-drill-action="set-path"` + `data-mobile-drill-path`.
+  - removed inline `addEventListener("click", ...)` from mobile drill item/back render paths.
+  - added one delegated `navList` click handler (mobile-only) that:
+    - resolves nearest `[data-mobile-drill-action='set-path']`
+    - decodes target drill path
+    - updates `menuState.mobileDrillPath` and active panel
+    - triggers `renderMobileDrawerPanel()`.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright full mobile keyboard runtime matrix (`390x844`): `12/12` passed.
+
+## Current Task (FDICnet DOM Reference Refresh Hardening)
+- [x] Replace one-time cached DOM references in `script.js` with refreshable `let` bindings.
+- [x] Add `refreshDomRefs()` resolver for component-backed and fallback selectors.
+- [x] Invoke ref refresh at key entry points to prevent stale references after component re-render/reconnect.
+- [x] Re-run syntax and runtime smoke checks.
+
+## Review / Results (FDICnet DOM Reference Refresh Hardening)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - converted startup `const` DOM references to mutable `let` bindings.
+  - added `refreshDomRefs()` to re-resolve:
+    - custom element hosts (`#fdicTopNav`, `#fdicMegaMenu`)
+    - component-exposed internals (`navList`, `megaMenuElement`, `l1List`, `l2List`, `l3List`, etc.)
+    - fallback direct selectors.
+  - added `refreshDomRefs()` calls at core entry points (`getMissingRequiredElements`, render/sync/open/close/event setup/init flows) so operations run against current DOM nodes instead of module-load snapshots.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - Playwright smoke checks (desktop + mobile): `3/3` passed.
+
+## Current Task (FDICnet Mega-Menu Behavior Componentization)
+- [x] Replace structural mega-menu shell with behavior-owning `fdic-mega-menu`.
+- [x] Move desktop mega-menu rendering (L1/L2/L3) into component API.
+- [x] Move mega-menu keyboard interactions (column roving + cross-column arrows) into component behavior.
+- [x] Wire component custom events back into `script.js` state orchestration.
+- [x] Run syntax checks and desktop/mobile runtime keyboard smoke verification.
+
+## Review / Results (FDICnet Mega-Menu Behavior Componentization)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - replaced `fdic-mega-menu-shell` with `fdic-mega-menu`.
+  - `fdic-mega-menu` now owns:
+    - mega-menu markup + internal element getters
+    - desktop L1/L2/L3 rendering via `updateView(...)`
+    - focus helpers (`focusSelectedL1`, `focusActiveL2`, `focusActiveL3`, targeted focus helpers)
+    - keyboard behavior for column roving (`ArrowUp/Down`, `Home`, `End`) and cross-column movement (`ArrowLeft/Right`)
+    - interaction event emission:
+      - `fdic-mega-l1-select`
+      - `fdic-mega-l1-roving`
+      - `fdic-mega-l2-preview`
+      - `fdic-mega-l2-overview-preview`
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - replaced `<fdic-mega-menu-shell>` with `<fdic-mega-menu id="fdicMegaMenu">`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - switched mega-menu element references to component host/getters.
+  - replaced direct L1/L2/L3 DOM rendering with view-model handoff (`getMegaMenuViewModel()` -> `megaMenuHost.updateView(...)`).
+  - removed script-owned desktop mega-menu keyboard handlers (`setupColumnArrowNav`, `setupColumnCrossNav`) now handled by component.
+  - added component event listeners in orchestration:
+    - select L1
+    - persist L1 roving index
+    - apply L2 preview / overview preview state.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright runtime smoke:
+    - desktop (`1280x900`): top-nav open/focus, mega-menu L1->L2->L3 arrow flows, L2 preview behavior
+    - mobile (`390x844`): escape-close focus restore regression check
+    - result: `8/8` checks passed
+
+## Current Task (FDICnet Mobile Keyboard Runtime QA)
+- [x] Run Playwright mobile keyboard path checks for drawer open/close, drill navigation, and Escape behavior.
+- [x] Validate close-control persistence across drill depths.
+- [x] Confirm focus behavior after keyboard close actions.
+- [x] Record findings and regressions.
+
+## Review / Results (FDICnet Mobile Keyboard Runtime QA)
+- Runtime environment:
+  - viewport `390x844`
+  - URL `http://127.0.0.1:4173/index.html` served from `sites/fdicnet-main-menu`
+- Passes:
+  - keyboard open from menu toggle moves focus into drawer.
+  - root list keyboard navigation works (`ArrowUp/Down`, `Home`, `End`).
+  - drill navigation works via keyboard (`Space` and `Enter`) from root -> L1 -> L2.
+  - `Escape` unwinds drill depth one level at a time (L2 -> L1 -> root).
+  - close toggle remains visible and labeled `Close menu` at drill depths.
+  - drawer model remains single-panel (`.mobile-drawer-panel-item` count `1`).
+- Finding:
+  - when closing mobile drawer from root using `Escape`, focus falls back to `BODY` instead of returning to a stable header control (expected: `#fdicNavToggle`).
+  - closing via toggle button (`Enter` on focused `#fdicNavToggle`) returns focus correctly to the toggle.
+
+## Current Task (FDICnet Mobile Escape Focus Restore Fix)
+- [x] Patch mobile `Escape` close path to restore focus to `#fdicNavToggle`.
+- [x] Keep desktop escape-focus restore behavior unchanged.
+- [x] Re-run full Playwright mobile keyboard QA matrix.
+
+## Review / Results (FDICnet Mobile Escape Focus Restore Fix)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - in global `Escape` handling, after `closeMenu(); closeMobileNav();`:
+    - mobile path now explicitly focuses `#fdicNavToggle` and returns.
+    - desktop path keeps existing active-panel button restore, with `#fdicNavToggle` as fallback if no active button exists.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - Playwright mobile matrix (`390x844`) rerun: `12/12` checks passed.
+  - Confirmed regression fixed: `Escape` close at mobile root now leaves focus on `#fdicNavToggle`.
+
+## Current Task (FDICnet Top-Nav Behavior Componentization)
+- [x] Replace structural top-nav shell with a behavior-owning `fdic-top-nav` component.
+- [x] Move desktop top-nav rendering and key/click activation behavior behind component custom events.
+- [x] Keep menu state orchestration in `script.js` and sync component state via explicit update calls.
+- [x] Re-run syntax + event-hook verification and record results.
+
+## Review / Results (FDICnet Top-Nav Behavior Componentization)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - replaced `fdic-top-nav-shell` with `fdic-top-nav`.
+  - `fdic-top-nav` now owns:
+    - primary nav markup rendering
+    - top-nav item rendering (`renderItems`)
+    - selected/expanded/tabindex sync (`updateState`)
+    - desktop top-nav event emission (`fdic-top-nav-activate`, `fdic-top-nav-roving-request`, `fdic-top-nav-link-activate`)
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - replaced `<fdic-top-nav-shell>` with `<fdic-top-nav id="fdicTopNav">`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - switched top-nav queries to the component instance (`#fdicTopNav`) and component-provided nav host.
+  - replaced inline top-nav rendering logic with `topNav.renderItems(...)`.
+  - replaced desktop top-nav key/click handlers with component event listeners.
+  - added centralized handlers:
+    - `activateTopNavPanel(...)`
+    - `handleTopNavRovingRequest(...)`
+  - removed obsolete `moveFocusIntoMenuOnOpen` state flag.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "fdic-top-nav|fdic-top-nav-activate|fdic-top-nav-roving-request|activateTopNavPanel|handleTopNavRovingRequest" sites/fdicnet-main-menu -S`
+
+## Current Task (FDICnet Menu Componentization)
+- [x] Create reusable web components for FDICnet menu structure (top nav shell + mega menu shell).
+- [x] Replace inline menu markup in `sites/fdicnet-main-menu/index.html` with custom elements.
+- [x] Keep existing menu behavior by preserving required IDs/hooks used by `script.js`.
+- [x] Run syntax and selector-presence verification; document outcomes.
+
+## Review / Results (FDICnet Menu Componentization)
+- Added `sites/fdicnet-main-menu/components.js` with reusable structural web components:
+  - `fdic-top-nav` renders the primary nav shell and `#fdicNavList` host.
+  - `fdic-mega-menu-shell` renders the mega-menu shell and existing L1/L2/L3 hook IDs.
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - replaced inline top-nav markup with `<fdic-top-nav>`.
+  - replaced inline mega-menu markup with `<fdic-mega-menu-shell>`.
+  - loaded `components.js` before `script.js` to guarantee element upgrade before runtime DOM queries.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - selector/ID checks via `rg` for new custom tags and required script hook IDs.
+
 ## Current Task (fdicnet-main-menu Micro-Interactions Pass, Skip #2)
 - [x] Add subtle mobile press feedback on drill rows.
 - [x] Add mobile back-caret nudge on hover/focus.
