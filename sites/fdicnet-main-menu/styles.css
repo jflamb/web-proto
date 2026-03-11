@@ -350,6 +350,26 @@ body {
   border-bottom-color: var(--menu-bottom-accent);
 }
 
+.mega-menu-scrim {
+  position: fixed;
+  top: calc(var(--layout-masthead-height) + var(--layout-top-nav-item-height));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease, visibility 180ms ease;
+  z-index: 40;
+}
+
+.fdic-header.menu-open + .mega-menu-scrim {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 /* clip-path keeps the panel paint bounded while intentionally allowing
    first-column left-bleed backgrounds/focus overlays to reach viewport
    edge (left inset is expanded to -100vw). */
@@ -763,6 +783,10 @@ body {
    Content inside uses a drill-down pattern: each tap pushes a
    deeper level onto menuState.mobileDrillPath in script.js. */
 @media (max-width: 768px) {
+  .mega-menu-scrim {
+    display: none !important;
+  }
+
   .mega-menu {
     position: static;
     top: auto;
