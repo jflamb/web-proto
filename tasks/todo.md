@@ -1,5 +1,106 @@
 # TODO
 
+## Current Task (fdicnet-main-menu Micro-Interactions Pass, Skip #2)
+- [x] Add subtle mobile press feedback on drill rows.
+- [x] Add mobile back-caret nudge on hover/focus.
+- [x] Add focus-ring fade-in transitions while preserving existing ring styles.
+- [x] Add reduced-motion-safe staggered reveal on mobile drill panel changes.
+- [x] Smooth desktop row hover ink transitions.
+- [x] Refine mobile backdrop opacity easing.
+- [x] Add optional lightweight haptic feedback on mobile drill-in/back actions.
+- [x] Run syntax/selector verification and record results.
+
+## Review / Results (fdicnet-main-menu Micro-Interactions Pass, Skip #2)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added optional light haptics (`navigator.vibrate(10)`) for mobile drill-in and back actions via `triggerLightHaptic()`.
+  - added `animateMobileDrillReveal()` with per-row stagger delay (15ms step, capped at 6 items) for mobile drill panel transitions.
+  - applied reveal animation calls across all mobile drill render branches (root/L1/L2/L3).
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added subtle transition smoothing for desktop row hover ink (`.l1-item`, `.l2-item`, `.l3-item`, `.overview-link`).
+  - added mobile press feedback (`transform: translateY(1px)`) for drill/back/current-link active states.
+  - added mobile back-caret nudge (`translateX(-2px)`) on hover/focus.
+  - added transition polish for mobile focusable controls and mobile stagger reveal classes.
+  - refined mobile backdrop easing to `opacity 200ms cubic-bezier(0.2, 0.7, 0.2, 1)`.
+  - expanded reduced-motion fallback to disable new transitions/stagger effects.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "triggerLightHaptic|animateMobileDrillReveal|MOBILE_STAGGER_MAX_ITEMS|MOBILE_STAGGER_STEP_MS|ensureMobileMenuFocus\\(|mobile-drill-back-icon|mobile-drill-trigger:active|mobile-drill-current-link:active|mobile-drawer-panel\\.is-entering|transition: opacity 200ms cubic-bezier|@media \\(prefers-reduced-motion: reduce\\)" sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/styles.css`
+
+## Current Task (fdicnet-main-menu Mobile Keyboard Navigation + Focus-On-Open)
+- [x] Move keyboard focus into the mobile menu when it opens.
+- [x] Add ArrowUp/ArrowDown keyboard navigation between visible mobile drawer items.
+- [x] Keep existing desktop roving behavior unchanged.
+- [x] Run syntax + targeted selector checks and record results.
+
+## Review / Results (fdicnet-main-menu Mobile Keyboard Navigation + Focus-On-Open)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added `getMobileDrawerFocusableItems()` to resolve keyboard-focusable items in the open mobile drawer (prefers drill controls, falls back to top-level nav items).
+  - added `focusFirstMobileMenuItem()` and invoked it after mobile drawer open render.
+  - extended `navList` `keydown` handling for mobile only to support:
+    - `ArrowDown`
+    - `ArrowUp`
+    - `Home`
+    - `End`
+  - desktop behavior remains unchanged and still uses existing roving/cross-nav logic.
+- Follow-up correction:
+  - replaced `focusFirstMobileMenuItem()` with resilient `ensureMobileMenuFocus()` to force focus into the drawer on open and after drill-panel rerenders if focus escapes to background content.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "function getMobileDrawerFocusableItems|function ensureMobileMenuFocus|ensureMobileMenuFocus\\(|ArrowDown|ArrowUp|Home|End" sites/fdicnet-main-menu/script.js`
+
+## Current Task (fdicnet-main-menu Mobile Caret Size + Consistency Review)
+- [x] Match mobile drill/back caret icon sizing to desktop caret sizing.
+- [x] Keep mobile caret icon glyph style aligned with desktop icon set.
+- [x] Review mobile vs desktop interaction styling for remaining inconsistencies and document recommendations.
+- [x] Run targeted verification checks and record results.
+
+## Review / Results (fdicnet-main-menu Mobile Caret Size + Consistency Review)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - mobile back and drill row carets now use the same Phosphor caret classes used in desktop menu rows:
+    - `mobile-drill-back-icon ph ph-caret-left`
+    - `mobile-drill-caret ph ph-caret-right`
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - set mobile drill/back caret icon geometry to match desktop caret size:
+    - `width: 20px;`
+    - `height: 20px;`
+    - `min-width: 20px;`
+    - `font-size: 20px;`
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "mobile-drill-back-icon|mobile-drill-caret|ph-caret-left|ph-caret-right|font-size: 20px|width: 20px|height: 20px" sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/styles.css`
+
+## Current Task (fdicnet-main-menu Code Simplification Pass)
+- [x] Remove unused/empty mobile menu container path (`mobileMenu` / `.mega-mobile`) and related JS checks.
+- [x] Remove dead JS class toggling for `fdic-nav-list--mobile-accordion`.
+- [x] Remove unused CSS custom properties and duplicate `.mega-col` rule block.
+- [x] Extract repeated desktop render calls into a helper function.
+- [x] Extract repeated focusout + `requestAnimationFrame` preview-clear wiring into a helper function.
+- [x] Re-run syntax and targeted grep checks to verify simplification scope and no behavior change.
+
+## Review / Results (fdicnet-main-menu Code Simplification Pass)
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - removed unused `<nav id="mobileMenu" class="mega-mobile">` container.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - removed `mobileMenu` DOM dependency from required-element checks and panel rendering branches.
+  - removed dead `fdic-nav-list--mobile-accordion` class toggling.
+  - removed unused `narrowHeaderMediaQuery` listener and breakpoint constant.
+  - added `renderDesktopColumns()` and replaced repeated `renderL1(); renderL2(); renderL3();` sequences.
+  - added `wirePreviewClearOnFocusOut()` to replace duplicated `focusout` + `requestAnimationFrame` preview-clear logic for L2/L3.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed unused custom properties:
+    - `--ds-spacing-xs`
+    - `--ds-font-size-h3`
+    - `--ds-corner-radius-sm`
+    - `--fdic-blue-100`
+    - `--fdic-border`
+    - `--fdic-divider`
+  - removed `.mega-mobile` rules and consolidated duplicate `.mega-col` blocks.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `rg -n "mobileMenu|mega-mobile|fdic-nav-list--mobile-accordion" sites/fdicnet-main-menu/index.html sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/styles.css` (no matches)
+  - `rg -n -e "--ds-spacing-xs" -e "--ds-font-size-h3" -e "--ds-corner-radius-sm" -e "--fdic-blue-100" -e "--fdic-border" -e "--fdic-divider" sites/fdicnet-main-menu/styles.css` (no matches)
+  - `rg -n "function renderDesktopColumns|renderDesktopColumns\\(\\);|function wirePreviewClearOnFocusOut|wirePreviewClearOnFocusOut\\(" sites/fdicnet-main-menu/script.js`
+
 ## Current Task (Hover Highlight Visibility Retune)
 - [x] Increase hover highlight visibility after over-lightening.
 - [x] Keep treatment subtle and consistent across menu columns.
