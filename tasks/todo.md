@@ -1,5 +1,137 @@
 # TODO
 
+## Current Task (L1 Active Focus Ring Left-Edge Obscuring)
+- [x] Prevent selected-item left bleed layer from obscuring L1 focus ring left edge.
+- [x] Keep active L1 item focusable in roving keyboard model.
+- [x] Verify CSS selector-level diff and document result.
+
+## Review / Results (L1 Active Focus Ring Left-Edge Obscuring)
+- Root cause: selected L1 left-bleed pseudo-element (`.l1-item[data-selected="true"]::before`) could visually overlap the row-level focus ring, making the left edge appear clipped.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - moved L1 focus ring painting from `.l1-item:focus-visible` box-shadow to a top-layer `.l1-item:focus-visible::after` overlay (`position: absolute; inset: 0; z-index: 2;`).
+- Result: active L1 focus ring now renders fully, including the left edge.
+- Verification:
+  - `rg -n "\\.l1-item:focus-visible \\{|\\.l1-item:focus-visible::after|data-selected=\"true\"::before" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (L1 Overview Link Left Alignment)
+- [x] Add left padding to bottom overview link in column 1.
+- [x] Match overview-link left inset with L1 row label alignment.
+- [x] Verify CSS-only diff scope and document result.
+
+## Review / Results (L1 Overview Link Left Alignment)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.overview-link` padding from `8px 24px 8px 0` to `8px 24px 8px 16px` (with existing right padding retained).
+- Result: bottom column-1 overview link text/focus box aligns with other column-1 row content.
+- Verification:
+  - `rg -n "^\\.overview-link \\{|padding: 8px 24px 8px 16px;" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (L1 Hover/Focus Fill Inset Alignment)
+- [x] Stop L1 hover/focus background from bleeding to viewport-left edge.
+- [x] Keep hover/focus fill aligned to row box with 16px label inset context.
+- [x] Verify selector-level CSS diff and document result.
+
+## Review / Results (L1 Hover/Focus Fill Inset Alignment)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed `.l1-item:hover::before, .l1-item:focus-visible::before` full-bleed pseudo-element rule.
+- Result:
+  - L1 hover/focus fill now renders on `.l1-item` only (same geometry as focus ring), so it extends 16px left of the text label instead of to viewport edge.
+  - selected-item behavior remains unchanged.
+- Verification:
+  - `rg -n "\\.l1-item:hover::before|\\.l1-item:focus-visible::before|\\.l1-item:hover \\{|\\.l1-item:focus-visible \\{" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (L1 Focus Ring Inset to Label Padding)
+- [x] Stop extending column-1 focus rectangle to viewport-left edge.
+- [x] Set L1 label inset so focus ring sits 16px left of text.
+- [x] Verify CSS-only diff scope and document result.
+
+## Review / Results (L1 Focus Ring Inset to Label Padding)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.l1-item` left padding to `16px` so text and focus geometry match requested inset.
+  - moved L1 focus ring back onto `.l1-item:focus-visible` with the standard outset double-ring.
+  - removed full-bleed focus overlay rule `.l1-item:focus-visible::after` that previously extended to viewport-left edge.
+- Result: L1 focus rectangle now renders around the row with 16px space left of the label text instead of bleeding to the viewport edge.
+- Verification:
+  - `rg -n "^\\.l1-item \\{|padding-left: 16px;|\\.l1-item:focus-visible \\{|\\.l1-item:focus-visible::after" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (Selected L1 Focus Fill Consistency)
+- [x] Remove partial gray fill when the selected L1 item receives keyboard focus.
+- [x] Preserve focus visibility via ring while keeping selected item fill stable.
+- [x] Verify CSS-only diff scope and record outcome.
+
+## Review / Results (Selected L1 Focus Fill Consistency)
+- Decision: the active/selected L1 item remains focusable for keyboard users (roving focus model), but focus styling should not change its selected fill color.
+- Root cause: `.l1-item:focus-visible` applied hover-style gray background to all L1 items, including the selected one, while selected left-bleed remained white; this produced a split/partial gray appearance.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.l1-item[data-selected="true"]:focus-visible { background: #fff; }`.
+- Verification:
+  - `rg -n "l1-item:focus-visible|data-selected=\"true\":focus-visible" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (L1 Focus Height Parity + No Hover on Selected L1)
+- [x] Make column-1 focus rectangle height treatment match columns 2 and 3.
+- [x] Remove hover-state visual override on selected/active column-1 item.
+- [x] Verify CSS-only diff scope and capture result.
+
+## Review / Results (L1 Focus Height Parity + No Hover on Selected L1)
+- Root cause:
+  - Column-1 focus ring was drawn with an inset shadow while columns 2/3 use outset rings, making L1 focus appear shorter.
+  - Selected L1 hover override forced hover fill onto active item, conflicting with desired stable selected styling.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.l1-item:focus-visible::after` from inset to outset double-ring shadow:
+    - `box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);`
+  - removed selected hover/focus override block for `.l1-item[data-selected="true"]::before` background.
+- Verification:
+  - `rg -n "\\.l1-item:focus-visible::after|box-shadow: 0 0 0 2px var\\(--menu-focus-inner\\), 0 0 0 4px var\\(--menu-focus-ring\\);|data-selected=\"true\":hover::before" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (L1 Height + Selected Hover Left-Bleed)
+- [x] Match column-1 item row height geometry to column-2 rows.
+- [x] Ensure selected column-1 row hover/focus fill extends to viewport-left edge.
+- [x] Verify CSS-only diff scope and record the result.
+
+## Review / Results (L1 Height + Selected Hover Left-Bleed)
+- Root cause:
+  - L1 rows used a slightly different line-height than L2 rows, creating visible height mismatch.
+  - `.l1-item[data-selected="true"]::before` (white left-bleed layer) overrode hover/focus left-bleed fill on selected items.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - set `.l1-item { line-height: 1.4; }` to match L2 row geometry.
+  - added `.l1-item[data-selected="true"]:hover::before, .l1-item[data-selected="true"]:focus-visible::before { background: var(--menu-hover-overlay); }`.
+- Verification:
+  - `rg -n "\\.l1-item \\{|line-height: 1\\.4;|data-selected=\"true\"\\]:hover::before|data-selected=\"true\"\\]:focus-visible::before" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (Column 1 Focus + Left-Bleed Background)
+- [x] Fix column-1 focus rectangle left-edge clipping.
+- [x] Restore first-column gray panel background bleed to viewport left edge.
+- [x] Verify CSS-only diff scope and document outcome.
+
+## Review / Results (Column 1 Focus + Left-Bleed Background)
+- Root cause: `.mega-menu-inner` clipping constrained first-column left-bleed paint to the shell boundary, which made column-1 background/focus treatments appear clipped on the left.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - widened left paint allowance on `.mega-menu-inner` with `clip-path: inset(-6px -6px -6px -100vw)` so first-column gray background can extend to the viewport edge.
+  - changed `.l1-item:focus-visible` to render focus via a single full-bleed overlay (`::after`) from `left: -100vw` through the row, eliminating clipped/split left focus edges.
+  - kept existing left-bleed background logic (`.l1-item:focus-visible::before`) intact for hover/focus fill behavior.
+- Verification:
+  - `rg -n "mega-menu-inner|clip-path|\\.l1-item:focus-visible|\\.l1-item:focus-visible::after" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (L2 Focus Ring Left-Edge Clipping)
+- [x] Confirm root cause of left-edge clipping for column-2 focus ring.
+- [x] Apply minimal CSS fix to keep full focus rectangle visible.
+- [x] Verify diff scope and document result.
+
+## Review / Results (L2 Focus Ring Left-Edge Clipping)
+- Root cause: focused L2 row ring rendered underneath adjacent column content due to stacking order, so the ring's left edge appeared clipped at the column boundary.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - in `.l2-item:focus-visible, .l3-item:focus-visible`, added `position: relative;` and `z-index: 2;` so focused row rings paint above neighboring column layers.
+- Verification:
+  - `rg -n "\\.l2-item:focus-visible|\\.l3-item:focus-visible|z-index: 2;" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
 ## Current Task (Implement Issues #59 #62 #63 per PR Plan)
 - [x] Implement `#59` by aligning L2 anchor behavior with true link navigation semantics.
 - [x] Implement `#62` by consolidating duplicate `769px-1049px` media-query rules and removing redundant/dead rules.
