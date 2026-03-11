@@ -67,35 +67,10 @@
         </div>
       </div>
 
-      <nav class="fdic-nav" aria-label="Primary navigation">
-        <div class="fdic-shell">
-          <ul id="fdicNavList" class="fdic-nav-list"></ul>
-        </div>
-      </nav>
+      <fdic-top-nav id="fdicTopNav"></fdic-top-nav>
       <div id="mobileNavBackdrop" class="mobile-nav-backdrop" hidden></div>
 
-      <section id="megaMenu" class="mega-menu" aria-label="Main menu">
-        <div class="fdic-shell mega-menu-inner">
-          <section class="mega-col mega-col--l1" aria-labelledby="l1Heading">
-            <h2 id="l1Heading" class="sr-only">Level 1</h2>
-            <ul id="l1List" class="menu-list" aria-labelledby="l1Heading"></ul>
-            <div class="overview-link-wrap">
-              <a id="l1OverviewLink" class="overview-link" href="#">Overview</a>
-            </div>
-          </section>
-
-          <section class="mega-col mega-col--l2" aria-labelledby="l2Heading">
-            <h2 id="l2Heading" class="sr-only">Level 2</h2>
-            <ul id="l2List" class="menu-list" aria-labelledby="l2Heading"></ul>
-          </section>
-
-          <section class="mega-col mega-col--l3" aria-labelledby="l3Heading">
-            <h2 id="l3Heading" class="sr-only">Level 3</h2>
-            <div id="l3Description" class="menu-description"></div>
-            <ul id="l3List" class="menu-list menu-list--l3" role="list"></ul>
-          </section>
-        </div>
-      </section>
+      <fdic-mega-menu id="fdicMegaMenu"></fdic-mega-menu>
     </header>
 
     <main class="page-content">
@@ -110,6 +85,11 @@
       integrity="sha384-+pxiN6T7yvpryuJmE1gM9PX7yQit15auDb+ZwwvJOd/4be2Cie5/IuVXgQb/S9du"
       crossorigin="anonymous"
     ></script>
+    <script src="components.js"></script>
+    <script src="state.js"></script>
+    <script src="mobile-drawer.js"></script>
+    <script src="events.js"></script>
+    <script src="init.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
