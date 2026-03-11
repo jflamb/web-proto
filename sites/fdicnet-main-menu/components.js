@@ -321,36 +321,6 @@ class FDICMegaMenu extends HTMLElement {
       this.l2List.appendChild(li);
     });
 
-    if (l2Overview) {
-      const separatorLi = document.createElement("li");
-      separatorLi.className = "l2-separator-item";
-      separatorLi.setAttribute("aria-hidden", "true");
-      separatorLi.setAttribute("role", "presentation");
-
-      const separatorLine = document.createElement("span");
-      separatorLine.className = "l2-separator-line";
-      separatorLi.appendChild(separatorLine);
-      this.l2List.appendChild(separatorLi);
-
-      const overviewLi = document.createElement("li");
-      overviewLi.setAttribute("role", "none");
-      const overviewLink = document.createElement("a");
-      const overviewLabel = document.createElement("span");
-      const overviewCaret = document.createElement("span");
-      overviewLink.className = "l2-item l2-item--overview";
-      overviewLink.href = l2Overview.href || "#";
-      overviewLink.dataset.column = "l2";
-      overviewLink.dataset.index = String(l2Items.length);
-      overviewLink.tabIndex = l2Items.length === 0 ? 0 : -1;
-      overviewLabel.className = "l2-label";
-      overviewLabel.textContent = l2Overview.label || "Overview";
-      overviewCaret.className = "l1-caret l2-caret ph ph-caret-right";
-      overviewCaret.setAttribute("aria-hidden", "true");
-      overviewLink.append(overviewLabel, overviewCaret);
-      overviewLi.appendChild(overviewLink);
-      this.l2List.appendChild(overviewLi);
-    }
-
     this.l3Description.textContent = l3Description || "";
     this.l3Description.hidden = !l3Description;
 

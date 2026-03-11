@@ -1,5 +1,18 @@
 # TODO
 
+## Current Task (FDICnet Remove L2 Overview Row)
+- [x] Remove the second-column bottom overview link and separator from mega-menu rendering.
+- [x] Keep existing L2 item rendering and keyboard behavior intact.
+- [x] Run runtime regression check to confirm no `.l2-item--overview` row is generated.
+
+## Review / Results (FDICnet Remove L2 Overview Row)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - removed the L2 separator + synthetic bottom overview row creation in `FDICMegaMenu.updateView(...)`.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - Runtime check (cache-busted load): `#l2List` no longer contains `.l2-item--overview` or `.l2-separator-item`.
+  - Runtime check on populated L1 section still shows expected direct L2 links only.
+
 ## Current Task (FDICnet Menu Content IA Refresh)
 - [x] Replace `sites/fdicnet-main-menu/content.yaml` menu taxonomy to match the provided IA outline.
 - [x] Keep YAML schema compatible with existing menu renderer.
