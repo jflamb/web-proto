@@ -1,5 +1,37 @@
 # TODO
 
+## Current Task (L1 Focus Ring 16px Left Extension)
+- [x] Extend column-1 focus rectangle 16px left of label baseline.
+- [x] Keep hover/selected/focus left extension geometry consistent in L1.
+- [x] Verify selector-level diff scope and document result.
+
+## Review / Results (L1 Focus Ring 16px Left Extension)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.l1-item:focus-visible::after` geometry from `inset: 0` to explicit edges with `left: -16px` (`top/right/bottom: 0`).
+- Result: L1 focus ring now extends 16px left of the text label, matching L1 hover/selected inset extension.
+- Verification:
+  - `rg -n "\\.l1-item:focus-visible::after|left: -16px;" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
+## Current Task (L1 Selected Fill Inset + Text Alignment Baseline)
+- [x] Change selected L1 white fill to extend only 16px left of text label (not viewport edge).
+- [x] Align column-1 item text start with top-nav first-item text and FDICnet wordmark baseline.
+- [x] Verify focused/hovered/selected left-extension behavior and diff scope.
+
+## Review / Results (L1 Selected Fill Inset + Text Alignment Baseline)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.l1-item` left padding from `16px` to `0` so L1 labels align with the shell baseline used by the wordmark/top-nav first item.
+  - replaced selected/hover/focus left-bleed behavior with local 16px extensions:
+    - `.l1-item:hover::before, .l1-item:focus-visible::before` now render `left: -16px; width: 16px`.
+    - `.l1-item[data-selected="true"]::before` now renders `left: -16px; width: 16px; background: #fff`.
+  - changed `.overview-link` left padding from `16px` to `0` to keep column-1 text alignment consistent.
+- Result:
+  - Selected L1 white background extends only 16px left of label.
+  - L1 and overview link text now share the same left baseline as the first top-nav item and wordmark.
+- Verification:
+  - `rg -n "^\\.l1-item \\{|^\\.l1-item:hover::before|^\\.l1-item:focus-visible::before|^\\.l1-item\\[data-selected=\"true\"\\]::before|^\\.overview-link \\{|padding: 8px 24px 8px 0;" sites/fdicnet-main-menu/styles.css -S`
+  - `git diff -- sites/fdicnet-main-menu/styles.css tasks/todo.md`
+
 ## Current Task (L1 Active Focus Ring Left-Edge Obscuring)
 - [x] Prevent selected-item left bleed layer from obscuring L1 focus ring left edge.
 - [x] Keep active L1 item focusable in roving keyboard model.
