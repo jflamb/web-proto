@@ -1,5 +1,32 @@
 # TODO
 
+## Current Task (FDICnet L1 Link-Style Navigation)
+- [x] Render desktop first-column (L1) rows as links to each L1 overview URL.
+- [x] Preserve L1 hover/focus preview behavior for column 2/3 content.
+- [x] Align L1 visual styling with L2/L3 link treatment.
+- [x] Run syntax + desktop/mobile runtime regression checks.
+
+## Review / Results (FDICnet L1 Link-Style Navigation)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - desktop L1 rows now render as `<a class="l1-item">` with per-item `href` sourced from `item.overviewHref`.
+  - removed standalone L1 bottom overview row from mega-menu markup.
+  - preserved L1 hover/focus preview event emission (`fdic-mega-l1-preview`) for column 2/3 updates.
+  - removed obsolete L1 click-select event handling.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - removed listener for obsolete `fdic-mega-l1-select` event.
+- Updated `sites/fdicnet-main-menu/script.js` + `sites/fdicnet-main-menu/init.js`:
+  - removed stale `l1OverviewLink` DOM dependency from orchestration and bootstrap required-element checks.
+  - updated focus fallback target set to `.l1-item, .l2-item, .l3-item`.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - L1 visual treatment now matches link-style rows (underline, link color, lighter weight).
+  - removed unused `.overview-link` and `.overview-link-wrap` desktop styles.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node --check sites/fdicnet-main-menu/events.js`
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node --check sites/fdicnet-main-menu/init.js`
+  - runtime QA: desktop hover/focus preview + L1 click navigation + mobile drawer/escape sanity.
+
 ## Current Task (FDICnet Hover-Driven Top Nav + L1 Preview)
 - [x] Make desktop top-level menu items open/switch panels on hover preview.
 - [x] Make desktop first-column (L1) items preview L2/L3 on hover/focus, matching existing L2/L3 behavior.

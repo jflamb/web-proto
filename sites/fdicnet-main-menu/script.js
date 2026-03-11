@@ -38,7 +38,6 @@ let l3List = null;
 let l3Description = null;
 let l3Column = null;
 let l1Column = null;
-let l1OverviewLink = null;
 let pageTitle = null;
 let pageIntro = null;
 let desktopSearchInput = null;
@@ -61,7 +60,6 @@ function refreshDomRefs() {
   l3Description = megaMenuHost?.l3Description || document.getElementById("l3Description");
   l3Column = megaMenuHost?.l3Column || document.querySelector(".mega-col--l3");
   l1Column = megaMenuHost?.l1Column || document.querySelector(".mega-col--l1");
-  l1OverviewLink = megaMenuHost?.l1OverviewLink || document.getElementById("l1OverviewLink");
   pageTitle = document.getElementById("pageTitle");
   pageIntro = document.getElementById("pageIntro");
   desktopSearchInput = document.getElementById("desktopSearchInput");
@@ -87,7 +85,6 @@ function getDom() {
     l3Description,
     l3Column,
     l1Column,
-    l1OverviewLink,
     pageTitle,
     pageIntro,
     desktopSearchInput,
@@ -474,7 +471,7 @@ function openMenu({ focusMenu = false } = {}) {
       header.classList.add("menu-open");
       if (focusMenu) {
         if (!focusSelectedL1()) {
-          const fallbackTarget = megaMenu.querySelector(".l2-item, .overview-link, .l3-item");
+          const fallbackTarget = megaMenu.querySelector(".l1-item, .l2-item, .l3-item");
           if (fallbackTarget instanceof HTMLElement) {
             fallbackTarget.focus();
           }
@@ -650,8 +647,6 @@ function getMegaMenuViewModel() {
     l1Items: getPanelL1(),
     selectedL1Index: menuState.selectedL1Index,
     l1FocusIndex: menuState.l1FocusIndex,
-    l1OverviewLabel: panel?.overviewLabel || selectedL1?.overviewLabel || "Overview",
-    l1OverviewHref: panel?.overviewHref || selectedL1?.overviewHref || "#",
     l2Items: selectedL1?.l2 || [],
     activeL2Index: getVisibleL2Index(),
     l2Overview,

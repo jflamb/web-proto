@@ -166,7 +166,6 @@ class FDICTopNav extends HTMLElement {
 class FDICMegaMenu extends HTMLElement {
   constructor() {
     super();
-    this.handleClick = this.handleClick.bind(this);
     this.handleFocusIn = this.handleFocusIn.bind(this);
     this.handleMouseOver = this.handleMouseOver.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
@@ -181,9 +180,6 @@ class FDICMegaMenu extends HTMLElement {
             <section class="mega-col mega-col--l1" aria-labelledby="l1Heading">
               <h2 id="l1Heading" class="sr-only">Level 1</h2>
               <ul id="l1List" class="menu-list" aria-labelledby="l1Heading"></ul>
-              <div class="overview-link-wrap">
-                <a id="l1OverviewLink" class="overview-link" href="#">Overview</a>
-              </div>
             </section>
 
             <section class="mega-col mega-col--l2" aria-labelledby="l2Heading">
@@ -200,14 +196,12 @@ class FDICMegaMenu extends HTMLElement {
         </section>
       `;
     }
-    this.addEventListener("click", this.handleClick);
     this.addEventListener("focusin", this.handleFocusIn);
     this.addEventListener("mouseover", this.handleMouseOver);
     this.addEventListener("keydown", this.handleKeydown);
   }
 
   disconnectedCallback() {
-    this.removeEventListener("click", this.handleClick);
     this.removeEventListener("focusin", this.handleFocusIn);
     this.removeEventListener("mouseover", this.handleMouseOver);
     this.removeEventListener("keydown", this.handleKeydown);
@@ -241,18 +235,12 @@ class FDICMegaMenu extends HTMLElement {
     return this.querySelector("#l3Description");
   }
 
-  get l1OverviewLink() {
-    return this.querySelector("#l1OverviewLink");
-  }
-
   updateView({
     panelLabel = "Site menu",
     isMobile = false,
     l1Items = [],
     selectedL1Index = 0,
     l1FocusIndex = 0,
-    l1OverviewLabel = "Overview",
-    l1OverviewHref = "#",
     l2Items = [],
     activeL2Index = 0,
     l2Overview = null,
@@ -267,7 +255,7 @@ class FDICMegaMenu extends HTMLElement {
       megaMenu.setAttribute("aria-label", panelLabel || "Site menu");
     }
 
-    if (!this.l1List || !this.l2List || !this.l3List || !this.l3Description || !this.l1OverviewLink) return;
+    if (!this.l1List || !this.l2List || !this.l3List || !this.l3Description) return;
 
     if (isMobile) {
       this.l1List.innerHTML = "";
@@ -285,16 +273,16 @@ class FDICMegaMenu extends HTMLElement {
     l1Items.forEach((item, index) => {
       const li = document.createElement("li");
       li.setAttribute("role", "none");
-      const button = document.createElement("button");
+      const link = document.createElement("a");
       const label = document.createElement("span");
       const caret = document.createElement("span");
 
-      button.type = "button";
-      button.className = "l1-item";
-      button.dataset.column = "l1";
-      button.dataset.index = String(index);
-      button.dataset.selected = index === selectedL1Index ? "true" : "false";
-      button.tabIndex = index === boundedL1FocusIndex ? 0 : -1;
+      link.className = "l1-item";
+      link.href = item.overviewHref || "#";
+      link.dataset.column = "l1";
+      link.dataset.index = String(index);
+      link.dataset.selected = index === selectedL1Index ? "true" : "false";
+      link.tabIndex = index === boundedL1FocusIndex ? 0 : -1;
 
       label.className = "l1-label";
       label.textContent = item.label || "Section";
@@ -302,16 +290,10 @@ class FDICMegaMenu extends HTMLElement {
       caret.className = "l1-caret ph ph-caret-right";
       caret.setAttribute("aria-hidden", "true");
 
-      button.append(label, caret);
-      li.appendChild(button);
+      link.append(label, caret);
+      li.appendChild(link);
       this.l1List.appendChild(li);
     });
-
-    this.l1OverviewLink.textContent = l1OverviewLabel || "Overview";
-    this.l1OverviewLink.href = l1OverviewHref || "#";
-    this.l1OverviewLink.dataset.column = "l1";
-    this.l1OverviewLink.dataset.index = String(l1Items.length);
-    this.l1OverviewLink.tabIndex = boundedL1FocusIndex === l1Items.length ? 0 : -1;
 
     this.l2List.innerHTML = "";
     l2Items.forEach((item, index) => {
@@ -404,7 +386,7 @@ class FDICMegaMenu extends HTMLElement {
 
   focusL1Index(index) {
     const target = this.l1List?.querySelector(`.l1-item[data-index="${index}"]`);
-    return this.setColumnFocus(this.l1Column, ".l1-item, #l1OverviewLink", target);
+    return this.setColumnFocus(this.l1Column, ".l1-item", target);
   }
 
   focusL2Index(index) {
@@ -419,7 +401,7 @@ class FDICMegaMenu extends HTMLElement {
 
   focusSelectedL1() {
     const target = this.l1List?.querySelector('.l1-item[data-selected="true"]') || this.l1List?.querySelector(".l1-item");
-    return this.setColumnFocus(this.l1Column, ".l1-item, #l1OverviewLink", target);
+    return this.setColumnFocus(this.l1Column, ".l1-item", target);
   }
 
   focusActiveL2() {
@@ -435,28 +417,13 @@ class FDICMegaMenu extends HTMLElement {
     return this.setColumnFocus(this.l3List, ".l3-item", target);
   }
 
-  handleClick(event) {
-    const target = event.target instanceof HTMLElement ? event.target : null;
-    if (!target) return;
-
-    const l1Button = target.closest(".l1-item");
-    if (l1Button instanceof HTMLButtonElement) {
-      this.dispatchEvent(
-        new CustomEvent("fdic-mega-l1-select", {
-          bubbles: true,
-          detail: { index: Number(l1Button.dataset.index || 0) },
-        })
-      );
-    }
-  }
-
   handleFocusIn(event) {
     if (this.isMobileView) return;
     const target = event.target instanceof HTMLElement ? event.target : null;
     if (!target) return;
 
     const l1Item = target.closest(".l1-item");
-    if (l1Item instanceof HTMLButtonElement) {
+    if (l1Item instanceof HTMLAnchorElement) {
       this.dispatchEvent(
         new CustomEvent("fdic-mega-l1-preview", {
           bubbles: true,
@@ -488,7 +455,7 @@ class FDICMegaMenu extends HTMLElement {
     if (!target) return;
 
     const l1Item = target.closest(".l1-item");
-    if (l1Item instanceof HTMLButtonElement) {
+    if (l1Item instanceof HTMLAnchorElement) {
       this.dispatchEvent(
         new CustomEvent("fdic-mega-l1-preview", {
           bubbles: true,
@@ -526,7 +493,7 @@ class FDICMegaMenu extends HTMLElement {
       let selector = "";
       if (column === "l1") {
         container = this.l1Column;
-        selector = ".l1-item, #l1OverviewLink";
+        selector = ".l1-item";
       } else if (column === "l2") {
         container = this.l2List;
         selector = ".l2-item";

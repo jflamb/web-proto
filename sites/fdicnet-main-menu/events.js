@@ -129,14 +129,6 @@
         deps.setSelectedL1(index, { restoreFocus: Boolean(fromFocus) });
       });
 
-      megaMenuHost.addEventListener("fdic-mega-l1-select", (event) => {
-        if (isMobileViewport()) return;
-        const { index } = event.detail || {};
-        if (!Number.isFinite(index)) return;
-        deps.setSelectedL1(index, { restoreFocus: true });
-        openMenu();
-      });
-
       megaMenuHost.addEventListener("fdic-mega-l1-roving", (event) => {
         const { index } = event.detail || {};
         if (!Number.isFinite(index)) return;
