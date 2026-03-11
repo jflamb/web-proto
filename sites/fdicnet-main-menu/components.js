@@ -3,6 +3,7 @@ class FDICTopNav extends HTMLElement {
     super();
     this.handleClick = this.handleClick.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
+    this.handleMouseOver = this.handleMouseOver.bind(this);
   }
 
   connectedCallback() {
@@ -17,11 +18,13 @@ class FDICTopNav extends HTMLElement {
     }
     this.addEventListener("click", this.handleClick);
     this.addEventListener("keydown", this.handleKeydown);
+    this.addEventListener("mouseover", this.handleMouseOver);
   }
 
   disconnectedCallback() {
     this.removeEventListener("click", this.handleClick);
     this.removeEventListener("keydown", this.handleKeydown);
+    this.removeEventListener("mouseover", this.handleMouseOver);
   }
 
   get navList() {
@@ -141,6 +144,22 @@ class FDICTopNav extends HTMLElement {
       target.dataset.focusMenuOnActivate = "true";
       target.click();
     }
+  }
+
+  handleMouseOver(event) {
+    const target = event.target instanceof HTMLElement ? event.target : null;
+    if (!target) return;
+    const button = target.closest(".fdic-nav-item--button");
+    if (!(button instanceof HTMLButtonElement)) return;
+    this.dispatchEvent(
+      new CustomEvent("fdic-top-nav-preview", {
+        bubbles: true,
+        detail: {
+          panelKey: button.dataset.panelKey || "",
+          navIndex: Number(button.dataset.navIndex || 0),
+        },
+      })
+    );
   }
 }
 
@@ -436,6 +455,17 @@ class FDICMegaMenu extends HTMLElement {
     const target = event.target instanceof HTMLElement ? event.target : null;
     if (!target) return;
 
+    const l1Item = target.closest(".l1-item");
+    if (l1Item instanceof HTMLButtonElement) {
+      this.dispatchEvent(
+        new CustomEvent("fdic-mega-l1-preview", {
+          bubbles: true,
+          detail: { index: Number(l1Item.dataset.index || 0), fromFocus: true },
+        })
+      );
+      return;
+    }
+
     const l2Item = target.closest(".l2-item");
     if (!(l2Item instanceof HTMLAnchorElement)) return;
 
@@ -456,6 +486,17 @@ class FDICMegaMenu extends HTMLElement {
     if (this.isMobileView) return;
     const target = event.target instanceof HTMLElement ? event.target : null;
     if (!target) return;
+
+    const l1Item = target.closest(".l1-item");
+    if (l1Item instanceof HTMLButtonElement) {
+      this.dispatchEvent(
+        new CustomEvent("fdic-mega-l1-preview", {
+          bubbles: true,
+          detail: { index: Number(l1Item.dataset.index || 0), fromFocus: false },
+        })
+      );
+      return;
+    }
 
     const l2Item = target.closest(".l2-item");
     if (!(l2Item instanceof HTMLAnchorElement)) return;

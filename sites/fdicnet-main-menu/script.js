@@ -422,6 +422,22 @@ function activateTopNavPanel(panelKey, navIndex, { focusMenu = false } = {}) {
   closeMobileNav();
 }
 
+function previewTopNavPanel(panelKey, navIndex) {
+  if (!panelKey) return;
+  if (menuState.activePanelKey === panelKey && menuState.menuOpen) return;
+  menuState.topNavFocusIndex = navIndex;
+  if (menuState.activePanelKey !== panelKey) {
+    menuState.activePanelKey = panelKey;
+    resetPanelSelection();
+    renderMenuPanel();
+  }
+  syncTopNavState();
+  applyTopNavRoving();
+  if (!menuState.menuOpen) {
+    openMenu({ focusMenu: false });
+  }
+}
+
 function handleTopNavRovingRequest({ key, currentIndex, itemCount }) {
   if (!itemCount) return;
   if (key === "ArrowRight") menuState.topNavFocusIndex = (currentIndex + 1) % itemCount;
@@ -716,6 +732,7 @@ function setupEvents() {
     renderMenuPanel,
     syncMobileSearchState,
     activateTopNavPanel,
+    previewTopNavPanel,
     handleTopNavRovingRequest,
     getMobileDrawerFocusableItems,
     handleMobileDelegatedClick: (target) => mobileDrawerController?.handleDelegatedMobileDrillClick(target),

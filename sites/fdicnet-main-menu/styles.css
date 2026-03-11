@@ -59,6 +59,10 @@
   --menu-focus-inner: #ffffff;                  /* Focus ring: white inner */
   --menu-focus-ring: var(--ds-border-input-focus); /* Focus ring: accent outer */
   --menu-bottom-accent: #84dbff;
+  --layout-masthead-height: 83px;
+  --layout-top-nav-item-height: 48px;
+  --layout-mega-open-min-height: 237px;
+  --layout-mobile-drawer-header-height: 92px;
 }
 
 * {
@@ -107,7 +111,7 @@ body {
 
 .fdic-masthead {
   background: var(--fdic-blue-900);
-  min-height: 83px;
+  min-height: var(--layout-masthead-height);
   padding: 24px 0;
   display: flex;
   align-items: center;
@@ -261,7 +265,7 @@ body {
 }
 
 .fdic-nav-item {
-  height: 57px;
+  height: var(--layout-top-nav-item-height);
   display: inline-flex;
   align-items: center;
   padding: 0 16px;
@@ -352,7 +356,7 @@ body {
 }
 
 .fdic-header.menu-open .mega-menu-inner {
-  min-height: 237px;
+  min-height: var(--layout-mega-open-min-height);
 }
 
 .mega-col {
@@ -608,8 +612,7 @@ body {
   width: 100%;
   min-height: 41px;
   margin: 0;
-  padding: 8px 24px 8px 0;
-  padding-right: 16px;
+  padding: 8px 16px 8px 0;
   display: flex;
   align-items: center;
   color: var(--menu-link);
@@ -847,12 +850,13 @@ body {
   .fdic-nav-list {
     flex-direction: column;
     align-items: stretch;
-    padding: 92px 0 18px;
+    padding: var(--layout-mobile-drawer-header-height) 0 18px;
     position: fixed;
     top: 0;
     left: 0;
     width: min(88vw, 360px);
     height: 100vh;
+    height: 100dvh;
     overflow-y: auto;
     background: var(--ds-background-base);
     border-right: 1px solid var(--ds-border-divider);
@@ -877,7 +881,7 @@ body {
     top: 0;
     left: 0;
     width: min(88vw, 360px);
-    height: 92px;
+    height: var(--layout-mobile-drawer-header-height);
     background: var(--ds-background-base);
     border-right: 1px solid var(--ds-border-divider);
     pointer-events: none;
