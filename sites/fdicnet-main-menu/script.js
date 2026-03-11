@@ -111,6 +111,11 @@ function getPanelL1() {
   return selectPanelL1(getPanelConfig());
 }
 
+function getDefaultL1Index(panel = getPanelConfig()) {
+  const l1Items = panel?.l1 || [];
+  return l1Items.length > 1 ? 1 : 0;
+}
+
 function applyHeaderContent() {
   refreshDomRefs();
   const placeholder = menuState.siteContent.header?.searchPlaceholder || "Search";
@@ -375,11 +380,12 @@ function applyTopNavRoving({ focus = false } = {}) {
 }
 
 function resetPanelSelection() {
-  menuState.selectedL1Index = 0;
+  const defaultL1Index = getDefaultL1Index();
+  menuState.selectedL1Index = defaultL1Index;
   menuState.selectedL2Index = 0;
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
-  menuState.l1FocusIndex = 0;
+  menuState.l1FocusIndex = defaultL1Index;
   menuState.mobileDrillPath = [];
 }
 

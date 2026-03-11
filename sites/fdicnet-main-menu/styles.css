@@ -587,6 +587,19 @@ body {
   text-underline-offset: 2px;
 }
 
+.l1-item--overview {
+  justify-content: flex-start;
+}
+
+.l1-separator-item {
+  padding: 4px 16px 4px 0;
+}
+
+.l1-separator-line {
+  display: block;
+  border-top: 1px solid #bdbdbf;
+}
+
 .l2-label {
   flex: 1;
   min-width: 0;

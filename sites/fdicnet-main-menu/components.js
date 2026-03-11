@@ -270,7 +270,11 @@ class FDICMegaMenu extends HTMLElement {
     const boundedL1FocusIndex = Math.max(0, Math.min(l1FocusIndex, l1Items.length));
 
     this.l1List.innerHTML = "";
-    l1Items.forEach((item, index) => {
+    const hasOverviewRow = l1Items.length > 1;
+    const primaryItems = hasOverviewRow ? l1Items.slice(1) : l1Items;
+
+    primaryItems.forEach((item, orderIndex) => {
+      const index = hasOverviewRow ? orderIndex + 1 : orderIndex;
       const li = document.createElement("li");
       li.setAttribute("role", "none");
       const link = document.createElement("a");
@@ -294,6 +298,36 @@ class FDICMegaMenu extends HTMLElement {
       li.appendChild(link);
       this.l1List.appendChild(li);
     });
+
+    if (hasOverviewRow) {
+      const dividerLi = document.createElement("li");
+      dividerLi.className = "l1-separator-item";
+      dividerLi.setAttribute("aria-hidden", "true");
+      dividerLi.setAttribute("role", "presentation");
+      const dividerLine = document.createElement("span");
+      dividerLine.className = "l1-separator-line";
+      dividerLi.appendChild(dividerLine);
+      this.l1List.appendChild(dividerLi);
+
+      const overviewItem = l1Items[0];
+      const overviewLi = document.createElement("li");
+      overviewLi.setAttribute("role", "none");
+      const overviewLink = document.createElement("a");
+      const overviewLabel = document.createElement("span");
+
+      overviewLink.className = "l1-item l1-item--overview";
+      overviewLink.href = overviewItem?.overviewHref || overviewItem?.href || "#";
+      overviewLink.dataset.column = "l1";
+      overviewLink.dataset.index = "0";
+      overviewLink.dataset.selected = selectedL1Index === 0 ? "true" : "false";
+      overviewLink.tabIndex = boundedL1FocusIndex === 0 ? 0 : -1;
+
+      overviewLabel.className = "l1-label";
+      overviewLabel.textContent = overviewItem?.label || "Overview";
+      overviewLink.append(overviewLabel);
+      overviewLi.appendChild(overviewLink);
+      this.l1List.appendChild(overviewLi);
+    }
 
     this.l2List.innerHTML = "";
     l2Items.forEach((item, index) => {
@@ -394,6 +428,7 @@ class FDICMegaMenu extends HTMLElement {
 
     const l1Item = target.closest(".l1-item");
     if (l1Item instanceof HTMLAnchorElement) {
+      if (l1Item.classList.contains("l1-item--overview")) return;
       this.dispatchEvent(
         new CustomEvent("fdic-mega-l1-preview", {
           bubbles: true,
@@ -426,6 +461,7 @@ class FDICMegaMenu extends HTMLElement {
 
     const l1Item = target.closest(".l1-item");
     if (l1Item instanceof HTMLAnchorElement) {
+      if (l1Item.classList.contains("l1-item--overview")) return;
       this.dispatchEvent(
         new CustomEvent("fdic-mega-l1-preview", {
           bubbles: true,
