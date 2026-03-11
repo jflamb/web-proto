@@ -32,13 +32,13 @@ const menuState = {
 /* ── Responsive breakpoints ──────────────────────────────────────────
    These mirror the media queries in styles.css. Keep them in sync. */
 const MOBILE_NAV_BREAKPOINT = "(max-width: 768px)";       // Switches to mobile drawer
-const NARROW_HEADER_BREAKPOINT = "(max-width: 1049px)";   // Compact top-nav padding
 const PHONE_SEARCH_BREAKPOINT = "(max-width: 640px)";     // Collapses search into toggle
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const mobileNavMediaQuery = window.matchMedia(MOBILE_NAV_BREAKPOINT);
-const narrowHeaderMediaQuery = window.matchMedia(NARROW_HEADER_BREAKPOINT);
 const phoneSearchMediaQuery = window.matchMedia(PHONE_SEARCH_BREAKPOINT);
 const reduceMotionMediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
+const MOBILE_STAGGER_MAX_ITEMS = 6;
+const MOBILE_STAGGER_STEP_MS = 15;
 
 const header = document.getElementById("fdicHeader");
 const navList = document.getElementById("fdicNavList");
@@ -50,7 +50,6 @@ const l3List = document.getElementById("l3List");
 const l3Description = document.getElementById("l3Description");
 const l3Column = document.querySelector(".mega-col--l3");
 const l1Column = document.querySelector(".mega-col--l1");
-const mobileMenu = document.getElementById("mobileMenu");
 const l1OverviewLink = document.getElementById("l1OverviewLink");
 const pageTitle = document.getElementById("pageTitle");
 const pageIntro = document.getElementById("pageIntro");
@@ -70,7 +69,6 @@ function getMissingRequiredElements() {
     ["l2List", l2List],
     ["l3List", l3List],
     ["l3Description", l3Description],
-    ["mobileMenu", mobileMenu],
     ["l1OverviewLink", l1OverviewLink],
     ["pageTitle", pageTitle],
     ["pageIntro", pageIntro],
@@ -208,6 +206,42 @@ function syncMobileToggleButton() {
   }
 }
 
+function getMobileDrawerFocusableItems() {
+  const drillItems = [...navList.querySelectorAll(
+    ".mobile-drill-back, .mobile-drill-trigger, .mobile-drill-link, .mobile-drill-current-link"
+  )];
+  if (drillItems.length > 0) {
+    return drillItems;
+  }
+  return [...navList.querySelectorAll(".fdic-nav-item")];
+}
+
+function ensureMobileMenuFocus({ force = false, attempts = 2 } = {}) {
+  if (!menuState.mobileNavOpen || !isMobileViewport()) return;
+  if (!force && navList.contains(document.activeElement)) return;
+
+  const firstItem = getMobileDrawerFocusableItems()[0];
+  if (firstItem) {
+    firstItem.focus();
+  } else {
+    navList.tabIndex = -1;
+    navList.focus();
+  }
+
+  if (!navList.contains(document.activeElement) && attempts > 0) {
+    window.requestAnimationFrame(() => {
+      ensureMobileMenuFocus({ force: true, attempts: attempts - 1 });
+    });
+  }
+}
+
+function triggerLightHaptic() {
+  if (!isMobileViewport()) return;
+  if (reduceMotionMediaQuery.matches) return;
+  if (!("vibrate" in navigator)) return;
+  navigator.vibrate(10);
+}
+
 function syncMobileNavState() {
   if (!navToggle) return;
   const mobile = isMobileViewport();
@@ -241,6 +275,11 @@ function syncMobileNavState() {
     window.requestAnimationFrame(() => {
       navList.classList.add("is-mobile-open");
       renderMobileDrawerPanel();
+      window.requestAnimationFrame(() => {
+        if (menuState.mobileNavOpen) {
+          ensureMobileMenuFocus({ force: true });
+        }
+      });
     });
   } else {
     const wasOpen = navList.classList.contains("is-mobile-open");
@@ -341,15 +380,10 @@ function resetPanelSelection() {
 function renderTopNav() {
   navList.innerHTML = "";
   const navItems = menuState.siteContent.header?.nav || [];
-  const mobile = isMobileViewport();
-
-  if (mobile) {
-    navList.classList.add("fdic-nav-list--mobile-accordion");
+  if (isMobileViewport()) {
     syncTopNavState();
     return;
   }
-
-  navList.classList.remove("fdic-nav-list--mobile-accordion");
 
   navItems.forEach((item) => {
     const li = document.createElement("li");
@@ -359,9 +393,7 @@ function renderTopNav() {
       button.className = "fdic-nav-item fdic-nav-item--button";
       button.dataset.navIndex = String(navList.children.length);
       button.dataset.panelKey = item.panelKey || item.id;
-      if (!mobile) {
-        button.setAttribute("aria-controls", "megaMenu");
-      }
+      button.setAttribute("aria-controls", "megaMenu");
       button.textContent = item.label;
       button.addEventListener("click", () => {
         const focusMenu = menuState.moveFocusIntoMenuOnOpen;
@@ -430,15 +462,17 @@ function renderMobileDrillHeader(targetContainer, backLabel, onBack) {
     backButton.setAttribute("aria-label", `Back to ${backLabel}`);
 
     const icon = document.createElement("span");
-    icon.className = "mobile-drill-back-icon";
-    icon.textContent = "‹";
+    icon.className = "mobile-drill-back-icon ph ph-caret-left";
     icon.setAttribute("aria-hidden", "true");
 
     const text = document.createElement("span");
     text.textContent = backLabel;
 
     backButton.append(icon, text);
-    backButton.addEventListener("click", onBack);
+    backButton.addEventListener("click", () => {
+      triggerLightHaptic();
+      onBack();
+    });
     drillHeader.appendChild(backButton);
   }
 
@@ -466,12 +500,14 @@ function appendMobileDrillItem(list, label, onClick) {
   text.textContent = label;
 
   const icon = document.createElement("span");
-  icon.className = "mobile-drill-caret";
-  icon.textContent = "›";
+  icon.className = "mobile-drill-caret ph ph-caret-right";
   icon.setAttribute("aria-hidden", "true");
 
   button.append(text, icon);
-  button.addEventListener("click", onClick);
+  button.addEventListener("click", () => {
+    triggerLightHaptic();
+    onClick();
+  });
   li.appendChild(button);
   list.appendChild(li);
 }
@@ -593,6 +629,8 @@ function renderMobileDrawerPanel() {
   const [panelKey, l1Index, l2Index] = menuState.mobileDrillPath;
   if (!panelKey) {
     renderMobileDrillRoot(panelContainer, panelKeys);
+    ensureMobileMenuFocus();
+    animateMobileDrillReveal(panelContainer);
     return;
   }
 
@@ -600,20 +638,42 @@ function renderMobileDrawerPanel() {
   if (!panelConfig) {
     menuState.mobileDrillPath = [];
     renderMobileDrillRoot(panelContainer, panelKeys);
+    ensureMobileMenuFocus();
+    animateMobileDrillReveal(panelContainer);
     return;
   }
 
   if (typeof l1Index !== "number") {
     renderMobileDrillL1(panelContainer, panelKey, panelConfig);
+    ensureMobileMenuFocus();
+    animateMobileDrillReveal(panelContainer);
     return;
   }
 
   if (typeof l2Index !== "number") {
     renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index);
+    ensureMobileMenuFocus();
+    animateMobileDrillReveal(panelContainer);
     return;
   }
 
   renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index);
+  ensureMobileMenuFocus();
+  animateMobileDrillReveal(panelContainer);
+}
+
+function animateMobileDrillReveal(panelContainer) {
+  if (!panelContainer || reduceMotionMediaQuery.matches) return;
+  const staggerItems = [...panelContainer.querySelectorAll(".mobile-drill-item, .mobile-drill-link-item")];
+  if (staggerItems.length === 0) return;
+  staggerItems.forEach((item, index) => {
+    const clampedIndex = Math.min(index, MOBILE_STAGGER_MAX_ITEMS - 1);
+    item.style.setProperty("--mobile-stagger-delay", `${clampedIndex * MOBILE_STAGGER_STEP_MS}ms`);
+  });
+  panelContainer.classList.add("is-entering");
+  window.requestAnimationFrame(() => {
+    panelContainer.classList.remove("is-entering");
+  });
 }
 
 function openMenu({ focusMenu = false } = {}) {
@@ -643,9 +703,7 @@ function openMenu({ focusMenu = false } = {}) {
     }
   });
   if (isMobileViewport()) {
-    renderL1();
-    renderL2();
-    renderL3();
+    renderDesktopColumns();
   }
   syncTopNavState();
 }
@@ -749,9 +807,7 @@ function setSelectedL1(index, { restoreFocus = false } = {}) {
   menuState.selectedL2Index = 0;
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
-  renderL1();
-  renderL2();
-  renderL3();
+  renderDesktopColumns();
   if (restoreFocus) {
     const target = l1List.querySelector(`.l1-item[data-index="${index}"]`);
     setColumnFocus(l1Column, ".l1-item, #l1OverviewLink", target);
@@ -993,6 +1049,12 @@ function renderL3() {
   });
 }
 
+function renderDesktopColumns() {
+  renderL1();
+  renderL2();
+  renderL3();
+}
+
 function renderMenuPanel() {
   const panel = getPanelConfig();
   if (!panel) {
@@ -1000,23 +1062,15 @@ function renderMenuPanel() {
     l2List.innerHTML = "";
     l3List.innerHTML = "";
     l3Description.textContent = "";
-    if (mobileMenu) {
-      mobileMenu.innerHTML = "";
-    }
     return;
   }
 
   megaMenu.setAttribute("aria-label", panel.ariaLabel || "Site menu");
   if (isMobileViewport()) {
-    if (mobileMenu) {
-      mobileMenu.innerHTML = "";
-    }
     renderMobileDrawerPanel();
     return;
   }
-  renderL1();
-  renderL2();
-  renderL3();
+  renderDesktopColumns();
 }
 
 /** Wire up vertical arrow-key navigation within a single column.
@@ -1108,6 +1162,19 @@ function setupColumnCrossNav() {
   });
 }
 
+function wirePreviewClearOnFocusOut(container, keepInColumns = []) {
+  if (!container) return;
+  container.addEventListener("focusout", () => {
+    window.requestAnimationFrame(() => {
+      const activeElement = document.activeElement;
+      if (activeElement && keepInColumns.some((node) => node && node.contains(activeElement))) {
+        return;
+      }
+      clearPreviewL2();
+    });
+  });
+}
+
 /* ── Event wiring ────────────────────────────────────────────────────
    All DOM event listeners are registered here, during init().
    Interaction patterns to be aware of:
@@ -1153,17 +1220,30 @@ function setupEvents() {
     renderMenuPanel();
   });
 
-  narrowHeaderMediaQuery.addEventListener("change", () => {
-    syncMobileNavState();
-    renderMobileDrawerPanel();
-  });
-
   phoneSearchMediaQuery.addEventListener("change", () => {
     syncMobileSearchState();
   });
 
   navList.addEventListener("keydown", (event) => {
     if (isMobileViewport()) {
+      if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+        return;
+      }
+      const items = getMobileDrawerFocusableItems();
+      if (items.length === 0) return;
+      const currentIndex = items.indexOf(document.activeElement);
+
+      event.preventDefault();
+      let nextIndex = 0;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = items.length - 1;
+      if (event.key === "ArrowDown") {
+        nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % items.length;
+      }
+      if (event.key === "ArrowUp") {
+        nextIndex = currentIndex === -1 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length;
+      }
+      items[nextIndex].focus();
       return;
     }
 
@@ -1278,32 +1358,10 @@ function setupEvents() {
       schedulePreviewClear();
     });
     l3Column.addEventListener("focusin", cancelPreviewClear);
-    l3Column.addEventListener("focusout", () => {
-      window.requestAnimationFrame(() => {
-        const activeElement = document.activeElement;
-        if (
-          activeElement &&
-          (l3Column.contains(activeElement) || l2List.contains(activeElement))
-        ) {
-          return;
-        }
-        clearPreviewL2();
-      });
-    });
+    wirePreviewClearOnFocusOut(l3Column, [l3Column, l2List]);
   }
 
-  l2List.addEventListener("focusout", () => {
-    window.requestAnimationFrame(() => {
-      const activeElement = document.activeElement;
-      if (
-        activeElement &&
-        (l2List.contains(activeElement) || (l3Column && l3Column.contains(activeElement)))
-      ) {
-        return;
-      }
-      clearPreviewL2();
-    });
-  });
+  wirePreviewClearOnFocusOut(l2List, [l2List, l3Column]);
 
   megaMenu.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);
   navList.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);

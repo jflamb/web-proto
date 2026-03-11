@@ -100,3 +100,9 @@ Use this file to record correction-driven learning.
 - Root cause: Mobile toggle sync logic hid the nav toggle whenever drill depth was greater than zero, removing the only persistent close affordance in deeper drawer states.
 - Prevention rule: Off-canvas navigation must keep a persistent global close control visible at every hierarchy depth.
 - Actionable check for future tasks: In mobile QA, verify `Close` remains visible and actionable at root, L1, L2, and L3 drill states.
+
+- Date: 2026-03-11
+- Trigger / correction: User reported mobile menu focus remained on background page elements after opening, despite keyboard navigation support being added.
+- Root cause: Mobile keyboard updates focused on arrow-key handling but did not guarantee focus transfer/retention inside the drawer after open and drill-view rerenders.
+- Prevention rule: For any off-canvas/mobile drawer keyboard work, treat focus transfer on open and focus containment after dynamic rerender as first-class acceptance criteria.
+- Actionable check for future tasks: In mobile QA, open the drawer via pointer and keyboard, then confirm `document.activeElement` is inside the drawer immediately and remains inside after each drill navigation step.
