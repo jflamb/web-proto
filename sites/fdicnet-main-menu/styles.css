@@ -437,7 +437,7 @@ body {
   padding: 8px 24px;
   display: flex;
   align-items: center;
-  padding-left: 16px;
+  padding-left: 0;
   padding-right: 16px;
   color: var(--menu-text-primary);
   font-weight: 600;
@@ -483,7 +483,10 @@ body {
 .l1-item:focus-visible::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: -16px;
   pointer-events: none;
   z-index: 2;
   box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
@@ -495,16 +498,27 @@ body {
   background: #fff;
 }
 
-/* Selected state: same leftward bleed, but with a white bg to
-   visually "connect" the L1 item to the L2 column. */
+/* Extend L1 row fills 16px left of the text start, matching the
+   desired inset behavior without bleeding to viewport edge. */
+.l1-item:hover::before,
+.l1-item:focus-visible::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -16px;
+  width: 16px;
+  background: var(--menu-hover-overlay);
+}
+
+/* Selected state keeps a white 16px left extension. */
 .l1-item[data-selected="true"]::before {
   content: "";
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
-  width: 100vw;
-  transform: translateX(-100%);
+  left: -16px;
+  width: 16px;
   background: #fff;
 }
 
@@ -606,7 +620,7 @@ body {
   width: 100%;
   min-height: 41px;
   margin: 0;
-  padding: 8px 24px 8px 16px;
+  padding: 8px 24px 8px 0;
   padding-right: 16px;
   display: flex;
   align-items: center;
