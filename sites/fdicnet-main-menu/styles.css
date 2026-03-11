@@ -61,7 +61,7 @@
   --menu-text-primary: var(--ds-text-primary);
   --menu-link: #1278b0;
   --menu-link-hover-underline: #1278b0;
-  --menu-hover-overlay: rgba(0, 50, 86, 0.08); /* Shared hover/focus bg */
+  --menu-hover-overlay: rgba(0, 110, 190, 0.09); /* Shared hover/focus bg */
   --menu-focus-inner: #ffffff;                  /* Focus ring: white inner */
   --menu-focus-ring: var(--ds-border-input-focus); /* Focus ring: accent outer */
   --menu-bottom-accent: #84dbff;
