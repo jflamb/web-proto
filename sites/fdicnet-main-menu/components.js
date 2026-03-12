@@ -140,6 +140,13 @@ class FDICTopNav extends HTMLElement {
       return;
     }
 
+    if (event.key === "ArrowDown" && target.classList.contains("fdic-nav-item--button")) {
+      event.preventDefault();
+      target.dataset.focusMenuOnActivate = "true";
+      target.click();
+      return;
+    }
+
     if ((event.key === "Enter" || event.key === " ") && target.classList.contains("fdic-nav-item--button")) {
       event.preventDefault();
       target.dataset.focusMenuOnActivate = "true";
