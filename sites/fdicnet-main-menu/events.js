@@ -200,6 +200,15 @@
         return;
       }
 
+      if (event.key === "ArrowRight" && menuState.mobileNavOpen) {
+        const activeElement = document.activeElement;
+        if (activeElement instanceof HTMLElement && activeElement.classList.contains("mobile-drill-trigger")) {
+          event.preventDefault();
+          handleMobileDelegatedClick(activeElement);
+          return;
+        }
+      }
+
       if (event.key === "ArrowLeft" && menuState.mobileNavOpen && menuState.mobileDrillPath.length > 0) {
         event.preventDefault();
         menuState.mobileDrillPath = menuState.mobileDrillPath.slice(0, -1);
