@@ -2,7 +2,7 @@
 
 ## Current Task (FDICnet Menu Consistency + A11y Staged Delivery)
 - [x] Stage 1 (Priority 1): Add hover-intent delay and consistent desktop hover traversal behavior.
-- [ ] Stage 2 (Priority 2): Align IA cues between desktop and mobile (path context, overview placement, state continuity).
+- [x] Stage 2 (Priority 2): Align IA cues between desktop and mobile (path context, overview placement, state continuity).
 - [ ] Stage 3 (Priority 3): Improve accessibility parity (ARIA semantics, mobile back key support, focus containment).
 - [ ] Stage 4 (Priority 4): Visual/readability polish for dense labels and cross-mode affordance consistency.
 - [ ] Validate each stage in browser before commit.
@@ -16,6 +16,17 @@
   - added timer cancellation guards on pointer exits and global pointerdown to prevent stale delayed previews.
 - Browser validation:
   - Desktop hover traversal still works, now with intentional delay to reduce accidental fly-over panel switches.
+
+## Review / Results (Stage 2 - Priority 2)
+- Updated `sites/fdicnet-main-menu/components.js` + `script.js`:
+  - added desktop mega-menu path context line (`Panel / L1 / L2`) that updates with current preview/selection.
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js` + `styles.css`:
+  - aligned mobile L1 ordering with desktop by moving the Overview row to the bottom and adding a separator.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - preserved top-panel continuity for mobile open state by defaulting first open path to `[activePanelKey]` instead of resetting to root.
+- Browser validation:
+  - Desktop: context path renders and updates when hovering top nav.
+  - Mobile: drawer opens directly into active panel L1 list and places Overview at bottom with separator.
 
 ## Current Task (FDICnet Open-State Nav/Mega-Menu Gap Removal)
 - [x] Remove residual spacing between top nav and mega-menu in open state.
