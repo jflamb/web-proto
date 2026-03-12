@@ -479,9 +479,20 @@ function renderTopNav() {
   applyTopNavRoving();
 }
 
-function activateTopNavPanel(panelKey, navIndex, { focusMenu = false } = {}) {
+function activateTopNavPanel(panelKey, navIndex, { focusMenu = false, forceOpen = false } = {}) {
   menuState.topNavFocusIndex = navIndex;
   if (menuState.activePanelKey === panelKey) {
+    if (menuState.menuOpen && forceOpen) {
+      if (!focusSelectedL1()) {
+        const fallbackTarget = megaMenu?.querySelector(".l1-item, .l2-item, .l3-item");
+        if (fallbackTarget instanceof HTMLElement) {
+          fallbackTarget.focus();
+        }
+      }
+      closeMobileNav();
+      return;
+    }
+
     if (menuState.menuOpen) {
       closeMenu();
     } else {
@@ -539,6 +550,7 @@ function openMenu({ focusMenu = false } = {}) {
   refreshDomRefs();
   if (menuState.menuOpen) return;
   menuState.menuOpen = true;
+  menuState.menuOpenGuardUntil = performance.now() + 320;
   megaMenu.removeAttribute("aria-hidden");
   if (menuState.closeTransitionHandler) {
     megaMenu.removeEventListener("transitionend", menuState.closeTransitionHandler);
@@ -581,6 +593,12 @@ function scheduleMenuSystemFocusExitCheck() {
         return;
       }
 
+      const guardActive = Number(menuState.menuOpenGuardUntil || 0) > performance.now();
+      if (guardActive && attempt < 6) {
+        runCheck(attempt + 1);
+        return;
+      }
+
       // During keyboard-driven rerenders, focus can briefly fall back to body
       // for multiple frames. Retry before treating it as a real focus exit.
       if ((activeElement === document.body || activeElement === document.documentElement) && attempt < 3) {
@@ -597,6 +615,7 @@ function scheduleMenuSystemFocusExitCheck() {
 function closeMenu() {
   resetMenuAnnouncementState();
   refreshDomRefs();
+  menuState.menuOpenGuardUntil = 0;
   if (isMobileViewport()) {
     menuState.menuOpen = false;
     header.classList.remove("menu-open");
@@ -661,6 +680,15 @@ function getL2Overview(selectedL1) {
 }
 
 function setSelectedL1(index, { restoreFocus = false } = {}) {
+  const selectionUnchanged = (
+    menuState.selectedL1Index === index
+    && menuState.previewL2Index === null
+    && !menuState.previewingOverview
+  );
+  if (selectionUnchanged && !restoreFocus) {
+    return;
+  }
+
   refreshDomRefs();
   menuState.selectedL1Index = index;
   menuState.l1FocusIndex = index;
