@@ -1,5 +1,24 @@
 # TODO
 
+## Current Task (FDICnet Live Region Announcements)
+- [x] Add a visually hidden polite live region for menu context announcements.
+- [x] Announce desktop top-level panel switches with item counts.
+- [x] Announce mobile drill-level transitions with context + item counts.
+- [ ] Run browser validation for SR announcements.
+
+## Review / Results (FDICnet Live Region Announcements)
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - added `#menuLiveRegion` (`aria-live=\"polite\"`, `aria-atomic=\"true\"`) using existing `.sr-only` treatment.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added `announceMenuContext(...)` utility with dedupe + delayed text swap for reliable SR announcements.
+  - added desktop switch announcements in top-level panel activation/preview flows.
+  - passed announcement callback into mobile drawer controller.
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added mobile drill context announcement helper for root/L1/L2/L3 states, including item counts and back-target context.
+- Validation note:
+  - JS syntax checks pass.
+  - Browser/SR runtime validation still pending due local Playwright launcher profile conflict.
+
 ## Current Task (FDICnet Menu Consistency + A11y Staged Delivery)
 - [x] Stage 1 (Priority 1): Add hover-intent delay and consistent desktop hover traversal behavior.
 - [x] Stage 2 (Priority 2): Align IA cues between desktop and mobile (path context, overview placement, state continuity).

@@ -45,7 +45,10 @@ let mobileSearchToggle = null;
 let mobileSearchRow = null;
 let mobileSearchInput = null;
 let mobileNavBackdrop = null;
+let menuLiveRegion = null;
 let mobileDrawerController = null;
+let liveAnnouncementTimer = null;
+let lastLiveAnnouncement = "";
 
 function refreshDomRefs() {
   topNav = document.getElementById("fdicTopNav");
@@ -67,6 +70,7 @@ function refreshDomRefs() {
   mobileSearchRow = document.getElementById("mobileSearchRow");
   mobileSearchInput = document.getElementById("mobileSearchInput");
   mobileNavBackdrop = document.getElementById("mobileNavBackdrop");
+  menuLiveRegion = document.getElementById("menuLiveRegion");
 }
 
 refreshDomRefs();
@@ -92,6 +96,7 @@ function getDom() {
     mobileSearchRow,
     mobileSearchInput,
     mobileNavBackdrop,
+    menuLiveRegion,
   };
 }
 
@@ -114,6 +119,34 @@ function getPanelL1() {
 function getDefaultL1Index(panel = getPanelConfig()) {
   const l1Items = panel?.l1 || [];
   return l1Items.length > 1 ? 1 : 0;
+}
+
+function announceMenuContext(message) {
+  const text = typeof message === "string" ? message.trim() : "";
+  if (!text || !menuLiveRegion) return;
+  if (text === lastLiveAnnouncement) return;
+  lastLiveAnnouncement = text;
+  if (liveAnnouncementTimer) {
+    window.clearTimeout(liveAnnouncementTimer);
+    liveAnnouncementTimer = null;
+  }
+  menuLiveRegion.textContent = "";
+  liveAnnouncementTimer = window.setTimeout(() => {
+    menuLiveRegion.textContent = text;
+    liveAnnouncementTimer = null;
+  }, 20);
+}
+
+function announceDesktopPanelContext(panelKey) {
+  const panelConfig = getPanelConfigByKey(panelKey);
+  if (!panelConfig) return;
+  const panelLabel = (menuState.siteContent?.header?.nav || []).find(
+    (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
+  )?.label || panelConfig.overviewLabel || "Menu";
+  const l1Items = panelConfig.l1 || [];
+  const hasOverviewRow = l1Items.length > 1;
+  const visibleItemCount = hasOverviewRow ? l1Items.length - 1 : l1Items.length;
+  announceMenuContext(`${panelLabel}, ${visibleItemCount} item${visibleItemCount === 1 ? "" : "s"}.`);
 }
 
 function applyHeaderContent() {
@@ -241,6 +274,7 @@ function initializeMobileDrawerController() {
     syncMobileToggleButton,
     ensureMobileMenuFocus,
     triggerLightHaptic,
+    announceMenuContext,
   });
 }
 
@@ -420,6 +454,7 @@ function activateTopNavPanel(panelKey, navIndex, { focusMenu = false } = {}) {
 
   menuState.activePanelKey = panelKey;
   resetPanelSelection();
+  announceDesktopPanelContext(panelKey);
   syncTopNavState();
   applyTopNavRoving();
   renderMenuPanel();
@@ -434,6 +469,7 @@ function previewTopNavPanel(panelKey, navIndex) {
   if (menuState.activePanelKey !== panelKey) {
     menuState.activePanelKey = panelKey;
     resetPanelSelection();
+    announceDesktopPanelContext(panelKey);
     renderMenuPanel();
   }
   syncTopNavState();
