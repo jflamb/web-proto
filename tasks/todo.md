@@ -2591,3 +2591,12 @@
     - `"{Selected L1} links"`
     - `"{Active L2} resources"`
 - Result: screen reader column context is meaningful and reflects current content.
+
+## Current Task (FDICnet Active L2 Visual State)
+- [x] Add explicit visual styling for the active desktop L2 item (`data-active="true"`).
+
+## Review / Results (FDICnet Active L2 Visual State)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `.l2-item[data-active="true"]` now has a subtle active background tint and accent left inset border.
+  - active L2 label text is underlined to match navigation affordance patterns.
+- Result: users can identify the current non-hover baseline L2 item at a glance, and see where L3 will revert after hover preview clears.
