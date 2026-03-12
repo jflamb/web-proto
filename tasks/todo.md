@@ -6,7 +6,7 @@
 - [x] Stage 3 (Priority 3): Improve accessibility parity (ARIA semantics, mobile back key support, focus containment).
 - [x] Stage 4 (Priority 4): Visual/readability polish for dense labels and cross-mode affordance consistency.
 - [x] Validate each stage in browser before commit.
-- [ ] Push branch and open pull request.
+- [x] Push branch and open pull request.
 
 ## Review / Results (Stage 1 - Priority 1)
 - Updated `sites/fdicnet-main-menu/events.js`:
