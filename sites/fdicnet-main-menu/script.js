@@ -538,6 +538,18 @@ function handleTopNavRovingRequest({ key, currentIndex, itemCount }) {
   applyTopNavRoving({ focus: true });
 }
 
+function focusActiveTopNavButton() {
+  const items = getTopNavItems();
+  if (items.length === 0) return;
+  const activeIndex = getActiveTopNavIndex(items);
+  if (activeIndex >= 0) {
+    menuState.topNavFocusIndex = activeIndex;
+  } else if (menuState.topNavFocusIndex < 0 || menuState.topNavFocusIndex >= items.length) {
+    menuState.topNavFocusIndex = 0;
+  }
+  applyTopNavRoving({ focus: true });
+}
+
 function renderMobileDrawerPanel() {
   mobileDrawerController?.renderMobileDrawerPanel();
 }
@@ -875,6 +887,7 @@ function setupEvents() {
     activateTopNavPanel,
     previewTopNavPanel,
     handleTopNavRovingRequest,
+    focusActiveTopNavButton,
     getMobileDrawerFocusableItems,
     handleMobileDelegatedClick: (target) => mobileDrawerController?.handleDelegatedMobileDrillClick(target),
     scheduleMenuSystemFocusExitCheck,

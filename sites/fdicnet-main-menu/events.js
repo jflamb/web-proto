@@ -16,6 +16,7 @@
       syncMobileSearchState,
       activateTopNavPanel,
       handleTopNavRovingRequest,
+      focusActiveTopNavButton,
       getMobileDrawerFocusableItems,
       handleMobileDelegatedClick,
       scheduleMenuSystemFocusExitCheck,
@@ -192,6 +193,11 @@
         const { index } = event.detail || {};
         if (!Number.isFinite(index)) return;
         menuState.l1FocusIndex = index;
+      });
+
+      megaMenuHost.addEventListener("fdic-mega-focus-active-top-nav", () => {
+        if (isMobileViewport()) return;
+        focusActiveTopNavButton();
       });
 
       megaMenuHost.addEventListener("fdic-mega-l2-preview", (event) => {

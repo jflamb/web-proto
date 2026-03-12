@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (FDICnet ArrowUp Exit to Active Top Nav)
+- [x] Update desktop mega-menu ArrowUp behavior at column start to focus the active top-level nav button.
+- [x] Verify no regressions for ArrowDown/ArrowRight/ArrowLeft/Escape paths.
+
+## Review / Results (FDICnet ArrowUp Exit to Active Top Nav)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - when `ArrowUp` is pressed on the first item in an L1/L2/L3 column, the mega-menu now emits `fdic-mega-focus-active-top-nav` instead of wrapping to the last item.
+- Updated `sites/fdicnet-main-menu/events.js` + `sites/fdicnet-main-menu/script.js`:
+  - added handling to focus the currently active top-level nav button while leaving the mega-menu open.
+- Validation:
+  - `node --check` passed for `components.js`, `events.js`, `script.js`.
+  - Browser checks confirmed:
+    - top-of-L1 `ArrowUp` moves focus to active top nav button and keeps menu open
+    - top-of-L2 `ArrowUp` does the same
+    - re-entry (`ArrowDown`) and column traversal (`ArrowRight`, `ArrowDown`) still work
+
 ## Current Task (FDICnet Mega-Menu ArrowDown Second-Press Close Regression)
 - [x] Reproduce: Tab to top-nav button, `ArrowDown` to open, `ArrowDown` again closes unexpectedly.
 - [x] Fix focus/rerender behavior so in-menu arrow navigation does not trigger close.

@@ -561,6 +561,12 @@ class FDICMegaMenu extends HTMLElement {
       const currentIndex = items.indexOf(activeElement);
       if (currentIndex === -1 || items.length === 0) return;
 
+      if (key === "ArrowUp" && currentIndex === 0) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent("fdic-mega-focus-active-top-nav", { bubbles: true }));
+        return;
+      }
+
       event.preventDefault();
       let nextIndex = currentIndex;
       if (key === "ArrowDown") nextIndex = (currentIndex + 1) % items.length;
