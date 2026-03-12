@@ -1,5 +1,25 @@
 # TODO
 
+## Current Task (FDICnet Top-Nav ArrowDown Open Regression)
+- [x] Reproduce desktop ArrowDown open failure from focused top-nav item.
+- [x] Fix menu open/close focus race so ArrowDown reliably opens and keeps mega-menu visible.
+- [x] Validate keyboard path in browser (`ArrowDown`, `ArrowUp`, `ArrowLeft/Right`, `Escape`) and ensure no regressions.
+
+## Review / Results (FDICnet Top-Nav ArrowDown Open Regression)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - ArrowDown activation now sets `forceOpenOnActivate` in addition to `focusMenuOnActivate`.
+  - activation event detail now includes `forceOpen`.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - forwarded `forceOpen` from `fdic-top-nav-activate` to orchestration.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - `activateTopNavPanel(...)` now treats `forceOpen` as a non-toggle intent when the active panel is already open, keeping menu open and moving focus into L1.
+- Validation:
+  - `node --check` passed for `components.js`, `events.js`, `script.js`.
+  - Browser checks confirmed:
+    - closed top-nav + `ArrowDown` opens mega-menu and focuses L1
+    - open active panel + `ArrowDown` keeps mega-menu open and focuses L1
+    - click on active top-nav button still closes the menu (toggle behavior preserved)
+
 ## Current Task (FDICnet Mobile Drill aria-expanded Transition Feedback)
 - [x] Set active mobile drill trigger `aria-expanded=\"true\"` before drill re-render.
 - [x] Add immediate live-region transition announcement for drill trigger activation.

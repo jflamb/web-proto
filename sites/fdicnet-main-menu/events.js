@@ -155,9 +155,12 @@
       });
 
       topNav.addEventListener("fdic-top-nav-activate", (event) => {
-        const { panelKey, navIndex, focusMenu } = event.detail || {};
+        const { panelKey, navIndex, focusMenu, forceOpen } = event.detail || {};
         if (!panelKey) return;
-        activateTopNavPanel(panelKey, Number(navIndex || 0), { focusMenu: Boolean(focusMenu) });
+        activateTopNavPanel(panelKey, Number(navIndex || 0), {
+          focusMenu: Boolean(focusMenu),
+          forceOpen: Boolean(forceOpen),
+        });
       });
 
       topNav.addEventListener("fdic-top-nav-roving-request", (event) => {

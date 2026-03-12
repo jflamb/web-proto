@@ -100,7 +100,9 @@ class FDICTopNav extends HTMLElement {
     const button = target.closest(".fdic-nav-item--button");
     if (button instanceof HTMLButtonElement) {
       const focusMenu = button.dataset.focusMenuOnActivate === "true";
+      const forceOpen = button.dataset.forceOpenOnActivate === "true";
       delete button.dataset.focusMenuOnActivate;
+      delete button.dataset.forceOpenOnActivate;
       this.dispatchEvent(
         new CustomEvent("fdic-top-nav-activate", {
           bubbles: true,
@@ -108,6 +110,7 @@ class FDICTopNav extends HTMLElement {
             panelKey: button.dataset.panelKey || "",
             navIndex: Number(button.dataset.navIndex || 0),
             focusMenu,
+            forceOpen,
           },
         })
       );
@@ -143,6 +146,7 @@ class FDICTopNav extends HTMLElement {
     if (event.key === "ArrowDown" && target.classList.contains("fdic-nav-item--button")) {
       event.preventDefault();
       target.dataset.focusMenuOnActivate = "true";
+      target.dataset.forceOpenOnActivate = "true";
       target.click();
       return;
     }
