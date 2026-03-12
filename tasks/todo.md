@@ -1,5 +1,27 @@
 # TODO
 
+## Current Task (FDICnet Mobile Breadcrumb Best-Practice Upgrade)
+- [x] Replace visible `You are here:` text with semantic breadcrumb UI.
+- [x] Make parent breadcrumb nodes clickable to drill up.
+- [x] Keep current breadcrumb node non-clickable and SR-friendly.
+- [x] Validate breadcrumb navigation behavior in mobile drawer.
+
+## Review / Results (FDICnet Mobile Breadcrumb Best-Practice Upgrade)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - replaced plain context text with a semantic breadcrumb nav (`<nav aria-label="Current location"><ol>...</ol></nav>`).
+  - parent crumbs now render as buttons wired to `data-mobile-drill-action="set-path"` for direct drill-up.
+  - current crumb renders as non-clickable text with `aria-current="page"`.
+  - retained orientation phrase as screen-reader-only text (`sr-only`) rather than visible label.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added breadcrumb styling for list layout, separators, clickable crumb links, and current crumb emphasis.
+  - added focus-visible styling for crumb buttons consistent with menu focus tokens.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+  - Mobile browser checks confirmed:
+    - deeper path exposes clickable parent crumbs (`News & Events`, `News`) and non-clickable current crumb (`Global Messages`).
+    - clicking `News` updates drill path from `[panel, l1, l2]` -> `[panel, l1]`.
+    - clicking `News & Events` updates drill path from `[panel, l1]` -> `[panel]`.
+
 ## Current Task (FDICnet Mobile Current-Context Indicator)
 - [x] Add visible current-context breadcrumb text to the mobile drawer drill views.
 - [x] Place context indicator above the list content (not below it).
