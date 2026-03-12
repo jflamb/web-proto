@@ -1,5 +1,23 @@
 # TODO
 
+## Current Task (FDICnet Mega-Menu ArrowDown Second-Press Close Regression)
+- [x] Reproduce: Tab to top-nav button, `ArrowDown` to open, `ArrowDown` again closes unexpectedly.
+- [x] Fix focus/rerender behavior so in-menu arrow navigation does not trigger close.
+- [x] Validate keyboard sequence and no-regression paths in browser.
+
+## Review / Results (FDICnet Mega-Menu ArrowDown Second-Press Close Regression)
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - focus-driven L1/L2 preview handlers now request focus restoration (`restoreFocus: true`) so keyboard navigation survives render updates.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - `setSelectedL1`, `setPreviewL2`, and `setPreviewOverview` now short-circuit unchanged-state calls while still restoring focus when requested.
+  - prevents rerender loops and avoids transient focus loss that triggered menu close checks.
+- Validation:
+  - `node --check` passed for `events.js` and `script.js`.
+  - Browser sequence confirmed stable:
+    - top-nav focused `ArrowDown` opens/focuses mega-menu
+    - second `ArrowDown` advances within L1 and keeps menu open
+    - `ArrowRight` to L2 + `ArrowDown` keeps menu open with visible focus ring
+
 ## Current Task (FDICnet Top-Nav ArrowDown Open Regression)
 - [x] Reproduce desktop ArrowDown open failure from focused top-nav item.
 - [x] Fix menu open/close focus race so ArrowDown reliably opens and keeps mega-menu visible.

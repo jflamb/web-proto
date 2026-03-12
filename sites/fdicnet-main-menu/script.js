@@ -685,7 +685,10 @@ function setSelectedL1(index, { restoreFocus = false } = {}) {
     && menuState.previewL2Index === null
     && !menuState.previewingOverview
   );
-  if (selectionUnchanged && !restoreFocus) {
+  if (selectionUnchanged) {
+    if (restoreFocus) {
+      megaMenuHost?.focusL1Index(index);
+    }
     return;
   }
 
@@ -703,7 +706,12 @@ function setSelectedL1(index, { restoreFocus = false } = {}) {
 
 function setPreviewL2(index, { restoreFocus = false, fromFocus = false } = {}) {
   const previewChanged = menuState.previewL2Index !== index || menuState.previewingOverview;
-  if (!previewChanged) return;
+  if (!previewChanged) {
+    if (restoreFocus) {
+      megaMenuHost?.focusL2Index(index);
+    }
+    return;
+  }
   menuState.previewingOverview = false;
   menuState.previewL2Index = index;
   renderDesktopColumns();
@@ -713,7 +721,12 @@ function setPreviewL2(index, { restoreFocus = false, fromFocus = false } = {}) {
 }
 
 function setPreviewOverview({ restoreFocus = false, fromFocus = false } = {}) {
-  if (menuState.previewL2Index === null && menuState.previewingOverview) return;
+  if (menuState.previewL2Index === null && menuState.previewingOverview) {
+    if (restoreFocus) {
+      megaMenuHost?.focusL2Overview();
+    }
+    return;
+  }
   menuState.previewL2Index = null;
   menuState.previewingOverview = true;
   renderDesktopColumns();
