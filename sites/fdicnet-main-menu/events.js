@@ -41,6 +41,36 @@
       l3Column,
       l1Column,
     } = getDom();
+    const HOVER_INTENT_DELAY_MS = 140;
+    let topNavPreviewTimer = null;
+    let l1PreviewTimer = null;
+    let l2PreviewTimer = null;
+
+    function clearPreviewTimer(kind) {
+      if (kind === "topNav" && topNavPreviewTimer) {
+        window.clearTimeout(topNavPreviewTimer);
+        topNavPreviewTimer = null;
+      }
+      if (kind === "l1" && l1PreviewTimer) {
+        window.clearTimeout(l1PreviewTimer);
+        l1PreviewTimer = null;
+      }
+      if (kind === "l2" && l2PreviewTimer) {
+        window.clearTimeout(l2PreviewTimer);
+        l2PreviewTimer = null;
+      }
+    }
+
+    function scheduleHoverIntent(kind, callback) {
+      clearPreviewTimer(kind);
+      const timer = window.setTimeout(() => {
+        clearPreviewTimer(kind);
+        callback();
+      }, HOVER_INTENT_DELAY_MS);
+      if (kind === "topNav") topNavPreviewTimer = timer;
+      if (kind === "l1") l1PreviewTimer = timer;
+      if (kind === "l2") l2PreviewTimer = timer;
+    }
 
     function wirePreviewClearOnFocusOut(container, keepInColumns = []) {
       if (!container) return;
@@ -102,7 +132,9 @@
         if (isMobileViewport()) return;
         const { panelKey, navIndex } = event.detail || {};
         if (!panelKey) return;
-        deps.previewTopNavPanel(panelKey, Number(navIndex || 0));
+        scheduleHoverIntent("topNav", () => {
+          deps.previewTopNavPanel(panelKey, Number(navIndex || 0));
+        });
       });
 
       topNav.addEventListener("fdic-top-nav-activate", (event) => {
@@ -126,7 +158,14 @@
         if (isMobileViewport()) return;
         const { index, fromFocus } = event.detail || {};
         if (!Number.isFinite(index)) return;
-        deps.setSelectedL1(index, { restoreFocus: Boolean(fromFocus) });
+        if (fromFocus) {
+          clearPreviewTimer("l1");
+          deps.setSelectedL1(index, { restoreFocus: true });
+          return;
+        }
+        scheduleHoverIntent("l1", () => {
+          deps.setSelectedL1(index, { restoreFocus: false });
+        });
       });
 
       megaMenuHost.addEventListener("fdic-mega-l1-roving", (event) => {
@@ -139,7 +178,14 @@
         if (isMobileViewport()) return;
         const { index, fromFocus } = event.detail || {};
         if (!Number.isFinite(index)) return;
-        setPreviewL2(index, { fromFocus: Boolean(fromFocus), restoreFocus: Boolean(fromFocus) });
+        if (fromFocus) {
+          clearPreviewTimer("l2");
+          setPreviewL2(index, { fromFocus: true, restoreFocus: true });
+          return;
+        }
+        scheduleHoverIntent("l2", () => {
+          setPreviewL2(index, { fromFocus: false, restoreFocus: false });
+        });
       });
 
       megaMenuHost.addEventListener("fdic-mega-l2-overview-preview", (event) => {
@@ -203,6 +249,9 @@
         if (mobileSearchToggle.contains(event.target) || mobileSearchRow.contains(event.target)) return;
         setMobileSearchOpen(false);
       }
+      clearPreviewTimer("topNav");
+      clearPreviewTimer("l1");
+      clearPreviewTimer("l2");
     });
 
     document.addEventListener("keydown", (event) => {
@@ -241,6 +290,7 @@
     });
 
     l2List.addEventListener("mouseenter", cancelPreviewClear);
+    l2List.addEventListener("mouseenter", () => clearPreviewTimer("l2"));
     l2List.addEventListener("mouseleave", (event) => {
       if (l3Column && l3Column.contains(event.relatedTarget)) {
         return;
@@ -253,11 +303,13 @@
     });
 
     if (l1Column) {
+      l1Column.addEventListener("mouseenter", () => clearPreviewTimer("l1"));
       l1Column.addEventListener("mouseleave", (event) => {
         if (l2List.contains(event.relatedTarget)) {
           cancelPreviewClear();
           return;
         }
+        clearPreviewTimer("l1");
         schedulePreviewClear();
       });
     }
@@ -275,8 +327,13 @@
     }
 
     wirePreviewClearOnFocusOut(l2List, [l2List, l3Column]);
+    navList.addEventListener("mouseleave", () => clearPreviewTimer("topNav"));
 
     megaMenu.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);
+    megaMenu.addEventListener("mouseleave", () => {
+      clearPreviewTimer("l1");
+      clearPreviewTimer("l2");
+    });
     navList.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);
   }
 
