@@ -13,6 +13,7 @@
       syncMobileToggleButton,
       ensureMobileMenuFocus,
       triggerLightHaptic,
+      announceMenuContext,
     } = deps;
 
     function encodeMobilePath(path) {
@@ -252,6 +253,53 @@
       });
     }
 
+    function getPanelLabel(panelKey, panelConfig) {
+      const navMeta = (menuState.siteContent?.header?.nav || []).find(
+        (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
+      );
+      return navMeta?.label || panelConfig?.overviewLabel || "Menu";
+    }
+
+    function announceMobileDrillContext(panelKey, panelConfig, l1Index, l2Index, panelKeys) {
+      if (typeof announceMenuContext !== "function") return;
+
+      if (!panelKey || !panelConfig) {
+        const rootCount = Array.isArray(panelKeys) ? panelKeys.length : 0;
+        announceMenuContext(`Main menu, ${rootCount} section${rootCount === 1 ? "" : "s"}.`);
+        return;
+      }
+
+      const panelLabel = getPanelLabel(panelKey, panelConfig);
+
+      if (typeof l1Index !== "number") {
+        const l1Items = panelConfig.l1 || [];
+        const hasOverviewRow = l1Items.length > 1;
+        const count = hasOverviewRow ? l1Items.length - 1 : l1Items.length;
+        announceMenuContext(`${panelLabel}, ${count} item${count === 1 ? "" : "s"}. Back to Main menu.`);
+        return;
+      }
+
+      const l1Item = (panelConfig.l1 || [])[l1Index];
+      if (!l1Item) {
+        announceMenuContext(`${panelLabel}. Back to Main menu.`);
+        return;
+      }
+
+      if (typeof l2Index !== "number") {
+        const count = (l1Item.l2 || []).length + 1;
+        announceMenuContext(`${l1Item.label || "Section"}, ${count} item${count === 1 ? "" : "s"}. Back to ${panelLabel}.`);
+        return;
+      }
+
+      const l2Item = (l1Item.l2 || [])[l2Index];
+      if (!l2Item) {
+        announceMenuContext(`${l1Item.label || "Section"}. Back to ${panelLabel}.`);
+        return;
+      }
+      const count = (l2Item.l3 || []).length + 1;
+      announceMenuContext(`${l2Item.label || "Link"}, ${count} item${count === 1 ? "" : "s"}. Back to ${l1Item.label || panelLabel}.`);
+    }
+
     function renderMobileDrawerPanel() {
       refreshDomRefs();
       if (!isMobileViewport()) return;
@@ -268,6 +316,7 @@
       const [panelKey, l1Index, l2Index] = menuState.mobileDrillPath;
       if (!panelKey) {
         renderMobileDrillRoot(panelContainer, panelKeys, menuState.siteContent);
+        announceMobileDrillContext(null, null, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
         return;
@@ -277,6 +326,7 @@
       if (!panelConfig) {
         menuState.mobileDrillPath = [];
         renderMobileDrillRoot(panelContainer, panelKeys, menuState.siteContent);
+        announceMobileDrillContext(null, null, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
         return;
@@ -284,6 +334,7 @@
 
       if (typeof l1Index !== "number") {
         renderMobileDrillL1(panelContainer, panelKey, panelConfig);
+        announceMobileDrillContext(panelKey, panelConfig, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
         return;
@@ -291,12 +342,14 @@
 
       if (typeof l2Index !== "number") {
         renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index);
+        announceMobileDrillContext(panelKey, panelConfig, l1Index, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
         return;
       }
 
       renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index);
+      announceMobileDrillContext(panelKey, panelConfig, l1Index, l2Index, panelKeys);
       ensureMobileMenuFocus();
       animateMobileDrillReveal(panelContainer);
     }
