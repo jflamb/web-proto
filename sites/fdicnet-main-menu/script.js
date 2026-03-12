@@ -643,17 +643,6 @@ function getMegaMenuViewModel() {
   const showingPreview = menuState.previewL2Index !== null;
   const selectedL2 = selectedL1?.l2?.[menuState.selectedL2Index] || null;
   const previewL2 = getVisibleL2();
-  const activeNavMeta = (menuState.siteContent?.header?.nav || []).find(
-    (item) => item.kind === "menu" && (item.panelKey || item.id) === menuState.activePanelKey
-  );
-  const contextL2Label = showingPreview && !menuState.previewingOverview
-    ? previewL2?.label
-    : selectedL2?.label;
-  const contextPathLabels = [
-    activeNavMeta?.label,
-    selectedL1?.label,
-    contextL2Label,
-  ].filter(Boolean);
   const descriptionText = menuState.previewingOverview
     ? l2Overview?.description || ""
     : showingPreview
@@ -673,7 +662,6 @@ function getMegaMenuViewModel() {
     showingPreview,
     l3Items: showingPreview && !menuState.previewingOverview ? (previewL2?.l3 || []) : [],
     l3Description: descriptionText,
-    contextPathLabels,
   };
 }
 

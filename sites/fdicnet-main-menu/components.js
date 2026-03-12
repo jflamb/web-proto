@@ -177,7 +177,6 @@ class FDICMegaMenu extends HTMLElement {
     if (!this.querySelector("#megaMenu")) {
       this.innerHTML = `
         <section id="megaMenu" class="mega-menu" aria-label="Main menu">
-          <div id="megaMenuContext" class="mega-menu-context" aria-live="polite"></div>
           <div class="fdic-shell mega-menu-inner">
             <section class="mega-col mega-col--l1" aria-labelledby="l1Heading">
               <h2 id="l1Heading" class="sr-only">Level 1</h2>
@@ -225,10 +224,6 @@ class FDICMegaMenu extends HTMLElement {
     return this.querySelector("#l1List");
   }
 
-  get menuContext() {
-    return this.querySelector("#megaMenuContext");
-  }
-
   get l2List() {
     return this.querySelector("#l2List");
   }
@@ -254,7 +249,6 @@ class FDICMegaMenu extends HTMLElement {
     showingPreview = false,
     l3Items = [],
     l3Description = "",
-    contextPathLabels = [],
   } = {}) {
     this.isMobileView = isMobile;
     const megaMenu = this.megaMenuElement;
@@ -263,16 +257,6 @@ class FDICMegaMenu extends HTMLElement {
     }
 
     if (!this.l1List || !this.l2List || !this.l3List || !this.l3Description) return;
-
-    if (this.menuContext) {
-      if (isMobile || !Array.isArray(contextPathLabels) || contextPathLabels.length === 0) {
-        this.menuContext.hidden = true;
-        this.menuContext.textContent = "";
-      } else {
-        this.menuContext.hidden = false;
-        this.menuContext.textContent = contextPathLabels.join(" / ");
-      }
-    }
 
     if (isMobile) {
       this.l1List.innerHTML = "";
