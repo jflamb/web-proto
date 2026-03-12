@@ -1,33 +1,19 @@
-/**
- * Centralized state for the entire menu system.
- *
- * Desktop mega-menu: three-column layout (L1 → L2 → L3).
- *   - "selected" indices represent the committed choice (click / keyboard).
- *   - "preview" indices represent the transient hover/focus highlight.
- *   - When preview is null the selected value is shown.
- *
- * Mobile: a drill-down drawer controlled by mobileDrillPath[].
- *   Each entry pushes a deeper level: [panelKey] → [panelKey, l1Index] → etc.
- */
-const menuState = {
-  siteContent: null,           // Parsed content.yaml
-  activePanelKey: null,        // Which top-nav panel is active (e.g. "banking")
-  menuOpen: false,             // Desktop mega-menu visibility
-  selectedL1Index: 0,          // Committed L1 selection
-  selectedL2Index: 0,          // Committed L2 selection
-  previewL2Index: null,        // Transient L2 hover/focus preview (null = none)
-  previewingOverview: false,   // True when the L2 "overview" link is previewed
-  previewClearTimer: null,     // setTimeout handle for delayed preview reset
-  topNavFocusIndex: 0,         // Roving tabindex position in the top nav bar
-  mobileNavOpen: false,        // Mobile drawer visibility
-  mobileSearchOpen: false,     // Phone-viewport search field visibility
-  mobileNavCloseHandler: null, // transitionend handler for drawer close animation
-  closeTransitionHandler: null,// transitionend handler for mega-menu close animation
-  l1FocusIndex: 0,             // Roving tabindex position within L1 column
-  moveFocusIntoMenuOnOpen: false, // When true, opening the menu moves focus into L1
-  closeHideTimer: null,        // Fallback timer that hides mega-menu if transitionend doesn't fire
-  mobileDrillPath: [],         // Current drill-down breadcrumb path
-};
+const stateModule = window.FDICMenuState;
+if (!stateModule) {
+  throw new Error("FDICMenuState module missing. Ensure state.js is loaded before script.js.");
+}
+
+const {
+  menuState,
+  getPanelConfig: selectPanelConfig,
+  getPanelConfigByKey: selectPanelConfigByKey,
+  getMobilePanelKeys: selectMobilePanelKeys,
+  getPanelL1: selectPanelL1,
+  getSelectedL1: selectSelectedL1,
+  getVisibleL2Index: selectVisibleL2Index,
+  getVisibleL2: selectVisibleL2,
+  getL2Overview: selectL2Overview,
+} = stateModule;
 
 /* ── Responsive breakpoints ──────────────────────────────────────────
    These mirror the media queries in styles.css. Keep them in sync. */
@@ -40,118 +26,105 @@ const reduceMotionMediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
 const MOBILE_STAGGER_MAX_ITEMS = 6;
 const MOBILE_STAGGER_STEP_MS = 15;
 
-const header = document.getElementById("fdicHeader");
-const navList = document.getElementById("fdicNavList");
-const navToggle = document.getElementById("fdicNavToggle");
-const megaMenu = document.getElementById("megaMenu");
-const l1List = document.getElementById("l1List");
-const l2List = document.getElementById("l2List");
-const l3List = document.getElementById("l3List");
-const l3Description = document.getElementById("l3Description");
-const l3Column = document.querySelector(".mega-col--l3");
-const l1Column = document.querySelector(".mega-col--l1");
-const l1OverviewLink = document.getElementById("l1OverviewLink");
-const pageTitle = document.getElementById("pageTitle");
-const pageIntro = document.getElementById("pageIntro");
-const desktopSearchInput = document.getElementById("desktopSearchInput");
-const mobileSearchToggle = document.getElementById("mobileSearchToggle");
-const mobileSearchRow = document.getElementById("mobileSearchRow");
-const mobileSearchInput = document.getElementById("mobileSearchInput");
-const mobileNavBackdrop = document.getElementById("mobileNavBackdrop");
+let topNav = null;
+let megaMenuHost = null;
+let header = null;
+let navList = null;
+let navToggle = null;
+let megaMenu = null;
+let l1List = null;
+let l2List = null;
+let l3List = null;
+let l3Description = null;
+let l3Column = null;
+let l1Column = null;
+let pageTitle = null;
+let pageIntro = null;
+let desktopSearchInput = null;
+let mobileSearchToggle = null;
+let mobileSearchRow = null;
+let mobileSearchInput = null;
+let mobileNavBackdrop = null;
+let mobileDrawerController = null;
 
-function getMissingRequiredElements() {
-  const requiredElements = [
-    ["fdicHeader", header],
-    ["fdicNavList", navList],
-    ["fdicNavToggle", navToggle],
-    ["megaMenu", megaMenu],
-    ["l1List", l1List],
-    ["l2List", l2List],
-    ["l3List", l3List],
-    ["l3Description", l3Description],
-    ["l1OverviewLink", l1OverviewLink],
-    ["pageTitle", pageTitle],
-    ["pageIntro", pageIntro],
-    ["desktopSearchInput", desktopSearchInput],
-    ["mobileSearchToggle", mobileSearchToggle],
-    ["mobileSearchRow", mobileSearchRow],
-    ["mobileSearchInput", mobileSearchInput],
-    ["mobileNavBackdrop", mobileNavBackdrop],
-  ];
-  return requiredElements
-    .filter(([, element]) => !element)
-    .map(([name]) => name);
+function refreshDomRefs() {
+  topNav = document.getElementById("fdicTopNav");
+  megaMenuHost = document.getElementById("fdicMegaMenu");
+  header = document.getElementById("fdicHeader");
+  navList = topNav?.navList || document.getElementById("fdicNavList");
+  navToggle = document.getElementById("fdicNavToggle");
+  megaMenu = megaMenuHost?.megaMenuElement || document.getElementById("megaMenu");
+  l1List = megaMenuHost?.l1List || document.getElementById("l1List");
+  l2List = megaMenuHost?.l2List || document.getElementById("l2List");
+  l3List = megaMenuHost?.l3List || document.getElementById("l3List");
+  l3Description = megaMenuHost?.l3Description || document.getElementById("l3Description");
+  l3Column = megaMenuHost?.l3Column || document.querySelector(".mega-col--l3");
+  l1Column = megaMenuHost?.l1Column || document.querySelector(".mega-col--l1");
+  pageTitle = document.getElementById("pageTitle");
+  pageIntro = document.getElementById("pageIntro");
+  desktopSearchInput = document.getElementById("desktopSearchInput");
+  mobileSearchToggle = document.getElementById("mobileSearchToggle");
+  mobileSearchRow = document.getElementById("mobileSearchRow");
+  mobileSearchInput = document.getElementById("mobileSearchInput");
+  mobileNavBackdrop = document.getElementById("mobileNavBackdrop");
 }
 
-async function loadContent() {
-  const scriptEl = document.querySelector('script[src$="script.js"]');
-  const scriptSrc = scriptEl?.getAttribute("src") || "script.js";
-  const candidateUrls = [
-    new URL("content.yaml", window.location.href).toString(),
-    new URL("content.yaml", window.location.origin + window.location.pathname.replace(/\/?$/, "/")).toString(),
-    new URL("content.yaml", new URL(scriptSrc, window.location.href)).toString(),
-  ];
-  const dedupedUrls = [...new Set(candidateUrls)];
+refreshDomRefs();
 
-  let lastError = null;
-  for (const url of dedupedUrls) {
-    try {
-      const response = await fetch(url, { cache: "no-store" });
-      if (!response.ok) {
-        lastError = new Error(`Unable to load content.yaml from ${url} (${response.status})`);
-        continue;
-      }
-      const text = await response.text();
-      return window.jsyaml.load(text);
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError || new Error("Unable to load content.yaml from any known URL");
-}
-
-function renderContentLoadFallback() {
-  pageTitle.textContent = "FDICnet Main Menu Prototype";
-  pageIntro.innerHTML = "";
-  const fallbackLines = [
-    "Menu content is temporarily unavailable because the configuration file could not be loaded.",
-    "Try refreshing the page. If the issue persists, verify that content.yaml is reachable from this page URL.",
-  ];
-  fallbackLines.forEach((line) => {
-    const paragraph = document.createElement("p");
-    paragraph.textContent = line;
-    pageIntro.appendChild(paragraph);
-  });
-  megaMenu.hidden = true;
-  megaMenu.setAttribute("aria-hidden", "true");
+function getDom() {
+  return {
+    topNav,
+    megaMenuHost,
+    header,
+    navList,
+    navToggle,
+    megaMenu,
+    l1List,
+    l2List,
+    l3List,
+    l3Description,
+    l3Column,
+    l1Column,
+    pageTitle,
+    pageIntro,
+    desktopSearchInput,
+    mobileSearchToggle,
+    mobileSearchRow,
+    mobileSearchInput,
+    mobileNavBackdrop,
+  };
 }
 
 function getPanelConfig() {
-  return menuState.siteContent?.menu?.panels?.[menuState.activePanelKey] || null;
+  return selectPanelConfig(menuState.siteContent, menuState.activePanelKey);
 }
 
 function getPanelConfigByKey(panelKey) {
-  return menuState.siteContent?.menu?.panels?.[panelKey] || null;
+  return selectPanelConfigByKey(menuState.siteContent, panelKey);
 }
 
 function getMobilePanelKeys() {
-  return (menuState.siteContent?.header?.nav || [])
-    .filter((item) => item.kind === "menu")
-    .map((item) => item.panelKey || item.id)
-    .filter(Boolean);
+  return selectMobilePanelKeys(menuState.siteContent);
 }
 
 function getPanelL1() {
-  return getPanelConfig()?.l1 || [];
+  return selectPanelL1(getPanelConfig());
+}
+
+function getDefaultL1Index(panel = getPanelConfig()) {
+  const l1Items = panel?.l1 || [];
+  return l1Items.length > 1 ? 1 : 0;
 }
 
 function applyHeaderContent() {
+  refreshDomRefs();
   const placeholder = menuState.siteContent.header?.searchPlaceholder || "Search";
   if (desktopSearchInput) desktopSearchInput.placeholder = placeholder;
   if (mobileSearchInput) mobileSearchInput.placeholder = placeholder;
 }
 
 function renderPageContent() {
+  refreshDomRefs();
   pageTitle.textContent = menuState.siteContent.page?.title || "";
   pageIntro.innerHTML = "";
   (menuState.siteContent.page?.intro || []).forEach((line) => {
@@ -170,6 +143,7 @@ function isPhoneViewport() {
 }
 
 function syncMobileSearchState({ focus = false } = {}) {
+  refreshDomRefs();
   if (!mobileSearchToggle || !mobileSearchRow) return;
   const phone = isPhoneViewport();
   mobileSearchToggle.hidden = !phone;
@@ -194,6 +168,7 @@ function setMobileSearchOpen(isOpen, { focus = false } = {}) {
 }
 
 function syncMobileToggleButton() {
+  refreshDomRefs();
   if (!navToggle) return;
   const icon = navToggle.querySelector(".ph");
   const label = navToggle.querySelector("span");
@@ -207,6 +182,7 @@ function syncMobileToggleButton() {
 }
 
 function getMobileDrawerFocusableItems() {
+  refreshDomRefs();
   const drillItems = [...navList.querySelectorAll(
     ".mobile-drill-back, .mobile-drill-trigger, .mobile-drill-link, .mobile-drill-current-link"
   )];
@@ -217,6 +193,7 @@ function getMobileDrawerFocusableItems() {
 }
 
 function ensureMobileMenuFocus({ force = false, attempts = 2 } = {}) {
+  refreshDomRefs();
   if (!menuState.mobileNavOpen || !isMobileViewport()) return;
   if (!force && navList.contains(document.activeElement)) return;
 
@@ -242,7 +219,33 @@ function triggerLightHaptic() {
   navigator.vibrate(10);
 }
 
+function initializeMobileDrawerController() {
+  if (mobileDrawerController) return;
+  const createController = window.createFDICMobileDrawerController;
+  if (typeof createController !== "function") {
+    throw new Error("FDIC mobile drawer module missing. Ensure mobile-drawer.js is loaded before script.js.");
+  }
+  mobileDrawerController = createController({
+    menuState,
+    reduceMotionMediaQuery,
+    MOBILE_STAGGER_MAX_ITEMS,
+    MOBILE_STAGGER_STEP_MS,
+    refreshDomRefs,
+    isMobileViewport,
+    getNavList: () => {
+      refreshDomRefs();
+      return navList;
+    },
+    getMobilePanelKeys,
+    getPanelConfigByKey,
+    syncMobileToggleButton,
+    ensureMobileMenuFocus,
+    triggerLightHaptic,
+  });
+}
+
 function syncMobileNavState() {
+  refreshDomRefs();
   if (!navToggle) return;
   const mobile = isMobileViewport();
   navToggle.hidden = !mobile;
@@ -324,17 +327,19 @@ function closeMobileNav() {
 }
 
 function syncTopNavState() {
-  const buttons = navList.querySelectorAll(".fdic-nav-item--button");
-  buttons.forEach((button) => {
-    const isActive = button.dataset.panelKey === menuState.activePanelKey;
-    const isExpanded = isMobileViewport() ? isActive && menuState.mobileNavOpen : isActive && menuState.menuOpen;
-    button.classList.toggle("fdic-nav-item--selected", isExpanded);
-    button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+  refreshDomRefs();
+  topNav?.updateState({
+    activePanelKey: menuState.activePanelKey,
+    menuOpen: menuState.menuOpen,
+    mobileNavOpen: menuState.mobileNavOpen,
+    isMobile: isMobileViewport(),
+    focusIndex: menuState.topNavFocusIndex,
   });
 }
 
 function getTopNavItems() {
-  return [...navList.querySelectorAll(".fdic-nav-item")];
+  refreshDomRefs();
+  return topNav?.getTopNavItems() || [];
 }
 
 function getActiveTopNavIndex(items = getTopNavItems()) {
@@ -344,339 +349,117 @@ function getActiveTopNavIndex(items = getTopNavItems()) {
 }
 
 function applyTopNavRoving({ focus = false } = {}) {
+  const items = getTopNavItems();
+  if (items.length === 0) return;
+
   if (isMobileViewport()) {
-    getTopNavItems().forEach((item) => {
-      item.tabIndex = 0;
+    topNav?.updateState({
+      activePanelKey: menuState.activePanelKey,
+      menuOpen: menuState.menuOpen,
+      mobileNavOpen: menuState.mobileNavOpen,
+      isMobile: true,
+      focusIndex: menuState.topNavFocusIndex,
+      focus,
     });
     return;
   }
-
-  const items = getTopNavItems();
-  if (items.length === 0) return;
 
   const activeIndex = getActiveTopNavIndex(items);
   if (menuState.topNavFocusIndex < 0 || menuState.topNavFocusIndex >= items.length) {
     menuState.topNavFocusIndex = activeIndex >= 0 ? activeIndex : 0;
   }
 
-  items.forEach((item, index) => {
-    item.tabIndex = index === menuState.topNavFocusIndex ? 0 : -1;
+  topNav?.updateState({
+    activePanelKey: menuState.activePanelKey,
+    menuOpen: menuState.menuOpen,
+    mobileNavOpen: menuState.mobileNavOpen,
+    isMobile: false,
+    focusIndex: menuState.topNavFocusIndex,
+    focus,
   });
-
-  if (focus) {
-    items[menuState.topNavFocusIndex].focus();
-  }
 }
 
 function resetPanelSelection() {
-  menuState.selectedL1Index = 0;
+  const defaultL1Index = getDefaultL1Index();
+  menuState.selectedL1Index = defaultL1Index;
   menuState.selectedL2Index = 0;
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
-  menuState.l1FocusIndex = 0;
+  menuState.l1FocusIndex = defaultL1Index;
   menuState.mobileDrillPath = [];
 }
 
 function renderTopNav() {
-  navList.innerHTML = "";
+  refreshDomRefs();
   const navItems = menuState.siteContent.header?.nav || [];
   if (isMobileViewport()) {
+    topNav?.renderItems([]);
     syncTopNavState();
     return;
   }
 
-  navItems.forEach((item) => {
-    const li = document.createElement("li");
-    if (item.kind === "menu") {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "fdic-nav-item fdic-nav-item--button";
-      button.dataset.navIndex = String(navList.children.length);
-      button.dataset.panelKey = item.panelKey || item.id;
-      button.setAttribute("aria-controls", "megaMenu");
-      button.textContent = item.label;
-      button.addEventListener("click", () => {
-        const focusMenu = menuState.moveFocusIntoMenuOnOpen;
-        menuState.moveFocusIntoMenuOnOpen = false;
-        menuState.topNavFocusIndex = Number(button.dataset.navIndex || 0);
-        const nextPanel = button.dataset.panelKey;
-        if (menuState.activePanelKey === nextPanel) {
-          if (menuState.menuOpen) {
-            closeMenu();
-          } else {
-            openMenu({ focusMenu });
-          }
-          closeMobileNav();
-          return;
-        }
-        menuState.activePanelKey = nextPanel;
-        resetPanelSelection();
-        syncTopNavState();
-        applyTopNavRoving();
-        renderMenuPanel();
-        openMenu({ focusMenu });
-        closeMobileNav();
-      });
-      li.appendChild(button);
-    } else {
-      const link = document.createElement("a");
-      link.className = "fdic-nav-item";
-      link.dataset.navIndex = String(navList.children.length);
-      link.href = item.href || "#";
-      link.textContent = item.label;
-      link.addEventListener("click", closeMobileNav);
-      li.appendChild(link);
-    }
-    navList.appendChild(li);
-  });
+  topNav?.renderItems(navItems);
 
   syncTopNavState();
   applyTopNavRoving();
 }
 
-function ensureMobileDrawerPanel() {
-  const existing = navList.querySelector(".mobile-drawer-panel-item");
-  if (existing) return existing;
-  const li = document.createElement("li");
-  li.className = "mobile-drawer-panel-item";
-  const container = document.createElement("div");
-  container.className = "mobile-drawer-panel";
-  li.appendChild(container);
-  navList.appendChild(li);
-  return li;
-}
-
-function removeMobileDrawerPanel() {
-  const existing = navList.querySelector(".mobile-drawer-panel-item");
-  if (existing) existing.remove();
-}
-
-function renderMobileDrillHeader(targetContainer, backLabel, onBack) {
-  const drillHeader = document.createElement("div");
-  drillHeader.className = "mobile-drill-header";
-
-  if (onBack) {
-    const backButton = document.createElement("button");
-    backButton.type = "button";
-    backButton.className = "mobile-drill-back";
-    backButton.setAttribute("aria-label", `Back to ${backLabel}`);
-
-    const icon = document.createElement("span");
-    icon.className = "mobile-drill-back-icon ph ph-caret-left";
-    icon.setAttribute("aria-hidden", "true");
-
-    const text = document.createElement("span");
-    text.textContent = backLabel;
-
-    backButton.append(icon, text);
-    backButton.addEventListener("click", () => {
-      triggerLightHaptic();
-      onBack();
-    });
-    drillHeader.appendChild(backButton);
+function activateTopNavPanel(panelKey, navIndex, { focusMenu = false } = {}) {
+  menuState.topNavFocusIndex = navIndex;
+  if (menuState.activePanelKey === panelKey) {
+    if (menuState.menuOpen) {
+      closeMenu();
+    } else {
+      openMenu({ focusMenu });
+    }
+    closeMobileNav();
+    return;
   }
 
-  if (drillHeader.childElementCount > 0) {
-    targetContainer.appendChild(drillHeader);
+  menuState.activePanelKey = panelKey;
+  resetPanelSelection();
+  syncTopNavState();
+  applyTopNavRoving();
+  renderMenuPanel();
+  openMenu({ focusMenu });
+  closeMobileNav();
+}
+
+function previewTopNavPanel(panelKey, navIndex) {
+  if (!panelKey) return;
+  if (menuState.activePanelKey === panelKey && menuState.menuOpen) return;
+  menuState.topNavFocusIndex = navIndex;
+  if (menuState.activePanelKey !== panelKey) {
+    menuState.activePanelKey = panelKey;
+    resetPanelSelection();
+    renderMenuPanel();
+  }
+  syncTopNavState();
+  applyTopNavRoving();
+  if (!menuState.menuOpen) {
+    openMenu({ focusMenu: false });
   }
 }
 
-function createMobileDrillList() {
-  const list = document.createElement("ul");
-  list.className = "mobile-drill-list";
-  return list;
-}
-
-function appendMobileDrillItem(list, label, onClick) {
-  const li = document.createElement("li");
-  li.className = "mobile-drill-item";
-
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "mobile-drill-trigger";
-
-  const text = document.createElement("span");
-  text.className = "mobile-drill-label";
-  text.textContent = label;
-
-  const icon = document.createElement("span");
-  icon.className = "mobile-drill-caret ph ph-caret-right";
-  icon.setAttribute("aria-hidden", "true");
-
-  button.append(text, icon);
-  button.addEventListener("click", () => {
-    triggerLightHaptic();
-    onClick();
-  });
-  li.appendChild(button);
-  list.appendChild(li);
-}
-
-function appendMobileDrillLinkItem(list, label, href) {
-  const li = document.createElement("li");
-  li.className = "mobile-drill-link-item";
-
-  const link = document.createElement("a");
-  link.className = "mobile-drill-current-link";
-  link.href = href || "#";
-  link.textContent = label || "Overview";
-
-  li.appendChild(link);
-  list.appendChild(li);
-}
-
-function renderMobileDrillRoot(panelContainer, panelKeys) {
-  const list = createMobileDrillList();
-  panelKeys.forEach((panelKey) => {
-    const panelMeta = (menuState.siteContent?.header?.nav || []).find(
-      (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
-    );
-    appendMobileDrillItem(list, panelMeta?.label || panelKey, () => {
-      menuState.activePanelKey = panelKey;
-      menuState.mobileDrillPath = [panelKey];
-      renderMobileDrawerPanel();
-    });
-  });
-  panelContainer.appendChild(list);
-}
-
-function renderMobileDrillL1(panelContainer, panelKey, panelConfig) {
-  renderMobileDrillHeader(panelContainer, "Main menu", () => {
-    menuState.mobileDrillPath = [];
-    renderMobileDrawerPanel();
-  });
-
-  const list = createMobileDrillList();
-  (panelConfig.l1 || []).forEach((l1Item, l1Index) => {
-    appendMobileDrillItem(list, l1Item.label || "Section", () => {
-      menuState.mobileDrillPath = [panelKey, l1Index];
-      renderMobileDrawerPanel();
-    });
-  });
-  panelContainer.appendChild(list);
-}
-
-function renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index) {
-  const l1Item = (panelConfig.l1 || [])[l1Index];
-  if (!l1Item) return;
-
-  renderMobileDrillHeader(
-    panelContainer,
-    panelConfig?.overviewLabel || "Sections",
-    () => {
-      menuState.mobileDrillPath = [panelKey];
-      renderMobileDrawerPanel();
-    }
-  );
-
-  const list = createMobileDrillList();
-  (l1Item.l2 || []).forEach((l2Item, l2Index) => {
-    appendMobileDrillItem(list, l2Item.label || "Link", () => {
-      menuState.mobileDrillPath = [panelKey, l1Index, l2Index];
-      renderMobileDrawerPanel();
-    });
-  });
-  appendMobileDrillLinkItem(list, l1Item.label || "Section", l1Item.href || l1Item.overviewHref || "#");
-  panelContainer.appendChild(list);
-}
-
-function renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index) {
-  const l1Item = (panelConfig.l1 || [])[l1Index];
-  const l2Item = (l1Item?.l2 || [])[l2Index];
-  if (!l1Item || !l2Item) return;
-
-  renderMobileDrillHeader(
-    panelContainer,
-    l1Item.label || "Section",
-    () => {
-      menuState.mobileDrillPath = [panelKey, l1Index];
-      renderMobileDrawerPanel();
-    }
-  );
-
-  const list = document.createElement("ul");
-  list.className = "mobile-drill-link-list";
-
-  (l2Item.l3 || []).forEach((l3Item) => {
-    const li = document.createElement("li");
-    li.className = "mobile-drill-link-item";
-
-    const link = document.createElement("a");
-    link.className = "mobile-drill-link";
-    link.href = l3Item.href || "#";
-    link.textContent = l3Item.label || "Sub-link";
-
-    li.appendChild(link);
-    list.appendChild(li);
-  });
-
-  appendMobileDrillLinkItem(list, l2Item.label || "Link", l2Item.href || "#");
-  panelContainer.appendChild(list);
+function handleTopNavRovingRequest({ key, currentIndex, itemCount }) {
+  if (!itemCount) return;
+  if (key === "ArrowRight") menuState.topNavFocusIndex = (currentIndex + 1) % itemCount;
+  if (key === "ArrowLeft") menuState.topNavFocusIndex = (currentIndex - 1 + itemCount) % itemCount;
+  if (key === "Home") menuState.topNavFocusIndex = 0;
+  if (key === "End") menuState.topNavFocusIndex = itemCount - 1;
+  applyTopNavRoving({ focus: true });
 }
 
 function renderMobileDrawerPanel() {
-  if (!isMobileViewport()) return;
-  if (!menuState.mobileNavOpen) return;
-  syncMobileToggleButton();
-  const panelItem = ensureMobileDrawerPanel();
-  const panelContainer = panelItem.querySelector(".mobile-drawer-panel");
-  if (!panelContainer) return;
-  panelContainer.innerHTML = "";
-
-  const panelKeys = getMobilePanelKeys();
-  if (panelKeys.length === 0) return;
-
-  const [panelKey, l1Index, l2Index] = menuState.mobileDrillPath;
-  if (!panelKey) {
-    renderMobileDrillRoot(panelContainer, panelKeys);
-    ensureMobileMenuFocus();
-    animateMobileDrillReveal(panelContainer);
-    return;
-  }
-
-  const panelConfig = getPanelConfigByKey(panelKey);
-  if (!panelConfig) {
-    menuState.mobileDrillPath = [];
-    renderMobileDrillRoot(panelContainer, panelKeys);
-    ensureMobileMenuFocus();
-    animateMobileDrillReveal(panelContainer);
-    return;
-  }
-
-  if (typeof l1Index !== "number") {
-    renderMobileDrillL1(panelContainer, panelKey, panelConfig);
-    ensureMobileMenuFocus();
-    animateMobileDrillReveal(panelContainer);
-    return;
-  }
-
-  if (typeof l2Index !== "number") {
-    renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index);
-    ensureMobileMenuFocus();
-    animateMobileDrillReveal(panelContainer);
-    return;
-  }
-
-  renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index);
-  ensureMobileMenuFocus();
-  animateMobileDrillReveal(panelContainer);
+  mobileDrawerController?.renderMobileDrawerPanel();
 }
 
-function animateMobileDrillReveal(panelContainer) {
-  if (!panelContainer || reduceMotionMediaQuery.matches) return;
-  const staggerItems = [...panelContainer.querySelectorAll(".mobile-drill-item, .mobile-drill-link-item")];
-  if (staggerItems.length === 0) return;
-  staggerItems.forEach((item, index) => {
-    const clampedIndex = Math.min(index, MOBILE_STAGGER_MAX_ITEMS - 1);
-    item.style.setProperty("--mobile-stagger-delay", `${clampedIndex * MOBILE_STAGGER_STEP_MS}ms`);
-  });
-  panelContainer.classList.add("is-entering");
-  window.requestAnimationFrame(() => {
-    panelContainer.classList.remove("is-entering");
-  });
+function removeMobileDrawerPanel() {
+  mobileDrawerController?.removeMobileDrawerPanel();
 }
 
 function openMenu({ focusMenu = false } = {}) {
+  refreshDomRefs();
   if (menuState.menuOpen) return;
   menuState.menuOpen = true;
   megaMenu.removeAttribute("aria-hidden");
@@ -694,7 +477,7 @@ function openMenu({ focusMenu = false } = {}) {
       header.classList.add("menu-open");
       if (focusMenu) {
         if (!focusSelectedL1()) {
-          const fallbackTarget = megaMenu.querySelector(".l2-item, .overview-link, .l3-item");
+          const fallbackTarget = megaMenu.querySelector(".l1-item, .l2-item, .l3-item");
           if (fallbackTarget instanceof HTMLElement) {
             fallbackTarget.focus();
           }
@@ -709,6 +492,7 @@ function openMenu({ focusMenu = false } = {}) {
 }
 
 function scheduleMenuSystemFocusExitCheck() {
+  refreshDomRefs();
   window.requestAnimationFrame(() => {
     if (!menuState.menuOpen || isMobileViewport()) return;
     const activeElement = document.activeElement;
@@ -723,6 +507,7 @@ function scheduleMenuSystemFocusExitCheck() {
 }
 
 function closeMenu() {
+  refreshDomRefs();
   if (isMobileViewport()) {
     menuState.menuOpen = false;
     header.classList.remove("menu-open");
@@ -766,42 +551,28 @@ function closeMenu() {
   }
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
-  renderL2();
-  renderL3();
+  renderDesktopColumns();
   syncTopNavState();
 }
 
 function getSelectedL1() {
-  return getPanelL1()[menuState.selectedL1Index] || null;
+  return selectSelectedL1(getPanelConfig(), menuState.selectedL1Index);
 }
 
 function getVisibleL2Index() {
-  if (menuState.previewL2Index !== null) {
-    return menuState.previewL2Index;
-  }
-  return menuState.selectedL2Index;
+  return selectVisibleL2Index(menuState.previewL2Index, menuState.selectedL2Index);
 }
 
 function getVisibleL2() {
-  const selected = getSelectedL1();
-  const items = selected?.l2 || [];
-  return items[getVisibleL2Index()] || null;
+  return selectVisibleL2(getSelectedL1(), getVisibleL2Index());
 }
 
 function getL2Overview(selectedL1) {
-  if (!selectedL1) return null;
-  return selectedL1.l2Overview || (
-    selectedL1.overviewLabel || selectedL1.overviewHref
-      ? {
-          label: selectedL1.overviewLabel || `${selectedL1.label || "Overview"} Overview`,
-          href: selectedL1.overviewHref || "#",
-          description: "",
-        }
-      : null
-  );
+  return selectL2Overview(selectedL1);
 }
 
 function setSelectedL1(index, { restoreFocus = false } = {}) {
+  refreshDomRefs();
   menuState.selectedL1Index = index;
   menuState.l1FocusIndex = index;
   menuState.selectedL2Index = 0;
@@ -809,36 +580,18 @@ function setSelectedL1(index, { restoreFocus = false } = {}) {
   menuState.previewingOverview = false;
   renderDesktopColumns();
   if (restoreFocus) {
-    const target = l1List.querySelector(`.l1-item[data-index="${index}"]`);
-    setColumnFocus(l1Column, ".l1-item, #l1OverviewLink", target);
+    megaMenuHost?.focusL1Index(index);
   }
-}
-
-function syncL2ActiveState() {
-  const activeIndex = getVisibleL2Index();
-  const l2Items = [...l2List.querySelectorAll('.l2-item[data-index]')];
-  l2Items.forEach((item) => {
-    const itemIndex = Number(item.dataset.index);
-    const isActive = Number.isFinite(itemIndex) && itemIndex === activeIndex;
-    item.dataset.active = isActive ? "true" : "false";
-  });
 }
 
 function setPreviewL2(index, { restoreFocus = false, fromFocus = false } = {}) {
   const previewChanged = menuState.previewL2Index !== index || menuState.previewingOverview;
   if (!previewChanged) return;
-  const fromOverviewPreview = menuState.previewingOverview;
   menuState.previewingOverview = false;
   menuState.previewL2Index = index;
-  if (fromFocus && !fromOverviewPreview) {
-    syncL2ActiveState();
-  } else {
-    renderL2();
-  }
-  renderL3();
+  renderDesktopColumns();
   if (restoreFocus) {
-    const target = l2List.querySelector(`.l2-item[data-index="${index}"]`);
-    setColumnFocus(l2List, ".l2-item", target);
+    megaMenuHost?.focusL2Index(index);
   }
 }
 
@@ -846,15 +599,9 @@ function setPreviewOverview({ restoreFocus = false, fromFocus = false } = {}) {
   if (menuState.previewL2Index === null && menuState.previewingOverview) return;
   menuState.previewL2Index = null;
   menuState.previewingOverview = true;
-  if (fromFocus) {
-    syncL2ActiveState();
-  } else {
-    renderL2();
-  }
-  renderL3();
+  renderDesktopColumns();
   if (restoreFocus) {
-    const target = l2List.querySelector(".l2-item--overview");
-    setColumnFocus(l2List, ".l2-item", target);
+    megaMenuHost?.focusL2Overview();
   }
 }
 
@@ -864,8 +611,7 @@ function clearPreviewL2() {
   }
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
-  renderL2();
-  renderL3();
+  renderDesktopColumns();
 }
 
 /** Cancel any pending delayed preview reset. Called when the pointer
@@ -888,525 +634,139 @@ function schedulePreviewClear() {
   }, 120);
 }
 
-function renderL1() {
-  const selected = getSelectedL1();
+function getMegaMenuViewModel() {
   const panel = getPanelConfig();
-  const l1Items = getPanelL1();
-  const maxRovingIndex = l1Items.length;
-  const rovingIndex = Math.max(0, Math.min(menuState.l1FocusIndex, maxRovingIndex));
-  menuState.l1FocusIndex = rovingIndex;
-  l1List.innerHTML = "";
-
-  l1Items.forEach((l1Item, index) => {
-    const li = document.createElement("li");
-    const button = document.createElement("button");
-    const label = document.createElement("span");
-    const caret = document.createElement("span");
-
-    button.type = "button";
-    button.className = "l1-item";
-    button.dataset.column = "l1";
-    button.dataset.index = String(index);
-    button.dataset.selected = index === menuState.selectedL1Index ? "true" : "false";
-    button.tabIndex = index === rovingIndex ? 0 : -1;
-
-    label.className = "l1-label";
-    label.textContent = l1Item.label;
-
-    caret.className = "l1-caret ph ph-caret-right";
-    caret.setAttribute("aria-hidden", "true");
-
-    button.append(label, caret);
-    button.addEventListener("click", () => {
-      setSelectedL1(index, { restoreFocus: true });
-      openMenu();
-    });
-
-    li.appendChild(button);
-    l1List.appendChild(li);
-  });
-
-  l1OverviewLink.textContent = panel?.overviewLabel || selected?.overviewLabel || "Overview";
-  l1OverviewLink.href = panel?.overviewHref || selected?.overviewHref || "#";
-  l1OverviewLink.dataset.column = "l1";
-  l1OverviewLink.dataset.index = String(l1Items.length);
-  l1OverviewLink.tabIndex = rovingIndex === l1Items.length ? 0 : -1;
-}
-
-function renderL2() {
-  if (isMobileViewport()) {
-    l2List.innerHTML = "";
-    return;
-  }
-
   const selectedL1 = getSelectedL1();
-  const l2Items = selectedL1?.l2 || [];
-  const activeIndex = getVisibleL2Index();
-  l2List.innerHTML = "";
-
-  l2Items.forEach((l2Item, index) => {
-    const li = document.createElement("li");
-    const link = document.createElement("a");
-    const label = document.createElement("span");
-    const caret = document.createElement("span");
-    const isActive = index === activeIndex;
-
-    link.className = "l2-item";
-    link.href = l2Item.href || "#";
-    link.dataset.column = "l2";
-    link.dataset.index = String(index);
-    link.dataset.active = isActive ? "true" : "false";
-    link.tabIndex = index === 0 ? 0 : -1;
-    label.className = "l2-label";
-    label.textContent = l2Item.label;
-    caret.className = "l1-caret l2-caret ph ph-caret-right";
-    caret.setAttribute("aria-hidden", "true");
-    link.append(label, caret);
-
-    link.addEventListener("mouseenter", () => setPreviewL2(index));
-    link.addEventListener("focus", () => setPreviewL2(index, { fromFocus: true, restoreFocus: true }));
-
-    li.appendChild(link);
-    l2List.appendChild(li);
-  });
-
   const l2Overview = getL2Overview(selectedL1);
-  if (l2Overview) {
-    const separatorLi = document.createElement("li");
-    separatorLi.className = "l2-separator-item";
-    separatorLi.setAttribute("aria-hidden", "true");
-
-    const separatorLine = document.createElement("span");
-    separatorLine.className = "l2-separator-line";
-    separatorLi.appendChild(separatorLine);
-    l2List.appendChild(separatorLi);
-
-    const overviewLi = document.createElement("li");
-    const overviewLink = document.createElement("a");
-    const overviewLabel = document.createElement("span");
-    const overviewCaret = document.createElement("span");
-    overviewLink.className = "l2-item l2-item--overview";
-    overviewLink.href = l2Overview.href || "#";
-    overviewLink.dataset.column = "l2";
-    overviewLink.dataset.index = String(l2Items.length);
-    overviewLink.tabIndex = l2Items.length === 0 ? 0 : -1;
-    overviewLabel.className = "l2-label";
-    overviewLabel.textContent = l2Overview.label || "Overview";
-    overviewCaret.className = "l1-caret l2-caret ph ph-caret-right";
-    overviewCaret.setAttribute("aria-hidden", "true");
-    overviewLink.append(overviewLabel, overviewCaret);
-    overviewLink.addEventListener("mouseenter", () => setPreviewOverview());
-    overviewLink.addEventListener("focus", () => setPreviewOverview({ fromFocus: true, restoreFocus: true }));
-    overviewLi.appendChild(overviewLink);
-    l2List.appendChild(overviewLi);
-  }
-}
-
-function renderL3() {
-  if (isMobileViewport()) {
-    l3Description.textContent = "";
-    l3Description.hidden = true;
-    l3List.innerHTML = "";
-    l3List.hidden = true;
-    return;
-  }
-
   const showingPreview = menuState.previewL2Index !== null;
-  const selectedL2 = getSelectedL1()?.l2?.[menuState.selectedL2Index] || null;
+  const selectedL2 = selectedL1?.l2?.[menuState.selectedL2Index] || null;
   const previewL2 = getVisibleL2();
-  const selectedL1 = getSelectedL1();
-  const l2Overview = getL2Overview(selectedL1);
   const descriptionText = menuState.previewingOverview
     ? l2Overview?.description || ""
     : showingPreview
       ? ""
       : selectedL2?.description || "";
 
-  l3Description.textContent = descriptionText;
-  l3Description.hidden = !descriptionText;
-
-  l3List.innerHTML = "";
-  l3List.hidden = !showingPreview || menuState.previewingOverview;
-
-  if (!showingPreview || menuState.previewingOverview) {
-    return;
-  }
-
-  (previewL2?.l3 || []).forEach((l3Item, index) => {
-    const li = document.createElement("li");
-    const link = document.createElement("a");
-    if (!l3Item.href) {
-      console.warn(`Missing href for L3 item "${l3Item.label || "(unnamed)"}" in panel "${menuState.activePanelKey}"`);
-    }
-    link.className = "l3-item";
-    link.href = l3Item.href || "#";
-    link.textContent = l3Item.label;
-    link.dataset.column = "l3";
-    link.dataset.index = String(index);
-    link.tabIndex = index === 0 ? 0 : -1;
-    li.appendChild(link);
-    l3List.appendChild(li);
-  });
+  return {
+    panelLabel: panel?.ariaLabel || "Site menu",
+    isMobile: isMobileViewport(),
+    l1Items: getPanelL1(),
+    selectedL1Index: menuState.selectedL1Index,
+    l1FocusIndex: menuState.l1FocusIndex,
+    l2Items: selectedL1?.l2 || [],
+    activeL2Index: getVisibleL2Index(),
+    l2Overview,
+    previewingOverview: menuState.previewingOverview,
+    showingPreview,
+    l3Items: showingPreview && !menuState.previewingOverview ? (previewL2?.l3 || []) : [],
+    l3Description: descriptionText,
+  };
 }
 
 function renderDesktopColumns() {
-  renderL1();
-  renderL2();
-  renderL3();
+  refreshDomRefs();
+  megaMenuHost?.updateView(getMegaMenuViewModel());
 }
 
 function renderMenuPanel() {
+  refreshDomRefs();
   const panel = getPanelConfig();
   if (!panel) {
-    l1List.innerHTML = "";
-    l2List.innerHTML = "";
-    l3List.innerHTML = "";
-    l3Description.textContent = "";
+    megaMenuHost?.updateView({
+      panelLabel: "Site menu",
+      isMobile: isMobileViewport(),
+      l1Items: [],
+      l2Items: [],
+      l3Items: [],
+      l3Description: "",
+    });
     return;
   }
 
-  megaMenu.setAttribute("aria-label", panel.ariaLabel || "Site menu");
   if (isMobileViewport()) {
+    megaMenuHost?.updateView({ panelLabel: panel.ariaLabel || "Site menu", isMobile: true });
     renderMobileDrawerPanel();
     return;
   }
   renderDesktopColumns();
 }
 
-/** Wire up vertical arrow-key navigation within a single column.
- *  Implements the WAI-ARIA "roving tabindex" pattern: only the
- *  focused item has tabindex=0; the rest are set to -1. */
-function setupColumnArrowNav(container, selector) {
-  container.addEventListener("keydown", (event) => {
-    if (isMobileViewport()) return;
-    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
-    const items = [...container.querySelectorAll(selector)];
-    const currentIndex = items.indexOf(document.activeElement);
-    if (currentIndex === -1 || items.length === 0) return;
-
-    event.preventDefault();
-    let nextIndex = currentIndex;
-    if (event.key === "ArrowDown") nextIndex = (currentIndex + 1) % items.length;
-    if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + items.length) % items.length;
-    if (event.key === "Home") nextIndex = 0;
-    if (event.key === "End") nextIndex = items.length - 1;
-
-    items.forEach((item) => {
-      item.tabIndex = -1;
-    });
-    items[nextIndex].tabIndex = 0;
-    items[nextIndex].focus();
-    if (container === l1Column) {
-      const rovingIndex = Number(items[nextIndex].dataset.index);
-      if (!Number.isNaN(rovingIndex)) {
-        menuState.l1FocusIndex = rovingIndex;
-      }
-    }
-  });
-}
-
-function setColumnFocus(container, selector, target) {
-  if (!target) return false;
-  const items = [...container.querySelectorAll(selector)];
-  if (items.length === 0) return false;
-  items.forEach((item) => {
-    item.tabIndex = item === target ? 0 : -1;
-  });
-  target.focus();
-  return true;
-}
-
 function focusSelectedL1() {
-  const target = l1List.querySelector('.l1-item[data-selected="true"]') || l1List.querySelector(".l1-item");
-  return setColumnFocus(l1Column, ".l1-item, #l1OverviewLink", target);
+  refreshDomRefs();
+  return megaMenuHost?.focusSelectedL1() || false;
 }
 
-function focusActiveL2() {
-  const target = l2List.querySelector('.l2-item[data-active="true"]')
-    || l2List.querySelector('.l2-item[tabindex="0"]')
-    || l2List.querySelector(".l2-item");
-  return setColumnFocus(l2List, ".l2-item", target);
-}
-
-function focusActiveL3() {
-  if (l3List.hidden) return false;
-  const target = l3List.querySelector('.l3-item[tabindex="0"]') || l3List.querySelector(".l3-item");
-  return setColumnFocus(l3List, ".l3-item", target);
-}
-
-/** Wire up horizontal arrow-key navigation across columns (L1 ↔ L2 ↔ L3).
- *  ArrowRight moves deeper; ArrowLeft moves back toward L1. */
-function setupColumnCrossNav() {
-  megaMenu.addEventListener("keydown", (event) => {
-    if (isMobileViewport()) return;
-    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-    const activeElement = document.activeElement;
-    if (!(activeElement instanceof HTMLElement)) return;
-
-    const column = activeElement.dataset.column;
-    let moved = false;
-
-    if (event.key === "ArrowRight") {
-      if (column === "l1") moved = focusActiveL2();
-      if (column === "l2") moved = focusActiveL3();
-    }
-
-    if (event.key === "ArrowLeft") {
-      if (column === "l3") moved = focusActiveL2();
-      if (column === "l2") moved = focusSelectedL1();
-    }
-
-    if (moved) {
-      event.preventDefault();
-    }
-  });
-}
-
-function wirePreviewClearOnFocusOut(container, keepInColumns = []) {
-  if (!container) return;
-  container.addEventListener("focusout", () => {
-    window.requestAnimationFrame(() => {
-      const activeElement = document.activeElement;
-      if (activeElement && keepInColumns.some((node) => node && node.contains(activeElement))) {
-        return;
-      }
-      clearPreviewL2();
-    });
-  });
-}
-
-/* ── Event wiring ────────────────────────────────────────────────────
-   All DOM event listeners are registered here, during init().
-   Interaction patterns to be aware of:
-   - Desktop: pointer + keyboard, three-column preview model
-   - Mobile (<768px): touch-driven drill-down drawer
-   - Preview-clear coordination: L1, L2, and L3 columns share a
-     single debounced timer so the preview survives brief pointer
-     gaps between adjacent columns (see schedulePreviewClear).
-   - Focus management: roving tabindex within columns, cross-column
-     arrow keys, and focus-exit detection that auto-closes the menu. */
 function setupEvents() {
-  if (navToggle) {
-    navToggle.addEventListener("click", () => {
-      if (isMobileViewport()) {
-        if (!menuState.mobileNavOpen) {
-          setMobileSearchOpen(false);
-        }
-        setMobileNavOpen(!menuState.mobileNavOpen);
-        return;
-      }
-      if (menuState.menuOpen) {
-        closeMenu();
-      } else {
-        openMenu();
-      }
-    });
+  refreshDomRefs();
+  const binder = window.bindFDICMenuEvents;
+  if (typeof binder !== "function") {
+    throw new Error("FDIC events module missing. Ensure events.js is loaded before script.js.");
   }
-
-  if (mobileSearchToggle) {
-    mobileSearchToggle.addEventListener("click", () => {
-      if (!isPhoneViewport()) return;
-      const nextOpen = !menuState.mobileSearchOpen;
-      if (nextOpen) {
-        closeMobileNav();
-      }
-      setMobileSearchOpen(nextOpen, { focus: nextOpen });
-    });
-  }
-
-  mobileNavMediaQuery.addEventListener("change", () => {
-    syncMobileNavState();
-    renderTopNav();
-    renderMenuPanel();
+  binder({
+    menuState,
+    getDom: () => {
+      refreshDomRefs();
+      return {
+        navToggle,
+        mobileSearchToggle,
+        mobileSearchRow,
+        mobileNavMediaQuery,
+        phoneSearchMediaQuery,
+        topNav,
+        megaMenuHost,
+        navList,
+        megaMenu,
+        l2List,
+        l3Column,
+        l1Column,
+      };
+    },
+    isMobileViewport,
+    isPhoneViewport,
+    setMobileSearchOpen,
+    closeMobileNav,
+    setMobileNavOpen,
+    closeMenu,
+    openMenu,
+    syncMobileNavState,
+    renderTopNav,
+    renderMenuPanel,
+    syncMobileSearchState,
+    activateTopNavPanel,
+    previewTopNavPanel,
+    handleTopNavRovingRequest,
+    getMobileDrawerFocusableItems,
+    handleMobileDelegatedClick: (target) => mobileDrawerController?.handleDelegatedMobileDrillClick(target),
+    scheduleMenuSystemFocusExitCheck,
+    cancelPreviewClear,
+    schedulePreviewClear,
+    setPreviewL2,
+    setPreviewOverview,
+    renderMobileDrawerPanel,
+    getTopNavItems,
+    setSelectedL1,
   });
-
-  phoneSearchMediaQuery.addEventListener("change", () => {
-    syncMobileSearchState();
-  });
-
-  navList.addEventListener("keydown", (event) => {
-    if (isMobileViewport()) {
-      if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
-        return;
-      }
-      const items = getMobileDrawerFocusableItems();
-      if (items.length === 0) return;
-      const currentIndex = items.indexOf(document.activeElement);
-
-      event.preventDefault();
-      let nextIndex = 0;
-      if (event.key === "Home") nextIndex = 0;
-      if (event.key === "End") nextIndex = items.length - 1;
-      if (event.key === "ArrowDown") {
-        nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % items.length;
-      }
-      if (event.key === "ArrowUp") {
-        nextIndex = currentIndex === -1 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length;
-      }
-      items[nextIndex].focus();
-      return;
-    }
-
-    const target = event.target;
-    if (!(target instanceof HTMLElement) || !target.classList.contains("fdic-nav-item")) {
-      return;
-    }
-
-    const items = getTopNavItems();
-    if (items.length === 0) return;
-    const currentIndex = items.indexOf(target);
-    if (currentIndex === -1) return;
-
-    if (["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) {
-      event.preventDefault();
-      if (event.key === "ArrowRight") menuState.topNavFocusIndex = (currentIndex + 1) % items.length;
-      if (event.key === "ArrowLeft") menuState.topNavFocusIndex = (currentIndex - 1 + items.length) % items.length;
-      if (event.key === "Home") menuState.topNavFocusIndex = 0;
-      if (event.key === "End") menuState.topNavFocusIndex = items.length - 1;
-      applyTopNavRoving({ focus: true });
-      return;
-    }
-
-    if ((event.key === "Enter" || event.key === " ") && target.classList.contains("fdic-nav-item--button")) {
-      event.preventDefault();
-      menuState.moveFocusIntoMenuOnOpen = true;
-      target.click();
-    }
-  });
-
-  document.addEventListener("pointerdown", (event) => {
-    if (!(event.target instanceof HTMLElement)) return;
-    if (navToggle && navToggle.contains(event.target)) return;
-
-    if (menuState.menuOpen) {
-      if (megaMenu.contains(event.target)) return;
-
-      const navButton = event.target.closest(".fdic-nav-item--button");
-      if (navButton && navList.contains(navButton)) return;
-
-      closeMenu();
-    }
-
-    if (menuState.mobileNavOpen && navToggle) {
-      if (navList.contains(event.target)) return;
-      closeMobileNav();
-    }
-
-    if (menuState.mobileSearchOpen && mobileSearchToggle && mobileSearchRow) {
-      if (mobileSearchToggle.contains(event.target) || mobileSearchRow.contains(event.target)) return;
-      setMobileSearchOpen(false);
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    if (menuState.mobileSearchOpen) {
-      setMobileSearchOpen(false);
-      if (mobileSearchToggle) mobileSearchToggle.focus();
-      return;
-    }
-    if (isMobileViewport() && menuState.mobileNavOpen) {
-      if (menuState.mobileDrillPath.length > 0) {
-        event.preventDefault();
-        menuState.mobileDrillPath = menuState.mobileDrillPath.slice(0, -1);
-        renderMobileDrawerPanel();
-        const button = navList.querySelector(".mobile-drill-trigger");
-        if (button) button.focus();
-        return;
-      }
-    }
-    closeMenu();
-    closeMobileNav();
-    const activeButton = navList.querySelector(
-      `.fdic-nav-item--button[data-panel-key="${menuState.activePanelKey}"]`
-    );
-    if (activeButton) activeButton.focus();
-  });
-
-  /* Preview-clear coordination: L1, L2, and L3 columns cooperate so
-     that moving the pointer between adjacent columns keeps the L2→L3
-     preview alive, but leaving the column group clears it after a
-     short delay (PREVIEW_CLEAR_DELAY_MS in schedulePreviewClear). */
-  l2List.addEventListener("mouseenter", cancelPreviewClear);
-  l2List.addEventListener("mouseleave", (event) => {
-    if (l3Column && l3Column.contains(event.relatedTarget)) {
-      return;
-    }
-    if (l1Column && l1Column.contains(event.relatedTarget)) {
-      schedulePreviewClear();
-      return;
-    }
-    schedulePreviewClear();
-  });
-
-  if (l1Column) {
-    l1Column.addEventListener("mouseleave", (event) => {
-      if (l2List.contains(event.relatedTarget)) {
-        cancelPreviewClear();
-        return;
-      }
-      schedulePreviewClear();
-    });
-  }
-
-  if (l3Column) {
-    l3Column.addEventListener("mouseenter", cancelPreviewClear);
-    l3Column.addEventListener("mouseleave", (event) => {
-      if (l2List.contains(event.relatedTarget)) {
-        return;
-      }
-      schedulePreviewClear();
-    });
-    l3Column.addEventListener("focusin", cancelPreviewClear);
-    wirePreviewClearOnFocusOut(l3Column, [l3Column, l2List]);
-  }
-
-  wirePreviewClearOnFocusOut(l2List, [l2List, l3Column]);
-
-  megaMenu.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);
-  navList.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);
-
-  if (l1Column) {
-    setupColumnArrowNav(l1Column, ".l1-item, #l1OverviewLink");
-  }
-  setupColumnArrowNav(l2List, ".l2-item");
-  setupColumnArrowNav(l3List, ".l3-item");
-  setupColumnCrossNav();
 }
 
-async function init() {
-  const missingElements = getMissingRequiredElements();
-  if (missingElements.length > 0) {
-    console.error(
-      `FDICnet menu initialization aborted: missing required DOM element(s): ${missingElements.join(", ")}`
-    );
-    return;
-  }
-
-  try {
-    menuState.siteContent = await loadContent();
-  } catch (error) {
-    console.error("Failed to load site content:", error);
-    renderContentLoadFallback();
-    return;
-  }
-
-  const navMenuItem = (menuState.siteContent.header?.nav || []).find((item) => item.kind === "menu");
-  menuState.activePanelKey = menuState.siteContent.menu?.defaultPanel || navMenuItem?.panelKey || navMenuItem?.id || null;
-
-  applyHeaderContent();
-  renderTopNav();
-  syncMobileNavState();
-  syncMobileSearchState();
-  renderPageContent();
-  renderMenuPanel();
-  setupEvents();
-  megaMenu.hidden = true;
-  megaMenu.setAttribute("aria-hidden", "true");
-
-  if (menuState.siteContent.menu?.openByDefault && !isMobileViewport()) {
-    openMenu();
-  }
+const initializerFactory = window.createFDICMenuInitializer;
+if (typeof initializerFactory !== "function") {
+  throw new Error("FDIC init module missing. Ensure init.js is loaded before script.js.");
 }
 
-init();
+const menuInitializer = initializerFactory({
+  menuState,
+  refreshDomRefs,
+  getDom,
+  isMobileViewport,
+  applyHeaderContent,
+  renderTopNav,
+  initializeMobileDrawerController,
+  syncMobileNavState,
+  syncMobileSearchState,
+  renderPageContent,
+  renderMenuPanel,
+  setupEvents,
+  openMenu,
+});
+
+menuInitializer.init();
