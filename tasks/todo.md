@@ -1,5 +1,27 @@
 # TODO
 
+## Current Task (FDICnet Unified Focus Ring Strategy)
+- [x] Define a single tokenized focus ring strategy with standard and contained variants.
+- [x] Apply tokens across desktop mega-menu and mobile drawer interactive controls.
+- [x] Validate mobile clipping is resolved and desktop focus visibility remains clear.
+
+## Review / Results (FDICnet Unified Focus Ring Strategy)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - introduced shared focus tokens:
+    - `--focus-ring-standard-shadow` (desktop/outset)
+    - `--focus-ring-contained-shadow` (mobile/inset)
+    - `--menu-focus-ring-shadow` (single consumption token)
+  - switched menu focus styles to consume `--menu-focus-ring-shadow` across:
+    - top-level header controls (`.icon-button`, `.fdic-nav-item`, `.fdic-nav-toggle`)
+    - desktop mega-menu rows (`.l1-item`, `.l2-item`, `.l3-item`)
+    - mobile drawer rows/crumbs (`.mobile-drill-*`, `.mobile-drill-crumb`)
+  - on mobile breakpoint (`max-width: 768px`), set `--menu-focus-ring-shadow` to contained/inset variant to avoid clipping in drawer contexts.
+- Validation:
+  - syntax checks passed for related JS modules.
+  - browser validation via Chrome DevTools MCP confirmed:
+    - mobile focused drawer trigger uses inset ring shadow (`inset ...`) from contained token
+    - desktop focused L2 item uses standard outset ring shadow (`0 0 0 ...`) from standard token
+
 ## Current Task (FDICnet Mobile Breadcrumb Best-Practice Upgrade)
 - [x] Replace visible `You are here:` text with semantic breadcrumb UI.
 - [x] Make parent breadcrumb nodes clickable to drill up.
