@@ -385,6 +385,14 @@
       const nextPath = decodeMobilePath(drillControl.dataset.mobileDrillPath);
       if (!nextPath) return false;
 
+      if (drillControl.classList.contains("mobile-drill-trigger")) {
+        drillControl.setAttribute("aria-expanded", "true");
+        const triggerLabel = drillControl.querySelector(".mobile-drill-label")?.textContent?.trim();
+        if (triggerLabel && typeof announceMenuContext === "function") {
+          announceMenuContext(`Opening ${triggerLabel}.`);
+        }
+      }
+
       triggerLightHaptic();
       menuState.mobileDrillPath = nextPath;
       if (typeof nextPath[0] === "string") {

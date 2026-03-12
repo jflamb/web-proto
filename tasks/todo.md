@@ -1,5 +1,18 @@
 # TODO
 
+## Current Task (FDICnet Mobile Drill aria-expanded Transition Feedback)
+- [x] Set active mobile drill trigger `aria-expanded=\"true\"` before drill re-render.
+- [x] Add immediate live-region transition announcement for drill trigger activation.
+- [ ] Run browser + SR behavior validation.
+
+## Review / Results (FDICnet Mobile Drill aria-expanded Transition Feedback)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - when a `.mobile-drill-trigger` is activated, it now sets `aria-expanded=\"true\"` before the panel re-renders.
+  - emits immediate live-region text (`Opening {label}.`) prior to render transition.
+- Result: screen reader users get deterministic expansion feedback even though the next panel is rebuilt.
+- Validation note:
+  - JS syntax checks pending in this commit step.
+
 ## Current Task (FDICnet Mobile Drawer Landmark/Heading Parity)
 - [x] Add named landmark/heading structure per mobile drill level.
 - [ ] Run browser validation for screen-reader landmark orientation.
