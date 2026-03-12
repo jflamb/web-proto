@@ -674,11 +674,18 @@ function schedulePreviewClear() {
 
 function getMegaMenuViewModel() {
   const panel = getPanelConfig();
+  const panelLabel = (menuState.siteContent?.header?.nav || []).find(
+    (item) => item.kind === "menu" && (item.panelKey || item.id) === menuState.activePanelKey
+  )?.label || panel?.overviewLabel || "Menu";
   const selectedL1 = getSelectedL1();
   const l2Overview = getL2Overview(selectedL1);
   const showingPreview = menuState.previewL2Index !== null;
   const selectedL2 = selectedL1?.l2?.[menuState.selectedL2Index] || null;
   const previewL2 = getVisibleL2();
+  const activeL2ForHeading = showingPreview && !menuState.previewingOverview ? previewL2 : selectedL2;
+  const l1HeadingLabel = `${panelLabel} sections`;
+  const l2HeadingLabel = `${selectedL1?.label || "Section"} links`;
+  const l3HeadingLabel = `${activeL2ForHeading?.label || "Section"} resources`;
   const descriptionText = menuState.previewingOverview
     ? l2Overview?.description || ""
     : showingPreview
@@ -698,6 +705,9 @@ function getMegaMenuViewModel() {
     showingPreview,
     l3Items: showingPreview && !menuState.previewingOverview ? (previewL2?.l3 || []) : [],
     l3Description: descriptionText,
+    l1HeadingLabel,
+    l2HeadingLabel,
+    l3HeadingLabel,
   };
 }
 
