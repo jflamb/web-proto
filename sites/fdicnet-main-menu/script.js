@@ -317,6 +317,7 @@ function syncMobileNavState() {
     if (mobileNavBackdrop) {
       mobileNavBackdrop.hidden = true;
       mobileNavBackdrop.classList.remove("is-visible");
+      mobileNavBackdrop.tabIndex = -1;
     }
     navToggle.setAttribute("aria-expanded", "false");
     syncMobileToggleButton();
@@ -332,6 +333,7 @@ function syncMobileNavState() {
   if (mobileNavBackdrop) {
     mobileNavBackdrop.hidden = !menuState.mobileNavOpen;
     mobileNavBackdrop.classList.toggle("is-visible", menuState.mobileNavOpen);
+    mobileNavBackdrop.tabIndex = menuState.mobileNavOpen ? 0 : -1;
   }
   syncMobileBackgroundInertState();
 
