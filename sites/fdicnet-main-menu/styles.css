@@ -1140,6 +1140,11 @@ body {
     border-top: 1px solid var(--ds-border-divider);
   }
 
+  .mobile-drill-separator-item + .mobile-drill-item,
+  .mobile-drill-separator-item + .mobile-drill-link-item {
+    border-top: 0;
+  }
+
   .mobile-drawer-panel.is-entering .mobile-drill-item,
   .mobile-drawer-panel.is-entering .mobile-drill-link-item {
     opacity: 0;
