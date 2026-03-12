@@ -468,14 +468,14 @@ body {
   font-family: inherit;
   font-size: 18px;
   font-weight: 400;
-  line-height: 1.375;
+  line-height: 1.45;
   cursor: pointer;
   transition: background-color 120ms ease, color 120ms ease;
 }
 
 .l1-item {
   width: 100%;
-  min-height: 41px;
+  min-height: 44px;
   padding: 8px 16px 8px 0;
   display: flex;
   align-items: center;
@@ -497,7 +497,7 @@ body {
   align-items: center;
   width: 100%;
   max-width: 100%;
-  min-height: 41px;
+  min-height: 44px;
   padding: 8px 0;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -621,6 +621,14 @@ body {
   flex: 1;
   min-width: 0;
   text-decoration: none;
+}
+
+.menu-caret-spacer {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  margin-left: 12px;
+  display: inline-flex;
 }
 
 .l2-caret {
@@ -1028,8 +1036,8 @@ body {
     display: flex;
     font-family: inherit;
     font-size: var(--ds-font-size-md);
-    line-height: 1.375;
-    min-height: 44px;
+    line-height: 1.45;
+    min-height: 46px;
     padding: 8px var(--ds-spacing-md);
     text-align: left;
     text-decoration: none;
@@ -1061,11 +1069,21 @@ body {
   }
 
   .mobile-drill-link {
+    display: flex;
+    justify-content: space-between;
     color: var(--menu-link);
     font-weight: 400;
     text-decoration: underline;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
+  }
+
+  .mobile-drill-link::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin-left: 12px;
   }
 
   .mobile-drill-current-link {
