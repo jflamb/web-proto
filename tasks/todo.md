@@ -2578,3 +2578,16 @@
   - `.l1-caret` now has `margin-left: 12px`.
   - `.l2-caret` now has `margin-left: 12px` (replacing `auto`).
 - Result: wrapped or long labels keep a clearer visual gap before the chevron.
+
+## Current Task (FDICnet Desktop Column Heading Semantics)
+- [x] Replace generic desktop column headings with dynamic content-based labels.
+
+## Review / Results (FDICnet Desktop Column Heading Semantics)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - desktop `#l1Heading`, `#l2Heading`, `#l3Heading` are now set dynamically in `updateView(...)`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added content-aware heading labels in the view model:
+    - `"{Panel} sections"`
+    - `"{Selected L1} links"`
+    - `"{Active L2} resources"`
+- Result: screen reader column context is meaningful and reflects current content.

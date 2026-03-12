@@ -179,17 +179,17 @@ class FDICMegaMenu extends HTMLElement {
         <section id="megaMenu" class="mega-menu" aria-label="Main menu">
           <div class="fdic-shell mega-menu-inner">
             <section class="mega-col mega-col--l1" aria-labelledby="l1Heading">
-              <h2 id="l1Heading" class="sr-only">Level 1</h2>
+              <h2 id="l1Heading" class="sr-only">Menu sections</h2>
               <ul id="l1List" class="menu-list" aria-labelledby="l1Heading"></ul>
             </section>
 
             <section class="mega-col mega-col--l2" aria-labelledby="l2Heading">
-              <h2 id="l2Heading" class="sr-only">Level 2</h2>
+              <h2 id="l2Heading" class="sr-only">Section links</h2>
               <ul id="l2List" class="menu-list" aria-labelledby="l2Heading"></ul>
             </section>
 
             <section class="mega-col mega-col--l3" aria-labelledby="l3Heading">
-              <h2 id="l3Heading" class="sr-only">Level 3</h2>
+              <h2 id="l3Heading" class="sr-only">Resources</h2>
               <div id="l3Description" class="menu-description"></div>
               <ul id="l3List" class="menu-list menu-list--l3" role="list"></ul>
             </section>
@@ -236,6 +236,18 @@ class FDICMegaMenu extends HTMLElement {
     return this.querySelector("#l3Description");
   }
 
+  get l1Heading() {
+    return this.querySelector("#l1Heading");
+  }
+
+  get l2Heading() {
+    return this.querySelector("#l2Heading");
+  }
+
+  get l3Heading() {
+    return this.querySelector("#l3Heading");
+  }
+
   updateView({
     panelLabel = "Site menu",
     isMobile = false,
@@ -249,6 +261,9 @@ class FDICMegaMenu extends HTMLElement {
     showingPreview = false,
     l3Items = [],
     l3Description = "",
+    l1HeadingLabel = "Menu sections",
+    l2HeadingLabel = "Section links",
+    l3HeadingLabel = "Resources",
   } = {}) {
     this.isMobileView = isMobile;
     const megaMenu = this.megaMenuElement;
@@ -257,6 +272,9 @@ class FDICMegaMenu extends HTMLElement {
     }
 
     if (!this.l1List || !this.l2List || !this.l3List || !this.l3Description) return;
+    if (this.l1Heading) this.l1Heading.textContent = l1HeadingLabel || "Menu sections";
+    if (this.l2Heading) this.l2Heading.textContent = l2HeadingLabel || "Section links";
+    if (this.l3Heading) this.l3Heading.textContent = l3HeadingLabel || "Resources";
 
     if (isMobile) {
       this.l1List.innerHTML = "";
