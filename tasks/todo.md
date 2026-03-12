@@ -2600,3 +2600,11 @@
   - `.l2-item[data-active="true"]` now has a subtle active background tint and accent left inset border.
   - active L2 label text is underlined to match navigation affordance patterns.
 - Result: users can identify the current non-hover baseline L2 item at a glance, and see where L3 will revert after hover preview clears.
+
+## Current Task (FDICnet Top Nav ArrowDown Entry)
+- [x] Support `ArrowDown` on desktop top-nav buttons to open/focus into mega-menu.
+
+## Review / Results (FDICnet Top Nav ArrowDown Entry)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - `ArrowDown` on a top-nav menu button now triggers activation with `focusMenuOnActivate=true`.
+- Result: keyboard users can enter the mega-menu directly from top-nav with ArrowDown (without requiring Enter/Space first).
