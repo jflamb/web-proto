@@ -581,9 +581,9 @@ function scheduleMenuSystemFocusExitCheck() {
         return;
       }
 
-      // During keyboard-driven rerenders, focus can briefly fall back to body.
-      // Retry once before treating it as a real focus exit.
-      if ((activeElement === document.body || activeElement === document.documentElement) && attempt < 1) {
+      // During keyboard-driven rerenders, focus can briefly fall back to body
+      // for multiple frames. Retry before treating it as a real focus exit.
+      if ((activeElement === document.body || activeElement === document.documentElement) && attempt < 3) {
         runCheck(attempt + 1);
         return;
       }

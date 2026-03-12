@@ -58,6 +58,8 @@
   --menu-hover-overlay: rgba(0, 110, 190, 0.09); /* Shared hover/focus bg */
   --menu-focus-inner: #ffffff;                  /* Focus ring: white inner */
   --menu-focus-ring: var(--ds-border-input-focus); /* Focus ring: accent outer */
+  --menu-focus-inset: inset 0 0 0 2px rgba(0, 94, 162, 0.35);
+  --menu-focus-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
   --menu-bottom-accent: #84dbff;
   --layout-masthead-height: 83px;
   --layout-top-nav-item-height: 48px;
@@ -521,7 +523,7 @@ body {
   left: -16px;
   pointer-events: none;
   z-index: 2;
-  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
+  box-shadow: var(--menu-focus-shadow);
 }
 
 /* Active/selected L1 item remains white when focused; focus is shown by
@@ -628,16 +630,9 @@ body {
   position: relative;
   z-index: 2;
   outline: none;
-  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
+  box-shadow: var(--menu-focus-inset), var(--menu-focus-shadow);
   background: var(--menu-hover-overlay);
   text-decoration-thickness: 2px;
-}
-
-.l2-item:focus-visible {
-  box-shadow:
-    inset 4px 0 0 var(--menu-focus-ring),
-    0 0 0 2px var(--menu-focus-inner),
-    0 0 0 4px var(--menu-focus-ring);
 }
 
 .l2-item {
@@ -650,7 +645,18 @@ body {
 
 .l2-item[data-active="true"] {
   background: var(--menu-hover-overlay);
-  box-shadow: inset 3px 0 0 var(--fdic-accent);
+  position: relative;
+}
+
+.l2-item[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--fdic-accent);
+  pointer-events: none;
 }
 
 .l2-item[data-active="true"] .l2-label {
@@ -1115,7 +1121,7 @@ body {
   .mobile-drill-link:focus-visible,
   .mobile-drill-current-link:focus-visible,
   .mobile-drill-back:focus-visible {
-    box-shadow: inset 0 0 0 2px var(--menu-focus-inner), inset 0 0 0 4px var(--menu-focus-ring);
+    box-shadow: var(--menu-focus-inset), var(--menu-focus-shadow);
     background: var(--menu-hover-overlay);
     position: relative;
     z-index: 1;

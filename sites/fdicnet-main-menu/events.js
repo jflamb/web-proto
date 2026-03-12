@@ -177,7 +177,7 @@
         if (!Number.isFinite(index)) return;
         if (fromFocus) {
           clearPreviewTimer("l1");
-          deps.setSelectedL1(index, { restoreFocus: true });
+          deps.setSelectedL1(index, { restoreFocus: false });
           return;
         }
         scheduleHoverIntent("l1", () => {
@@ -197,7 +197,7 @@
         if (!Number.isFinite(index)) return;
         if (fromFocus) {
           clearPreviewTimer("l2");
-          setPreviewL2(index, { fromFocus: true, restoreFocus: true });
+          setPreviewL2(index, { fromFocus: true, restoreFocus: false });
           return;
         }
         scheduleHoverIntent("l2", () => {
