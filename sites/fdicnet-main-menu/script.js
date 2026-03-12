@@ -45,6 +45,9 @@ let mobileSearchToggle = null;
 let mobileSearchRow = null;
 let mobileSearchInput = null;
 let mobileNavBackdrop = null;
+let mainContent = null;
+let mastheadControls = null;
+let mastheadWordmark = null;
 let menuLiveRegion = null;
 let mobileDrawerController = null;
 let liveAnnouncementTimer = null;
@@ -70,6 +73,9 @@ function refreshDomRefs() {
   mobileSearchRow = document.getElementById("mobileSearchRow");
   mobileSearchInput = document.getElementById("mobileSearchInput");
   mobileNavBackdrop = document.getElementById("mobileNavBackdrop");
+  mainContent = document.querySelector("main.page-content");
+  mastheadControls = document.querySelector(".fdic-controls");
+  mastheadWordmark = document.querySelector(".fdic-wordmark");
   menuLiveRegion = document.getElementById("menuLiveRegion");
 }
 
@@ -96,6 +102,9 @@ function getDom() {
     mobileSearchRow,
     mobileSearchInput,
     mobileNavBackdrop,
+    mainContent,
+    mastheadControls,
+    mastheadWordmark,
     menuLiveRegion,
   };
 }
@@ -200,6 +209,23 @@ function setMobileSearchOpen(isOpen, { focus = false } = {}) {
   syncMobileSearchState({ focus });
 }
 
+function setInertState(element, isInert) {
+  if (!element) return;
+  if (isInert) {
+    element.setAttribute("inert", "");
+  } else {
+    element.removeAttribute("inert");
+  }
+}
+
+function syncMobileBackgroundInertState() {
+  const shouldInert = isMobileViewport() && menuState.mobileNavOpen;
+  setInertState(mainContent, shouldInert);
+  setInertState(mastheadControls, shouldInert);
+  setInertState(mastheadWordmark, shouldInert);
+  setInertState(mobileSearchRow, shouldInert);
+}
+
 function syncMobileToggleButton() {
   refreshDomRefs();
   if (!navToggle) return;
@@ -294,6 +320,7 @@ function syncMobileNavState() {
     }
     navToggle.setAttribute("aria-expanded", "false");
     syncMobileToggleButton();
+    syncMobileBackgroundInertState();
     return;
   }
   menuState.menuOpen = false;
@@ -306,6 +333,7 @@ function syncMobileNavState() {
     mobileNavBackdrop.hidden = !menuState.mobileNavOpen;
     mobileNavBackdrop.classList.toggle("is-visible", menuState.mobileNavOpen);
   }
+  syncMobileBackgroundInertState();
 
   if (menuState.mobileNavOpen) {
     navList.hidden = false;
