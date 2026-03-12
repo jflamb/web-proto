@@ -253,6 +253,21 @@
       });
     }
 
+    let mobileRegionCounter = 0;
+    function createMobileDrillRegion(panelContainer, headingText) {
+      const region = document.createElement("section");
+      region.className = "mobile-drill-region";
+      const heading = document.createElement("h2");
+      const headingId = `mobileDrillHeading-${mobileRegionCounter += 1}`;
+      heading.id = headingId;
+      heading.className = "sr-only";
+      heading.textContent = headingText || "Menu section";
+      region.setAttribute("aria-labelledby", headingId);
+      region.appendChild(heading);
+      panelContainer.appendChild(region);
+      return region;
+    }
+
     function getPanelLabel(panelKey, panelConfig) {
       const navMeta = (menuState.siteContent?.header?.nav || []).find(
         (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
@@ -315,7 +330,8 @@
 
       const [panelKey, l1Index, l2Index] = menuState.mobileDrillPath;
       if (!panelKey) {
-        renderMobileDrillRoot(panelContainer, panelKeys, menuState.siteContent);
+        const region = createMobileDrillRegion(panelContainer, "Main menu sections");
+        renderMobileDrillRoot(region, panelKeys, menuState.siteContent);
         announceMobileDrillContext(null, null, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
@@ -325,7 +341,8 @@
       const panelConfig = getPanelConfigByKey(panelKey);
       if (!panelConfig) {
         menuState.mobileDrillPath = [];
-        renderMobileDrillRoot(panelContainer, panelKeys, menuState.siteContent);
+        const region = createMobileDrillRegion(panelContainer, "Main menu sections");
+        renderMobileDrillRoot(region, panelKeys, menuState.siteContent);
         announceMobileDrillContext(null, null, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
@@ -333,7 +350,8 @@
       }
 
       if (typeof l1Index !== "number") {
-        renderMobileDrillL1(panelContainer, panelKey, panelConfig);
+        const region = createMobileDrillRegion(panelContainer, `${getPanelLabel(panelKey, panelConfig)} sections`);
+        renderMobileDrillL1(region, panelKey, panelConfig);
         announceMobileDrillContext(panelKey, panelConfig, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
@@ -341,14 +359,20 @@
       }
 
       if (typeof l2Index !== "number") {
-        renderMobileDrillL2(panelContainer, panelKey, panelConfig, l1Index);
+        const l1Item = (panelConfig.l1 || [])[l1Index];
+        const headingText = `${l1Item?.label || getPanelLabel(panelKey, panelConfig)} links`;
+        const region = createMobileDrillRegion(panelContainer, headingText);
+        renderMobileDrillL2(region, panelKey, panelConfig, l1Index);
         announceMobileDrillContext(panelKey, panelConfig, l1Index, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
         return;
       }
 
-      renderMobileDrillL3(panelContainer, panelKey, panelConfig, l1Index, l2Index);
+      const l1Item = (panelConfig.l1 || [])[l1Index];
+      const l2Item = (l1Item?.l2 || [])[l2Index];
+      const region = createMobileDrillRegion(panelContainer, `${l2Item?.label || "Section"} links`);
+      renderMobileDrillL3(region, panelKey, panelConfig, l1Index, l2Index);
       announceMobileDrillContext(panelKey, panelConfig, l1Index, l2Index, panelKeys);
       ensureMobileMenuFocus();
       animateMobileDrillReveal(panelContainer);

@@ -1,5 +1,17 @@
 # TODO
 
+## Current Task (FDICnet Mobile Drawer Landmark/Heading Parity)
+- [x] Add named landmark/heading structure per mobile drill level.
+- [ ] Run browser validation for screen-reader landmark orientation.
+
+## Review / Results (FDICnet Mobile Drawer Landmark/Heading Parity)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - each mobile drill render now creates a named `<section>` region with an `sr-only` `<h2>` and `aria-labelledby`.
+  - heading text is context-specific by level (e.g., main sections, panel sections, L1/L2 links).
+- Validation note:
+  - JS syntax checks pass.
+  - Browser/SR runtime validation pending due local Playwright launcher profile conflict.
+
 ## Current Task (FDICnet Live Region Announcements)
 - [x] Add a visually hidden polite live region for menu context announcements.
 - [x] Announce desktop top-level panel switches with item counts.
