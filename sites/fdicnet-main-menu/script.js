@@ -570,17 +570,28 @@ function openMenu({ focusMenu = false } = {}) {
 
 function scheduleMenuSystemFocusExitCheck() {
   refreshDomRefs();
-  window.requestAnimationFrame(() => {
-    if (!menuState.menuOpen || isMobileViewport()) return;
-    const activeElement = document.activeElement;
-    if (
-      activeElement &&
-      (megaMenu.contains(activeElement) || navList.contains(activeElement))
-    ) {
-      return;
-    }
-    closeMenu();
-  });
+  const runCheck = (attempt = 0) => {
+    window.requestAnimationFrame(() => {
+      if (!menuState.menuOpen || isMobileViewport()) return;
+      const activeElement = document.activeElement;
+      if (
+        activeElement &&
+        (megaMenu.contains(activeElement) || navList.contains(activeElement))
+      ) {
+        return;
+      }
+
+      // During keyboard-driven rerenders, focus can briefly fall back to body.
+      // Retry once before treating it as a real focus exit.
+      if ((activeElement === document.body || activeElement === document.documentElement) && attempt < 1) {
+        runCheck(attempt + 1);
+        return;
+      }
+      closeMenu();
+    });
+  };
+
+  runCheck();
 }
 
 function closeMenu() {
