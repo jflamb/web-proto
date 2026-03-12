@@ -48,6 +48,7 @@ class FDICTopNav extends HTMLElement {
         button.className = "fdic-nav-item fdic-nav-item--button";
         button.dataset.navIndex = String(index);
         button.dataset.panelKey = item.panelKey || item.id || "";
+        button.setAttribute("aria-haspopup", "true");
         button.setAttribute("aria-controls", "megaMenu");
         button.setAttribute("aria-expanded", "false");
         button.textContent = item.label || "Menu";
