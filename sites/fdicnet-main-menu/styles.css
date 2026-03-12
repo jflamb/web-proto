@@ -633,6 +633,13 @@ body {
   text-decoration-thickness: 2px;
 }
 
+.l2-item:focus-visible {
+  box-shadow:
+    inset 4px 0 0 var(--menu-focus-ring),
+    0 0 0 2px var(--menu-focus-inner),
+    0 0 0 4px var(--menu-focus-ring);
+}
+
 .l2-item {
   margin: 0;
   max-width: none;
