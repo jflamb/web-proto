@@ -6,10 +6,11 @@
      Tablet  (769–1049px) — narrower columns, same mega-menu
      Mobile  (≤768px) — slide-in drawer with drill-down navigation
 
-   Focus rings: all interactive items in the mega-menu use an
-   outset double-ring (white inner + accent outer) defined by
-   --menu-focus-inner and --menu-focus-ring. See the canonical
-   rule at .l2-item:focus-visible / .l3-item:focus-visible.
+   Focus rings: the menu system uses one tokenized strategy with
+   two variants:
+   - standard (desktop/outset)
+   - contained (mobile/inset to avoid clipping)
+   See --menu-focus-ring-shadow.
    ================================================================ */
 
 @font-face {
@@ -56,10 +57,11 @@
   --menu-link: #1278b0;
   --menu-link-hover-underline: #1278b0;
   --menu-hover-overlay: rgba(0, 110, 190, 0.09); /* Shared hover/focus bg */
-  --menu-focus-inner: #ffffff;                  /* Focus ring: white inner */
-  --menu-focus-ring: var(--ds-border-input-focus); /* Focus ring: accent outer */
-  --menu-focus-inset: inset 0 0 0 2px rgba(0, 94, 162, 0.35);
-  --menu-focus-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
+  --focus-ring-inner: #ffffff;
+  --focus-ring-outer: var(--ds-border-input-focus);
+  --focus-ring-standard-shadow: 0 0 0 2px var(--focus-ring-inner), 0 0 0 4px var(--focus-ring-outer);
+  --focus-ring-contained-shadow: inset 0 0 0 2px rgba(0, 94, 162, 0.35), inset 0 0 0 4px var(--focus-ring-outer);
+  --menu-focus-ring-shadow: var(--focus-ring-standard-shadow);
   --menu-bottom-accent: #84dbff;
   --layout-masthead-height: 83px;
   --layout-top-nav-item-height: 48px;
@@ -184,8 +186,8 @@ body {
 }
 
 .icon-button:focus-visible {
-  outline: 2px solid #84dbff;
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--menu-focus-ring-shadow);
   border-radius: 3px;
 }
 
@@ -306,8 +308,8 @@ body {
 .fdic-nav-item:focus-visible {
   background: var(--fdic-blue-800);
   border-bottom-color: var(--fdic-accent);
-  outline: 2px solid #005ea2;
-  outline-offset: -2px;
+  outline: none;
+  box-shadow: var(--menu-focus-ring-shadow);
 }
 
 .fdic-nav-item--button {
@@ -331,8 +333,8 @@ body {
 }
 
 .fdic-nav-item--selected:focus-visible {
-  outline: 2px solid #005ea2;
-  outline-offset: -2px;
+  outline: none;
+  box-shadow: var(--menu-focus-ring-shadow);
 }
 
 /* ── Desktop mega-menu panel ───────────────────────────────────────
@@ -523,7 +525,7 @@ body {
   left: -16px;
   pointer-events: none;
   z-index: 2;
-  box-shadow: var(--menu-focus-shadow);
+  box-shadow: var(--menu-focus-ring-shadow);
 }
 
 /* Active/selected L1 item remains white when focused; focus is shown by
@@ -630,7 +632,7 @@ body {
   position: relative;
   z-index: 2;
   outline: none;
-  box-shadow: var(--menu-focus-inset), var(--menu-focus-shadow);
+  box-shadow: var(--menu-focus-ring-shadow);
   background: var(--menu-hover-overlay);
   text-decoration-thickness: 2px;
 }
@@ -828,6 +830,10 @@ body {
    Content inside uses a drill-down pattern: each tap pushes a
    deeper level onto menuState.mobileDrillPath in script.js. */
 @media (max-width: 768px) {
+  :root {
+    --menu-focus-ring-shadow: var(--focus-ring-contained-shadow);
+  }
+
   .mega-menu-scrim {
     display: none !important;
   }
@@ -889,8 +895,8 @@ body {
   }
 
   .fdic-nav-toggle:focus-visible {
-    outline: 2px solid #84dbff;
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: var(--menu-focus-ring-shadow);
   }
 
   .fdic-nav-list {
@@ -1029,7 +1035,7 @@ body {
   }
 
   .mobile-drill-crumb:focus-visible {
-    box-shadow: var(--menu-focus-inset), var(--menu-focus-shadow);
+    box-shadow: var(--menu-focus-ring-shadow);
     border-radius: 2px;
     outline: none;
   }
@@ -1183,7 +1189,7 @@ body {
   .mobile-drill-link:focus-visible,
   .mobile-drill-current-link:focus-visible,
   .mobile-drill-back:focus-visible {
-    box-shadow: var(--menu-focus-inset), var(--menu-focus-shadow);
+    box-shadow: var(--menu-focus-ring-shadow);
     background: var(--menu-hover-overlay);
     position: relative;
     z-index: 1;
