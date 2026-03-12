@@ -149,13 +149,34 @@
       renderMobileDrillHeader(panelContainer, "Main menu", []);
 
       const list = createMobileDrillList();
-      (panelConfig.l1 || []).forEach((l1Item, l1Index) => {
+      const l1Items = panelConfig.l1 || [];
+      const hasOverviewRow = l1Items.length > 1;
+      const primaryItems = hasOverviewRow ? l1Items.slice(1) : l1Items;
+
+      primaryItems.forEach((l1Item, orderIndex) => {
+        const l1Index = hasOverviewRow ? orderIndex + 1 : orderIndex;
         const hasChildren = Array.isArray(l1Item.l2) && l1Item.l2.length > 0;
         appendMobileDrillItem(list, l1Item.label || "Section", [panelKey, l1Index], {
           hasChildren,
           href: l1Item.href || l1Item.overviewHref || "#",
         });
       });
+
+      if (hasOverviewRow) {
+        const divider = document.createElement("li");
+        divider.className = "mobile-drill-separator-item";
+        divider.setAttribute("aria-hidden", "true");
+        const dividerLine = document.createElement("span");
+        dividerLine.className = "mobile-drill-separator-line";
+        divider.appendChild(dividerLine);
+        list.appendChild(divider);
+
+        const overviewItem = l1Items[0];
+        appendMobileDrillItem(list, overviewItem.label || "Overview", [panelKey, 0], {
+          hasChildren: Array.isArray(overviewItem.l2) && overviewItem.l2.length > 0,
+          href: overviewItem.href || overviewItem.overviewHref || "#",
+        });
+      }
       panelContainer.appendChild(list);
     }
 
