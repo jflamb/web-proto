@@ -1,5 +1,25 @@
 # TODO
 
+## Current Task (FDICnet Mobile Current-Context Indicator)
+- [x] Add visible current-context breadcrumb text to the mobile drawer drill views.
+- [x] Place context indicator above the list content (not below it).
+- [x] Verify context updates across L1/L2/L3 drill levels.
+
+## Review / Results (FDICnet Mobile Current-Context Indicator)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added `renderMobileDrillContext(...)` that renders a lightweight path line (`You are here: ...`) from the active drill path.
+  - added `getMobileContextLabels(...)` to derive labels from panel/L1/L2 state.
+  - integrated context rendering for panel-level, L1-level, and L2-level drill screens.
+  - positioned the context row before the drill list.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.mobile-drill-context` styling (compact secondary text with divider) to visually separate context from list rows.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+  - Browser validation at mobile viewport confirmed:
+    - L1: `You are here: News & Events`
+    - L2: `You are here: News & Events > News`
+    - L3: `You are here: News & Events > News > Global Messages`
+
 ## Current Task (FDICnet ArrowUp Exit to Active Top Nav)
 - [x] Update desktop mega-menu ArrowUp behavior at column start to focus the active top-level nav button.
 - [x] Verify no regressions for ArrowDown/ArrowRight/ArrowLeft/Escape paths.

@@ -972,6 +972,16 @@ body {
     border-bottom: 1px solid var(--ds-border-divider);
   }
 
+  .mobile-drill-context {
+    margin: 0;
+    padding: 8px var(--ds-spacing-md);
+    border-bottom: 1px solid var(--ds-border-divider);
+    color: var(--ds-text-secondary);
+    font-size: var(--ds-font-size-sm);
+    line-height: 1.35;
+    font-weight: 500;
+  }
+
   .mobile-drill-back {
     align-items: center;
     appearance: none;
