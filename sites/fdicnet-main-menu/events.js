@@ -117,6 +117,23 @@
       });
     }
 
+    if (mobileNavBackdrop) {
+      mobileNavBackdrop.addEventListener("click", () => {
+        if (!isMobileViewport()) return;
+        if (!menuState.mobileNavOpen) return;
+        closeMobileNav();
+        if (navToggle) navToggle.focus();
+      });
+      mobileNavBackdrop.addEventListener("keydown", (event) => {
+        if (!isMobileViewport()) return;
+        if (!menuState.mobileNavOpen) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        closeMobileNav();
+        if (navToggle) navToggle.focus();
+      });
+    }
+
     mobileNavMediaQuery.addEventListener("change", () => {
       syncMobileNavState();
       renderTopNav();
