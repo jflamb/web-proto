@@ -49,7 +49,7 @@
   --fdic-bg: #f2f5f8;
   --fdic-accent: #38b6ff;
   --shell-max: 1440px;
-  /* Mega-menu tokens — used by L1, L2, L3, and overview-link */
+  /* Mega-menu tokens — used by L1, L2, and L3 */
   --menu-panel-bg: var(--ds-background-interactive);
   --menu-divider: var(--ds-border-divider);
   --menu-text-primary: var(--ds-text-primary);
@@ -59,6 +59,10 @@
   --menu-focus-inner: #ffffff;                  /* Focus ring: white inner */
   --menu-focus-ring: var(--ds-border-input-focus); /* Focus ring: accent outer */
   --menu-bottom-accent: #84dbff;
+  --layout-masthead-height: 83px;
+  --layout-top-nav-item-height: 48px;
+  --layout-mega-open-min-height: 237px;
+  --layout-mobile-drawer-header-height: 92px;
 }
 
 * {
@@ -103,11 +107,13 @@ body {
 .fdic-header {
   background: #fff;
   border-bottom: 0;
+  position: relative;
+  z-index: 20;
 }
 
 .fdic-masthead {
   background: var(--fdic-blue-900);
-  min-height: 83px;
+  min-height: var(--layout-masthead-height);
   padding: 24px 0;
   display: flex;
   align-items: center;
@@ -261,7 +267,7 @@ body {
 }
 
 .fdic-nav-item {
-  height: 57px;
+  height: var(--layout-top-nav-item-height);
   display: inline-flex;
   align-items: center;
   padding: 0 16px;
@@ -322,6 +328,10 @@ body {
 .mega-menu {
   background: #fff;
   width: 100%;
+  position: absolute;
+  top: calc(var(--layout-masthead-height) + var(--layout-top-nav-item-height));
+  left: 0;
+  z-index: 60;
   display: grid;
   grid-template-rows: 0fr;
   overflow: clip;
@@ -340,6 +350,26 @@ body {
   border-bottom-color: var(--menu-bottom-accent);
 }
 
+.mega-menu-scrim {
+  position: fixed;
+  top: calc(var(--layout-masthead-height) + var(--layout-top-nav-item-height));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease, visibility 180ms ease;
+  z-index: 10;
+}
+
+.fdic-header.menu-open + .mega-menu-scrim {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 /* clip-path keeps the panel paint bounded while intentionally allowing
    first-column left-bleed backgrounds/focus overlays to reach viewport
    edge (left inset is expanded to -100vw). */
@@ -352,7 +382,7 @@ body {
 }
 
 .fdic-header.menu-open .mega-menu-inner {
-  min-height: 237px;
+  min-height: var(--layout-mega-open-min-height);
 }
 
 .mega-col {
@@ -404,8 +434,7 @@ body {
 /* ── Shared base styles for all mega-menu interactive items ──────── */
 .l1-item,
 .l2-item,
-.l3-item,
-.overview-link {
+.l3-item {
   color: var(--fdic-link);
   text-decoration: none;
   background: transparent;
@@ -422,15 +451,19 @@ body {
 .l1-item {
   width: 100%;
   min-height: 41px;
-  padding: 8px 24px;
+  padding: 8px 16px 8px 0;
   display: flex;
   align-items: center;
-  padding-left: 0;
-  padding-right: 16px;
-  color: var(--menu-text-primary);
-  font-weight: 600;
+  color: var(--menu-link);
+  font-weight: 400;
   line-height: 1.4;
   justify-content: space-between;
+}
+
+.l1-label {
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
 }
 
 .l2-item,
@@ -526,7 +559,7 @@ body {
   justify-content: center;
   font-size: 20px;
   line-height: 1;
-  color: var(--menu-text-primary);
+  color: var(--menu-link);
   opacity: 0;
 }
 
@@ -539,12 +572,38 @@ body {
   opacity: 1;
 }
 
+.l1-item:hover .l1-label,
+.l1-item:focus-visible .l1-label {
+  text-decoration: underline;
+  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.l1-item[data-selected="true"] .l1-label {
+  text-decoration: underline;
+  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.l1-item--overview {
+  justify-content: flex-start;
+}
+
+.l1-separator-item {
+  padding: 4px 16px 4px 0;
+}
+
+.l1-separator-line {
+  display: block;
+  border-top: 1px solid #bdbdbf;
+}
+
 .l2-label {
   flex: 1;
   min-width: 0;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
 
 .l2-caret {
@@ -557,8 +616,7 @@ body {
 }
 
 /* Canonical focus ring for all mega-menu interactive items.
-   Double-ring: white inner (2px) + accent outer (4px).
-   L1 items and the overview-link reuse this same pattern. */
+   Double-ring: white inner (2px) + accent outer (4px). */
 .l2-item:focus-visible,
 .l3-item:focus-visible {
   position: relative;
@@ -585,8 +643,10 @@ body {
 
 .l2-item:hover .l2-label,
 .l2-item:focus-visible .l2-label {
+  text-decoration: underline;
   text-decoration-color: var(--menu-link-hover-underline);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .l2-separator-item {
@@ -596,60 +656,6 @@ body {
 .l2-separator-line {
   display: block;
   border-top: 1px solid #bdbdbf;
-}
-
-.overview-link-wrap {
-  margin-top: 8px;
-  border-top: 1px solid var(--menu-divider);
-  padding-top: 8px;
-}
-
-.overview-link {
-  width: 100%;
-  min-height: 41px;
-  margin: 0;
-  padding: 8px 24px 8px 0;
-  padding-right: 16px;
-  display: flex;
-  align-items: center;
-  color: var(--menu-link);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  position: relative;
-}
-
-.overview-link:hover {
-  background: var(--menu-hover-overlay);
-  color: var(--menu-link);
-  text-decoration-color: var(--menu-link-hover-underline);
-  text-decoration-thickness: 2px;
-}
-
-/* Focus: same outset double-ring as L2/L3 items for consistency. */
-.overview-link:focus-visible {
-  background: var(--menu-hover-overlay);
-  outline: none;
-  color: var(--menu-link);
-  text-decoration-color: var(--menu-link-hover-underline);
-  text-decoration-thickness: 2px;
-  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
-}
-
-/* Hover: extend highlight 16px left of label baseline. */
-.overview-link:hover::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -16px;
-  width: 16px;
-  background: var(--menu-hover-overlay);
-}
-
-.overview-link:hover > * {
-  position: relative;
-  z-index: 1;
 }
 
 .menu-description {
@@ -666,16 +672,16 @@ body {
   max-width: none;
   padding: 8px 8px 8px 24px;
   color: var(--menu-link);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration: none;
   position: relative;
 }
 
 .menu-list--l3 .l3-item:hover,
 .menu-list--l3 .l3-item:focus-visible {
+  text-decoration: underline;
   text-decoration-color: var(--menu-link-hover-underline);
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .menu-list--l3 .l3-item:hover::after,
@@ -790,6 +796,17 @@ body {
    Content inside uses a drill-down pattern: each tap pushes a
    deeper level onto menuState.mobileDrillPath in script.js. */
 @media (max-width: 768px) {
+  .mega-menu-scrim {
+    display: none !important;
+  }
+
+  .mega-menu {
+    position: static;
+    top: auto;
+    left: auto;
+    z-index: auto;
+  }
+
   .fdic-shell {
     width: min(var(--shell-max), calc(100% - 32px));
   }
@@ -847,12 +864,13 @@ body {
   .fdic-nav-list {
     flex-direction: column;
     align-items: stretch;
-    padding: 92px 0 18px;
+    padding: var(--layout-mobile-drawer-header-height) 0 18px;
     position: fixed;
     top: 0;
     left: 0;
     width: min(88vw, 360px);
     height: 100vh;
+    height: 100dvh;
     overflow-y: auto;
     background: var(--ds-background-base);
     border-right: 1px solid var(--ds-border-divider);
@@ -877,7 +895,7 @@ body {
     top: 0;
     left: 0;
     width: min(88vw, 360px);
-    height: 92px;
+    height: var(--layout-mobile-drawer-header-height);
     background: var(--ds-background-base);
     border-right: 1px solid var(--ds-border-divider);
     pointer-events: none;
@@ -1094,7 +1112,6 @@ body {
   .l1-item,
   .l2-item,
   .l3-item,
-  .overview-link,
   .mobile-drill-back,
   .mobile-drill-current-link,
   .mobile-drill-trigger,
