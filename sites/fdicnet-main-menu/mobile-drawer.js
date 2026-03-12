@@ -82,9 +82,20 @@
       return list;
     }
 
-    function appendMobileDrillItem(list, label, nextPath) {
+    function appendMobileDrillItem(list, label, nextPath, options = {}) {
+      const { hasChildren = true, href = "#" } = options;
       const li = document.createElement("li");
       li.className = "mobile-drill-item";
+
+      if (!hasChildren) {
+        const link = document.createElement("a");
+        link.className = "mobile-drill-link";
+        link.href = href || "#";
+        link.textContent = label || "Link";
+        li.appendChild(link);
+        list.appendChild(li);
+        return;
+      }
 
       const button = document.createElement("button");
       button.type = "button";
@@ -124,7 +135,12 @@
         const panelMeta = (siteContent?.header?.nav || []).find(
           (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
         );
-        appendMobileDrillItem(list, panelMeta?.label || panelKey, [panelKey]);
+        const panelConfig = getPanelConfigByKey(panelKey);
+        const hasChildren = Array.isArray(panelConfig?.l1) && panelConfig.l1.length > 0;
+        appendMobileDrillItem(list, panelMeta?.label || panelKey, [panelKey], {
+          hasChildren,
+          href: panelConfig?.overviewHref || "#",
+        });
       });
       panelContainer.appendChild(list);
     }
@@ -134,7 +150,11 @@
 
       const list = createMobileDrillList();
       (panelConfig.l1 || []).forEach((l1Item, l1Index) => {
-        appendMobileDrillItem(list, l1Item.label || "Section", [panelKey, l1Index]);
+        const hasChildren = Array.isArray(l1Item.l2) && l1Item.l2.length > 0;
+        appendMobileDrillItem(list, l1Item.label || "Section", [panelKey, l1Index], {
+          hasChildren,
+          href: l1Item.href || l1Item.overviewHref || "#",
+        });
       });
       panelContainer.appendChild(list);
     }
@@ -151,7 +171,11 @@
 
       const list = createMobileDrillList();
       (l1Item.l2 || []).forEach((l2Item, l2Index) => {
-        appendMobileDrillItem(list, l2Item.label || "Link", [panelKey, l1Index, l2Index]);
+        const hasChildren = Array.isArray(l2Item.l3) && l2Item.l3.length > 0;
+        appendMobileDrillItem(list, l2Item.label || "Link", [panelKey, l1Index, l2Index], {
+          hasChildren,
+          href: l2Item.href || "#",
+        });
       });
       appendMobileDrillLinkItem(list, l1Item.label || "Section", l1Item.href || l1Item.overviewHref || "#");
       panelContainer.appendChild(list);

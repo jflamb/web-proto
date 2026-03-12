@@ -279,7 +279,7 @@ class FDICMegaMenu extends HTMLElement {
       li.setAttribute("role", "none");
       const link = document.createElement("a");
       const label = document.createElement("span");
-      const caret = document.createElement("span");
+      const hasNextLevel = Array.isArray(item.l2) && item.l2.length > 0;
 
       link.className = "l1-item";
       link.href = item.overviewHref || "#";
@@ -291,10 +291,13 @@ class FDICMegaMenu extends HTMLElement {
       label.className = "l1-label";
       label.textContent = item.label || "Section";
 
-      caret.className = "l1-caret ph ph-caret-right";
-      caret.setAttribute("aria-hidden", "true");
-
-      link.append(label, caret);
+      link.append(label);
+      if (hasNextLevel) {
+        const caret = document.createElement("span");
+        caret.className = "l1-caret ph ph-caret-right";
+        caret.setAttribute("aria-hidden", "true");
+        link.append(caret);
+      }
       li.appendChild(link);
       this.l1List.appendChild(li);
     });
@@ -335,8 +338,8 @@ class FDICMegaMenu extends HTMLElement {
       li.setAttribute("role", "none");
       const link = document.createElement("a");
       const label = document.createElement("span");
-      const caret = document.createElement("span");
       const isActive = index === activeL2Index;
+      const hasNextLevel = Array.isArray(item.l3) && item.l3.length > 0;
 
       link.className = "l2-item";
       link.href = item.href || "#";
@@ -347,9 +350,13 @@ class FDICMegaMenu extends HTMLElement {
 
       label.className = "l2-label";
       label.textContent = item.label || "Link";
-      caret.className = "l1-caret l2-caret ph ph-caret-right";
-      caret.setAttribute("aria-hidden", "true");
-      link.append(label, caret);
+      link.append(label);
+      if (hasNextLevel) {
+        const caret = document.createElement("span");
+        caret.className = "l1-caret l2-caret ph ph-caret-right";
+        caret.setAttribute("aria-hidden", "true");
+        link.append(caret);
+      }
 
       li.appendChild(link);
       this.l2List.appendChild(li);

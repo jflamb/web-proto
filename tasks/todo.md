@@ -1,5 +1,98 @@
 # TODO
 
+## Current Task (FDICnet Menu Consistency + A11y Staged Delivery)
+- [ ] Stage 1 (Priority 1): Add hover-intent delay and consistent desktop hover traversal behavior.
+- [ ] Stage 2 (Priority 2): Align IA cues between desktop and mobile (path context, overview placement, state continuity).
+- [ ] Stage 3 (Priority 3): Improve accessibility parity (ARIA semantics, mobile back key support, focus containment).
+- [ ] Stage 4 (Priority 4): Visual/readability polish for dense labels and cross-mode affordance consistency.
+- [ ] Validate each stage in browser before commit.
+- [ ] Push branch and open pull request.
+
+## Current Task (FDICnet Open-State Nav/Mega-Menu Gap Removal)
+- [x] Remove residual spacing between top nav and mega-menu in open state.
+
+## Review / Results (FDICnet Open-State Nav/Mega-Menu Gap Removal)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed open-state top-nav accent handling to collapse border height:
+    - `.fdic-header.menu-open .fdic-nav { border-bottom-width: 0; border-bottom-color: transparent; }`
+- Result: no visible gap remains between the top nav and the open mega-menu panel.
+
+## Current Task (FDICnet Closed-State Main Menu Accent Line)
+- [x] Add light-blue accent line directly below top nav when mega-menu is closed.
+- [x] Suppress that line while mega-menu is open to avoid double accents.
+- [x] Scope behavior to desktop/tablet menu mode.
+
+## Review / Results (FDICnet Closed-State Main Menu Accent Line)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added desktop/tablet (`min-width: 769px`) `border-bottom: 6px solid var(--menu-bottom-accent)` on `.fdic-nav`.
+  - added `.fdic-header.menu-open .fdic-nav { border-bottom-color: transparent; }` so open mega-menu state uses only the panel accent treatment.
+
+## Current Task (FDICnet Mega-Menu Header Overlap Fix)
+- [x] Align desktop/tablet mega-menu top offset to actual header height.
+
+## Review / Results (FDICnet Mega-Menu Header Overlap Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed desktop/tablet `.mega-menu` top anchor from fixed token calc to `top: 100%` relative to `.fdic-header`.
+- Result: mega-menu now opens directly below the top-level header/nav stack without overlapping it.
+
+## Current Task (FDICnet Always-Visible Child Chevrons)
+- [x] Keep chevrons visible at rest for items that render a chevron (items with children).
+- [x] Remove hover/selected-only chevron opacity gating in desktop menu styles.
+
+## Review / Results (FDICnet Always-Visible Child Chevrons)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `.l1-caret` now has default `opacity: 1`.
+  - removed hover/focus/selected opacity toggles for `.l1-caret` and `.l2-caret`.
+- Result: chevrons are visible in normal state for all items that have children; childless items still render no chevron.
+
+## Current Task (FDICnet Mobile Chevron Child-Only Rendering)
+- [x] Show mobile drill chevron only when the next level has content.
+- [x] Render no-child mobile drill rows as direct links instead of drill triggers.
+- [x] Run syntax sanity check.
+
+## Review / Results (FDICnet Mobile Chevron Child-Only Rendering)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - `appendMobileDrillItem(...)` now conditionally renders:
+    - drill button with right chevron when child content exists
+    - direct link (no chevron) when no child content exists
+  - applied child-content checks at root, L1, and L2 mobile drill render levels.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+
+## Current Task (FDICnet Conditional Right Chevron Rendering)
+- [x] Show L1 chevron only when L2 content exists.
+- [x] Show L2 chevron only when L3 content exists.
+- [x] Run syntax sanity check.
+
+## Review / Results (FDICnet Conditional Right Chevron Rendering)
+- Updated `sites/fdicnet-main-menu/components.js` render logic:
+  - L1 rows now append right chevron only when `item.l2` has entries.
+  - L2 rows now append right chevron only when `item.l3` has entries.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/components.js` passed.
+
+## Current Task (FDICnet Content YAML Full Hierarchy Alignment)
+- [x] Translate provided IA outline into menu YAML schema.
+- [x] Update `sites/fdicnet-main-menu/content.yaml` to match provided labels and hierarchy.
+- [x] Run YAML parse/sanity checks for structure compatibility.
+- [x] Add review/results summary.
+
+## Review / Results (FDICnet Content YAML Full Hierarchy Alignment)
+- Updated `sites/fdicnet-main-menu/content.yaml` with the provided full hierarchy:
+  - top-level panels preserved as `News & Events`, `Career Development & Training`, `Knowledge Base`, `Benefits`, `Employee Services`, and `About`.
+  - mapped provided nested entries into renderer schema keys: `l1`, `l2`, and `l3`.
+  - retained schema compatibility fields (`overviewLabel`, `overviewHref`, `href`, `description`, `id`).
+- Validation:
+  - YAML parse check: `ruby -ryaml -e 'YAML.load_file(...)'` passed.
+  - structural sanity: `menu.panels` count is `6`; `header.nav` count is `6`.
+  - deep-content spot checks passed for representative entries, including:
+    - `Global Digest FAQ`
+    - `Career Management Program Series`
+    - `Regulations.gov (Federal Rule-making Portal)`
+    - `Policy on FDIC Foreign Technical Assistance Program`
+    - `CWT Sato Travel’s Get There`
+    - `FDIC Employee Viewpoint Survey FAQ`
+
 ## Current Task (FDICnet L1 Overview Row Placement)
 - [x] Move first L1 item to bottom of first-column list.
 - [x] Render bottom overview row without chevron.
@@ -2387,3 +2480,12 @@
 - Updated `AGENTS.md` Key Docs to include:
   - `docs/delivery-workflow.md`
 - This establishes a standing default workflow so future requests do not need to restate these process expectations.
+
+## Current Task (FDICnet Label/Chevron Spacing)
+- [x] Increase minimum spacing between row labels and chevrons in mega-menu columns.
+
+## Review / Results (FDICnet Label/Chevron Spacing)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `.l1-caret` now has `margin-left: 12px`.
+  - `.l2-caret` now has `margin-left: 12px` (replacing `auto`).
+- Result: wrapped or long labels keep a clearer visual gap before the chevron.

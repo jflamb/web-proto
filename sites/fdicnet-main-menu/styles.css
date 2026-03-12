@@ -231,6 +231,17 @@ body {
   background: var(--fdic-blue-900);
 }
 
+@media (min-width: 769px) {
+  .fdic-nav {
+    border-bottom: 6px solid var(--menu-bottom-accent);
+  }
+
+  .fdic-header.menu-open .fdic-nav {
+    border-bottom-width: 0;
+    border-bottom-color: transparent;
+  }
+}
+
 .fdic-nav-list {
   margin: 0;
   padding: 0;
@@ -329,7 +340,7 @@ body {
   background: #fff;
   width: 100%;
   position: absolute;
-  top: calc(var(--layout-masthead-height) + var(--layout-top-nav-item-height));
+  top: 100%;
   left: 0;
   z-index: 60;
   display: grid;
@@ -554,21 +565,13 @@ body {
   width: 20px;
   height: 20px;
   min-width: 20px;
+  margin-left: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   line-height: 1;
   color: var(--menu-link);
-  opacity: 0;
-}
-
-.l1-item[data-selected="true"] .l1-caret {
-  opacity: 1;
-}
-
-.l1-item:hover .l1-caret,
-.l1-item:focus-visible .l1-caret {
   opacity: 1;
 }
 
@@ -607,12 +610,7 @@ body {
 }
 
 .l2-caret {
-  margin-left: auto;
-}
-
-.l2-item:hover .l2-caret,
-.l2-item:focus-visible .l2-caret {
-  opacity: 1;
+  margin-left: 12px;
 }
 
 /* Canonical focus ring for all mega-menu interactive items.
