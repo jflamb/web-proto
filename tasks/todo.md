@@ -3,7 +3,7 @@
 ## Current Task (FDICnet Menu Consistency + A11y Staged Delivery)
 - [x] Stage 1 (Priority 1): Add hover-intent delay and consistent desktop hover traversal behavior.
 - [x] Stage 2 (Priority 2): Align IA cues between desktop and mobile (path context, overview placement, state continuity).
-- [ ] Stage 3 (Priority 3): Improve accessibility parity (ARIA semantics, mobile back key support, focus containment).
+- [x] Stage 3 (Priority 3): Improve accessibility parity (ARIA semantics, mobile back key support, focus containment).
 - [ ] Stage 4 (Priority 4): Visual/readability polish for dense labels and cross-mode affordance consistency.
 - [ ] Validate each stage in browser before commit.
 - [ ] Push branch and open pull request.
@@ -27,6 +27,20 @@
 - Browser validation:
   - Desktop: context path renders and updates when hovering top nav.
   - Mobile: drawer opens directly into active panel L1 list and places Overview at bottom with separator.
+
+## Review / Results (Stage 3 - Priority 3)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - added `aria-haspopup=\"true\"` to top-nav menu buttons.
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added `id=\"fdicMobileDrawerPanel\"` to drawer panel container.
+  - added mobile drill trigger semantics: `aria-haspopup`, `aria-controls`, `aria-expanded`, and clearer `aria-label`.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added `ArrowLeft` back-navigation for mobile drill depth.
+  - added mobile drawer focus trap for `Tab`/`Shift+Tab` to keep focus in drawer/toggle while open.
+- Browser validation:
+  - `ArrowLeft` reduces drill depth by one level and keeps focus in drawer.
+  - repeated `Tab` navigation stays trapped inside drawer/toggle while open.
+  - ARIA attribute checks pass for desktop top-nav and mobile drill triggers.
 
 ## Current Task (FDICnet Open-State Nav/Mega-Menu Gap Removal)
 - [x] Remove residual spacing between top nav and mega-menu in open state.

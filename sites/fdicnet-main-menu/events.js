@@ -200,6 +200,19 @@
         return;
       }
 
+      if (event.key === "ArrowLeft" && menuState.mobileNavOpen && menuState.mobileDrillPath.length > 0) {
+        event.preventDefault();
+        menuState.mobileDrillPath = menuState.mobileDrillPath.slice(0, -1);
+        renderMobileDrawerPanel();
+        const firstFocusable = navList.querySelector(
+          ".mobile-drill-trigger, .mobile-drill-link, .mobile-drill-current-link, .mobile-drill-back"
+        );
+        if (firstFocusable instanceof HTMLElement) {
+          firstFocusable.focus();
+        }
+        return;
+      }
+
       if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
         return;
       }
@@ -255,6 +268,30 @@
     });
 
     document.addEventListener("keydown", (event) => {
+      if (event.key === "Tab" && isMobileViewport() && menuState.mobileNavOpen) {
+        const focusables = [
+          navToggle,
+          ...getMobileDrawerFocusableItems(),
+        ].filter(
+          (item) => item instanceof HTMLElement && !item.hasAttribute("disabled") && !item.hasAttribute("hidden")
+        );
+        if (focusables.length > 0) {
+          const activeElement = document.activeElement;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (event.shiftKey && activeElement === first) {
+            event.preventDefault();
+            last.focus();
+            return;
+          }
+          if (!event.shiftKey && activeElement === last) {
+            event.preventDefault();
+            first.focus();
+            return;
+          }
+        }
+      }
+
       if (event.key !== "Escape") return;
       if (menuState.mobileSearchOpen) {
         setMobileSearchOpen(false);

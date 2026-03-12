@@ -36,6 +36,7 @@
       const li = document.createElement("li");
       li.className = "mobile-drawer-panel-item";
       const container = document.createElement("div");
+      container.id = "fdicMobileDrawerPanel";
       container.className = "mobile-drawer-panel";
       li.appendChild(container);
       navList.appendChild(li);
@@ -102,6 +103,10 @@
       button.className = "mobile-drill-trigger";
       button.dataset.mobileDrillAction = "set-path";
       button.dataset.mobileDrillPath = encodeMobilePath(nextPath);
+      button.setAttribute("aria-haspopup", "true");
+      button.setAttribute("aria-controls", "fdicMobileDrawerPanel");
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-label", `Open ${label}`);
 
       const text = document.createElement("span");
       text.className = "mobile-drill-label";
