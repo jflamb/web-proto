@@ -146,6 +146,14 @@ function announceMenuContext(message) {
   }, 20);
 }
 
+function resetMenuAnnouncementState() {
+  lastLiveAnnouncement = "";
+  if (liveAnnouncementTimer) {
+    window.clearTimeout(liveAnnouncementTimer);
+    liveAnnouncementTimer = null;
+  }
+}
+
 function announceDesktopPanelContext(panelKey) {
   const panelConfig = getPanelConfigByKey(panelKey);
   if (!panelConfig) return;
@@ -389,6 +397,7 @@ function setMobileNavOpen(isOpen) {
 }
 
 function closeMobileNav() {
+  resetMenuAnnouncementState();
   setMobileNavOpen(false);
 }
 
@@ -575,6 +584,7 @@ function scheduleMenuSystemFocusExitCheck() {
 }
 
 function closeMenu() {
+  resetMenuAnnouncementState();
   refreshDomRefs();
   if (isMobileViewport()) {
     menuState.menuOpen = false;
