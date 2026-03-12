@@ -1,12 +1,21 @@
 # TODO
 
 ## Current Task (FDICnet Menu Consistency + A11y Staged Delivery)
-- [ ] Stage 1 (Priority 1): Add hover-intent delay and consistent desktop hover traversal behavior.
+- [x] Stage 1 (Priority 1): Add hover-intent delay and consistent desktop hover traversal behavior.
 - [ ] Stage 2 (Priority 2): Align IA cues between desktop and mobile (path context, overview placement, state continuity).
 - [ ] Stage 3 (Priority 3): Improve accessibility parity (ARIA semantics, mobile back key support, focus containment).
 - [ ] Stage 4 (Priority 4): Visual/readability polish for dense labels and cross-mode affordance consistency.
 - [ ] Validate each stage in browser before commit.
 - [ ] Push branch and open pull request.
+
+## Review / Results (Stage 1 - Priority 1)
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added hover-intent delay (`140ms`) for desktop top-nav panel preview.
+  - added hover-intent delay (`140ms`) for desktop L1 and L2 preview switching.
+  - preserved immediate focus-driven behavior for keyboard interactions (no delay on focus previews).
+  - added timer cancellation guards on pointer exits and global pointerdown to prevent stale delayed previews.
+- Browser validation:
+  - Desktop hover traversal still works, now with intentional delay to reduce accidental fly-over panel switches.
 
 ## Current Task (FDICnet Open-State Nav/Mega-Menu Gap Removal)
 - [x] Remove residual spacing between top nav and mega-menu in open state.
