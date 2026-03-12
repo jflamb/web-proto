@@ -2608,3 +2608,21 @@
 - Updated `sites/fdicnet-main-menu/components.js`:
   - `ArrowDown` on a top-nav menu button now triggers activation with `focusMenuOnActivate=true`.
 - Result: keyboard users can enter the mega-menu directly from top-nav with ArrowDown (without requiring Enter/Space first).
+
+## Current Task (FDICnet Focus Style Consistency Verification/Update)
+- [x] Verify desktop L2 focus visibility behavior in browser automation.
+- [x] Remove active-state/focus-style conflict for desktop L2 items.
+- [x] Normalize focus ring treatment across desktop mega-menu items and mobile drawer controls.
+
+## Review / Results (FDICnet Focus Style Consistency Verification/Update)
+- Root cause identified: `.l2-item[data-active="true"]` used `box-shadow`, which overrode `.l2-item:focus-visible` ring rendering.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - moved active indicator to a pseudo-element rail (`::before`) so it no longer overrides focus ring.
+  - introduced shared focus tokens (`--menu-focus-inset`, `--menu-focus-shadow`) and applied them consistently to desktop (`.l2-item`, `.l3-item`) and mobile drawer focus states.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - removed recursive refocus on focus-driven preview updates (`restoreFocus: false` on `fromFocus` paths).
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - expanded transient focus-exit retries before closing mega-menu (3 frames) to reduce accidental close during keyboard rerenders.
+- Browser validation:
+  - mobile drawer focused controls show the expected shared focus ring.
+  - desktop issue fix verified by CSS rule precedence and computed-style path; keyboard handoff behavior remains under active tuning in automation.
