@@ -641,6 +641,18 @@ body {
   text-decoration: none;
 }
 
+.l2-item[data-active="true"] {
+  background: var(--menu-hover-overlay);
+  box-shadow: inset 3px 0 0 var(--fdic-accent);
+}
+
+.l2-item[data-active="true"] .l2-label {
+  text-decoration: underline;
+  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
 .l2-item:hover,
 .l3-item:hover {
   background: var(--menu-hover-overlay);
