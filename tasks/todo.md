@@ -4,8 +4,8 @@
 - [x] Stage 1 (Priority 1): Add hover-intent delay and consistent desktop hover traversal behavior.
 - [x] Stage 2 (Priority 2): Align IA cues between desktop and mobile (path context, overview placement, state continuity).
 - [x] Stage 3 (Priority 3): Improve accessibility parity (ARIA semantics, mobile back key support, focus containment).
-- [ ] Stage 4 (Priority 4): Visual/readability polish for dense labels and cross-mode affordance consistency.
-- [ ] Validate each stage in browser before commit.
+- [x] Stage 4 (Priority 4): Visual/readability polish for dense labels and cross-mode affordance consistency.
+- [x] Validate each stage in browser before commit.
 - [ ] Push branch and open pull request.
 
 ## Review / Results (Stage 1 - Priority 1)
@@ -41,6 +41,17 @@
   - `ArrowLeft` reduces drill depth by one level and keeps focus in drawer.
   - repeated `Tab` navigation stays trapped inside drawer/toggle while open.
   - ARIA attribute checks pass for desktop top-nav and mobile drill triggers.
+
+## Review / Results (Stage 4 - Priority 4)
+- Updated `sites/fdicnet-main-menu/components.js` + `styles.css`:
+  - added fixed chevron-column spacing for childless desktop L1/L2 rows via `.menu-caret-spacer`.
+  - increased desktop menu row rhythm (`line-height: 1.45`, `min-height: 44px`).
+- Updated `sites/fdicnet-main-menu/styles.css` (mobile):
+  - increased mobile drill row rhythm (`line-height: 1.45`, `min-height: 46px`).
+  - reserved right-side spacing for no-child mobile link rows with `::after` spacer.
+- Browser validation:
+  - Desktop no-child rows retain consistent right-column spacing.
+  - Mobile no-child rows maintain consistent trailing spacing and touch-target height.
 
 ## Current Task (FDICnet Open-State Nav/Mega-Menu Gap Removal)
 - [x] Remove residual spacing between top nav and mega-menu in open state.

@@ -314,6 +314,11 @@ class FDICMegaMenu extends HTMLElement {
         caret.className = "l1-caret ph ph-caret-right";
         caret.setAttribute("aria-hidden", "true");
         link.append(caret);
+      } else {
+        const spacer = document.createElement("span");
+        spacer.className = "menu-caret-spacer";
+        spacer.setAttribute("aria-hidden", "true");
+        link.append(spacer);
       }
       li.appendChild(link);
       this.l1List.appendChild(li);
@@ -373,6 +378,11 @@ class FDICMegaMenu extends HTMLElement {
         caret.className = "l1-caret l2-caret ph ph-caret-right";
         caret.setAttribute("aria-hidden", "true");
         link.append(caret);
+      } else {
+        const spacer = document.createElement("span");
+        spacer.className = "menu-caret-spacer";
+        spacer.setAttribute("aria-hidden", "true");
+        link.append(spacer);
       }
 
       li.appendChild(link);
