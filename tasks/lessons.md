@@ -184,3 +184,9 @@ Use this file to record correction-driven learning.
 - Root cause: I treated “same left padding” as a raw CSS padding-value change in column 2 instead of matching the full visual treatment across columns, including each column’s active-state geometry.
 - Prevention rule: For cross-column alignment requests, compare the rendered inset and active affordance in-browser before changing only one column’s padding values.
 - Actionable check for future tasks: When adjusting desktop mega-menu column alignment, inspect at least one live open menu state and verify both label inset and active indicator treatment for L1 and L2 together.
+
+- Date: 2026-03-13
+- Trigger / correction: User reported the bottom overview row in desktop column 1 did not show the same hover styling as the bottom overview row in column 2.
+- Root cause: The first-column overview row depended on broad `.l1-item` interaction styling instead of having an explicit variant rule, so parity drifted when overview-row treatments were tuned elsewhere.
+- Prevention rule: When parallel UI variants exist across menu columns, give each variant an explicit parity check and avoid assuming the base class remains sufficient after follow-on styling changes.
+- Actionable check for future tasks: After hover/focus styling changes in the desktop mega-menu, test the overview row at the bottom of both column 1 and column 2, not just standard rows.

@@ -1,5 +1,38 @@
 # TODO
 
+## Current Task (FDICnet Desktop Overview Hover Parity)
+- [x] Diagnose why the first-column overview row does not match the second-column overview row on hover.
+- [x] Update the desktop mega-menu CSS so the first-column overview row gets the same hover/focus label treatment.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDICnet Desktop Overview Hover Parity)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added an explicit `.l1-item--overview` label-decoration rule for hover, focus-visible, and selected states so the first-column overview row now uses the same underline treatment pattern as the second-column overview row.
+- Validation:
+  - selector audit confirms the first-column overview variant now has its own explicit interaction-state label styling instead of relying only on the generic `.l1-item` rule.
+  - browser verification was not available in-session, so this fix is statically verified only.
+
+## Current Task (FDICnet Menu Single Directory Component Accommodation)
+- [x] Audit the existing menu prototype boundaries and choose a non-breaking SDC accommodation approach.
+- [x] Add a collocated single-directory-component package for the FDICnet menu that Drupal teammates can map into their workflow.
+- [x] Keep the current HTML/CSS/JS prototype behavior intact or limit changes to safe compatibility wiring only.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDICnet Menu Single Directory Component Accommodation)
+- Added `sites/fdicnet-main-menu/components/fdicnet-main-menu/` as an additive Drupal-oriented package with:
+  - `fdicnet-main-menu.component.yml` for component metadata/props
+  - `fdicnet-main-menu.twig` preserving the current runtime DOM contract
+  - `fdicnet-main-menu.css` as a collocated stylesheet entrypoint
+  - `fdicnet-main-menu.js` as a defensive bootstrap that reuses the existing prototype runtime only when it is not already present
+  - `README.md` documenting the intended handoff and current constraints
+- Kept the working prototype runtime untouched:
+  - no behavior changes to `index.html`, `styles.css`, `components.js`, `state.js`, `mobile-drawer.js`, `events.js`, `init.js`, or `script.js`
+- Validation:
+  - `node --check` passed for the new SDC JS entrypoint and the existing runtime JS files
+  - a DOM-contract check confirmed the Twig shell contains the required runtime IDs used by the current initializer
+  - `curl -I http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html` returned `200 OK` from a local static server
+  - browser automation smoke testing was attempted but blocked by the local browser-tool state in this session, so verification here is static rather than interactive
+
 ## Current Task (FDICnet Mobile Overview Hover Underline)
 - [x] Diagnose why the bottom overview link in second- and third-level mobile drill views does not gain underline on hover.
 - [x] Fix the selector/state mismatch so overview links share the same hover/focus underline treatment as other mobile drawer links.

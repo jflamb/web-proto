@@ -1,0 +1,126 @@
+<div class="fdicnet-main-menu-component">
+  <div id="menuLiveRegion" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <noscript>
+    <div class="noscript-notice" role="status" aria-live="polite">
+      JavaScript is required to use the FDICnet main menu prototype. Please enable JavaScript and reload this
+      page.
+    </div>
+  </noscript>
+
+  <header class="fdic-header" id="fdicHeader">
+    <div class="fdic-masthead">
+      <div class="fdic-shell">
+        <div class="fdic-brand-row">
+          <button
+            id="fdicNavToggle"
+            class="fdic-nav-toggle fdic-nav-toggle--masthead"
+            type="button"
+            aria-controls="fdicNavList"
+            aria-expanded="false"
+          >
+            <i class="ph ph-list" aria-hidden="true"></i>
+            <span>Menu</span>
+          </button>
+          <a class="fdic-wordmark" href="#" aria-label="FDICnet home">
+            <img src="assets/FDICnet.svg" width="140" height="35" alt="FDICnet" />
+          </a>
+        </div>
+
+        <div class="fdic-controls" role="group" aria-label="Header controls">
+          <div class="fdic-control-icons">
+            <button class="icon-button" type="button" aria-label="Apps">
+              <i class="ph ph-squares-four" aria-hidden="true"></i>
+            </button>
+            <button class="icon-button" type="button" aria-label="Profile">
+              <i class="ph ph-user-circle" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <button
+            id="mobileSearchToggle"
+            class="icon-button icon-button--search-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="mobileSearchRow"
+            aria-label="Open search"
+          >
+            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+          </button>
+
+          <div class="site-search-field">
+            <label class="search-input">
+              <span class="sr-only">Search</span>
+              <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+              <input
+                id="desktopSearchInput"
+                type="search"
+                role="combobox"
+                placeholder="Search FDICnet"
+                autocomplete="off"
+              />
+            </label>
+            <button id="desktopSearchClear" class="search-clear" type="button" aria-label="Clear search" hidden>
+              <i class="ph ph-x" aria-hidden="true"></i>
+            </button>
+            <button id="desktopSearchSubmit" class="search-submit" type="button" aria-label="Search all FDICnet">
+              <i class="ph ph-arrow-right" aria-hidden="true"></i>
+            </button>
+            <section id="desktopSearchPanel" class="site-search-panel" hidden aria-label="Search suggestions">
+              <ul id="desktopSearchResults" class="site-search-results" role="listbox" aria-label="Matching menu content"></ul>
+              <p id="desktopSearchStatus" class="site-search-status" role="status" aria-live="polite"></p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mobileSearchRow" class="mobile-search-overlay" hidden>
+      <div id="mobileSearchBackdrop" class="mobile-search-backdrop"></div>
+      <section class="mobile-search-sheet" role="dialog" aria-modal="true" aria-labelledby="mobileSearchTitle">
+        <div class="mobile-search-sheet-header">
+          <h2 id="mobileSearchTitle" class="sr-only">Search FDICnet</h2>
+          <button id="mobileSearchClose" class="mobile-search-close" type="button" aria-label="Close search">
+            <i class="ph ph-x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="site-search-field site-search-field--mobile">
+          <label class="search-input search-input--mobile">
+            <span class="sr-only">Search</span>
+            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+            <input
+              id="mobileSearchInput"
+              type="search"
+              role="combobox"
+              placeholder="Search FDICnet"
+              autocomplete="off"
+            />
+          </label>
+          <button id="mobileSearchClear" class="search-clear" type="button" aria-label="Clear search" hidden>
+            <i class="ph ph-x" aria-hidden="true"></i>
+          </button>
+          <button id="mobileSearchSubmit" class="search-submit" type="button" aria-label="Search all FDICnet">
+            <i class="ph ph-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <p class="mobile-search-shortcut-hint">Search menu destinations or the full site.</p>
+        <ul id="mobileSearchResults" class="site-search-results" role="listbox" aria-label="Matching menu content"></ul>
+        <p id="mobileSearchStatus" class="site-search-status" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <fdic-top-nav id="fdicTopNav"></fdic-top-nav>
+    <div id="mobileNavBackdrop" class="mobile-nav-backdrop" hidden></div>
+    <fdic-mega-menu id="fdicMegaMenu"></fdic-mega-menu>
+  </header>
+
+  <div id="megaMenuScrim" class="mega-menu-scrim" aria-hidden="true"></div>
+
+  <main class="page-content">
+    <div class="fdic-shell">
+      <h1 id="pageTitle">{{ page_title|default("") }}</h1>
+      <div id="pageIntro">{{ page_intro|default("")|raw }}</div>
+    </div>
+  </main>
+</div>

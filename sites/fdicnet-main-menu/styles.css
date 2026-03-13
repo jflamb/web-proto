@@ -864,6 +864,15 @@ body.mobile-search-open {
   justify-content: flex-start;
 }
 
+.l1-item--overview:hover .l1-label,
+.l1-item--overview:focus-visible .l1-label,
+.l1-item--overview[data-selected="true"] .l1-label {
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
 .l1-separator-item {
   padding: 4px 16px 4px 0;
 }
