@@ -100,8 +100,6 @@
         ["mobileSearchRow", mobileSearchRow],
         ["mobileSearchInput", mobileSearchInput],
         ["mobileSearchClear", mobileSearchClear],
-        ["mobileSearchBackdrop", mobileSearchBackdrop],
-        ["mobileSearchClose", mobileSearchClose],
         ["mobileSearchSubmit", mobileSearchSubmit],
         ["mobileSearchResults", mobileSearchResults],
         ["mobileSearchStatus", mobileSearchStatus],

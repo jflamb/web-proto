@@ -190,3 +190,51 @@ Use this file to record correction-driven learning.
 - Root cause: The first-column overview row depended on broad `.l1-item` interaction styling instead of having an explicit variant rule, so parity drifted when overview-row treatments were tuned elsewhere.
 - Prevention rule: When parallel UI variants exist across menu columns, give each variant an explicit parity check and avoid assuming the base class remains sufficient after follow-on styling changes.
 - Actionable check for future tasks: After hover/focus styling changes in the desktop mega-menu, test the overview row at the bottom of both column 1 and column 2, not just standard rows.
+
+- Date: 2026-03-13
+- Trigger / correction: User reported I had reintroduced a blue stripe under the active main-menu item while trying to preserve the blue stripe under the main navigation bar.
+- Root cause: I conflated the selected tab's `::after` cue with the nav container's bottom border accent and restored both, even though only the nav-level stripe was desired.
+- Prevention rule: When a design uses both item-level and container-level accents, treat them as separate layers and verify which one the user means before restoring or moving both.
+- Actionable check for future tasks: After nav/mega-menu overlap changes, inspect one open state specifically for both the selected tab underline and the nav bottom border and confirm only the intended stripe remains visible.
+
+- Date: 2026-03-13
+- Trigger / correction: User clarified that `36px` desktop mega-menu rows should apply only to single-line items, while wrapped labels should keep the same padding and grow vertically.
+- Root cause: I translated the sizing request into a fixed `height: 36px` rule instead of a `min-height` rule, which compressed wrapped content.
+- Prevention rule: When a user gives a target component height, confirm whether it is a fixed height or a minimum height before enforcing it in CSS.
+- Actionable check for future tasks: After row-height changes in navigation UIs, verify one single-line item and one wrapped item in-browser to confirm both compact and expanded cases render correctly.
+
+- Date: 2026-03-13
+- Trigger / correction: User reported the mega-menu shadow still looked too crisp and the hovered third-column item changed color along the last stretch at the right edge.
+- Root cause: The mega-menu `clip-path` was clipping the configured shadow blur, and the L3 hover extension pseudo-element used a different overlay treatment than the hovered row itself.
+- Prevention rule: When using clipped panel containers and pseudo-element bleed extensions, verify both shadow paint bounds and color parity in the actual rendered hover state.
+- Actionable check for future tasks: After mega-menu visual polish changes, inspect one open desktop state for the shadow silhouette and one L3 hover state at the right frame edge to confirm there is no clipped blur or color seam.
+
+- Date: 2026-03-13
+- Trigger / correction: User reported the mega-menu shadow was still clipped along the left edge after I had only expanded the vertical blur bounds.
+- Root cause: I widened the clip-path for top and bottom blur but left the horizontal insets tied to the smaller frame-bleed value, so the left-side shadow still hit a paint boundary.
+- Prevention rule: When unclipping box-shadow on a panel that uses `clip-path`, check all four sides against the blur radius instead of assuming vertical fixes solve horizontal clipping too.
+- Actionable check for future tasks: After any shadow/clip-path change, inspect left, right, top, and bottom shadow edges individually in the browser rather than treating the silhouette as a single condition.
+
+- Date: 2026-03-13
+- Trigger / correction: User showed that opening the search box in mobile view left the submit arrow floating far down the sheet instead of aligned with the input.
+- Root cause: The mobile search sheet reused the desktop search controls, but the mobile field never overrode the desktop absolute positioning for the clear/submit buttons, so those controls positioned themselves against the growing field container instead of a compact row.
+- Prevention rule: When reusing desktop control markup inside a mobile modal or sheet, explicitly reset any absolute positioning assumptions and define the mobile layout container.
+- Actionable check for future tasks: After adapting shared search or form controls to mobile, open the real overlay at phone width and verify the input, clear button, and submit button align on one row before sign-off.
+
+- Date: 2026-03-13
+- Trigger / correction: User reported the mega-menu shadow was still clipped on the left and right in wider desktop viewports even after earlier clip-path expansions.
+- Root cause: I expanded the paint bounds incrementally, but I initially sized them only against the shadow blur and not against the combined width of the frame bleed plus the shadow blur.
+- Prevention rule: When a shadowed pseudo-element already extends beyond a container via frame bleed, size clip-path or overflow allowances against the pseudo-element edge plus blur, not just the blur radius alone.
+- Actionable check for future tasks: For shadowed panels with frame bleeds, compute the required paint margin as `bleed + blur` and verify at a wide desktop viewport where side clipping is easiest to spot.
+
+- Date: 2026-03-13
+- Trigger / correction: User reported the mobile search sheet was still badly broken even after I had fixed the input-row button anchoring.
+- Root cause: I focused on the button-positioning symptom and missed that the sheet itself was a full-height CSS grid, which stretched empty rows and pushed the field, hint, and status blocks far down the viewport.
+- Prevention rule: When a mobile overlay shows large unexplained gaps, inspect the container layout model first before refining child positioning.
+- Actionable check for future tasks: For modal or sheet regressions on mobile, measure the overlay child block positions in-browser and verify the container is not stretching empty rows or empty result/status regions.
+
+- Date: 2026-03-13
+- Trigger / correction: User clarified that the mobile search interaction should not be a modal or sheet at all; it should expand inline inside the dark-blue masthead and push the page content down.
+- Root cause: I repaired the broken overlay implementation instead of stepping back to confirm whether the overlay interaction model itself matched the intended design.
+- Prevention rule: When a mobile UI feels structurally wrong, verify the requested interaction model before polishing the existing implementation.
+- Actionable check for future tasks: For mobile header search work, confirm whether the control should be modal, dropdown, or inline-in-header before changing only the field layout or button positioning.

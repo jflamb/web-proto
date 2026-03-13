@@ -231,6 +231,10 @@ class FDICMegaMenu extends HTMLElement {
     return this.querySelector(".mega-col--l3");
   }
 
+  get l2Column() {
+    return this.querySelector(".mega-col--l2");
+  }
+
   get l1List() {
     return this.querySelector("#l1List");
   }
@@ -257,6 +261,36 @@ class FDICMegaMenu extends HTMLElement {
 
   get l3Heading() {
     return this.querySelector("#l3Heading");
+  }
+
+  updateColumnRail(column, selector) {
+    if (!(column instanceof HTMLElement)) return;
+
+    const target = column.querySelector(selector);
+    this.updateColumnRailTarget(column, target);
+  }
+
+  updateColumnRailTarget(column, target) {
+    if (!(column instanceof HTMLElement)) return;
+
+    if (!(target instanceof HTMLElement)) {
+      column.style.setProperty("--column-rail-opacity", "0");
+      column.style.setProperty("--column-rail-height", "0px");
+      column.style.setProperty("--column-rail-top", "0px");
+      return;
+    }
+
+    const columnRect = column.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const top = Math.max(0, targetRect.top - columnRect.top);
+    column.style.setProperty("--column-rail-opacity", "1");
+    column.style.setProperty("--column-rail-height", `${targetRect.height}px`);
+    column.style.setProperty("--column-rail-top", `${top}px`);
+  }
+
+  updateColumnRails() {
+    this.updateColumnRail(this.l1Column, '.l1-item[data-selected="true"]');
+    this.updateColumnRail(this.l2Column, '.l2-item[data-active="true"]');
   }
 
   updateView({
@@ -295,6 +329,7 @@ class FDICMegaMenu extends HTMLElement {
       this.l3List.hidden = true;
       this.l3Description.textContent = "";
       this.l3Description.hidden = true;
+      this.updateColumnRails();
       return;
     }
 
@@ -444,7 +479,10 @@ class FDICMegaMenu extends HTMLElement {
     this.l3List.innerHTML = "";
     const showL3List = showingPreview && !previewingOverview && l3Items.length > 0;
     this.l3List.hidden = !showL3List;
-    if (!showL3List) return;
+    if (!showL3List) {
+      this.updateColumnRails();
+      return;
+    }
 
     l3Items.forEach((item, index) => {
       const li = document.createElement("li");
@@ -460,6 +498,8 @@ class FDICMegaMenu extends HTMLElement {
       li.appendChild(link);
       this.l3List.appendChild(li);
     });
+
+    this.updateColumnRails();
   }
 
   setColumnFocus(container, selector, target) {
@@ -514,6 +554,7 @@ class FDICMegaMenu extends HTMLElement {
     const l1Item = target.closest(".l1-item");
     if (l1Item instanceof HTMLAnchorElement) {
       if (l1Item.classList.contains("l1-item--overview")) return;
+      this.updateColumnRailTarget(this.l1Column, l1Item);
       this.dispatchEvent(
         new CustomEvent("fdic-mega-l1-preview", {
           bubbles: true,
@@ -527,10 +568,12 @@ class FDICMegaMenu extends HTMLElement {
     if (!(l2Item instanceof HTMLAnchorElement)) return;
 
     if (l2Item.classList.contains("l2-item--overview")) {
+      this.updateColumnRailTarget(this.l2Column, l2Item);
       this.dispatchEvent(new CustomEvent("fdic-mega-l2-overview-preview", { bubbles: true, detail: { fromFocus: true } }));
       return;
     }
 
+    this.updateColumnRailTarget(this.l2Column, l2Item);
     this.dispatchEvent(
       new CustomEvent("fdic-mega-l2-preview", {
         bubbles: true,
@@ -547,6 +590,7 @@ class FDICMegaMenu extends HTMLElement {
     const l1Item = target.closest(".l1-item");
     if (l1Item instanceof HTMLAnchorElement) {
       if (l1Item.classList.contains("l1-item--overview")) return;
+      this.updateColumnRailTarget(this.l1Column, l1Item);
       this.dispatchEvent(
         new CustomEvent("fdic-mega-l1-preview", {
           bubbles: true,
@@ -560,10 +604,12 @@ class FDICMegaMenu extends HTMLElement {
     if (!(l2Item instanceof HTMLAnchorElement)) return;
 
     if (l2Item.classList.contains("l2-item--overview")) {
+      this.updateColumnRailTarget(this.l2Column, l2Item);
       this.dispatchEvent(new CustomEvent("fdic-mega-l2-overview-preview", { bubbles: true, detail: { fromFocus: false } }));
       return;
     }
 
+    this.updateColumnRailTarget(this.l2Column, l2Item);
     this.dispatchEvent(
       new CustomEvent("fdic-mega-l2-preview", {
         bubbles: true,

@@ -1,5 +1,89 @@
 # TODO
 
+## Current Task (FDICnet Manager Feedback Layout Follow-up)
+- [x] Remove the detached whitespace and stripe treatment between the desktop top nav and mega-menu.
+- [x] Make the desktop mega-menu columns equal width and keep the panel visually anchored to the active top-level item.
+- [x] Run browser verification against the reported screenshot issues and record results.
+- [x] Rebalance the desktop mega-menu frame so left/right outer margins are symmetrical without breaking shell alignment.
+- [x] Extend the first-column background to the left frame edge so the panel surface matches the L1 area.
+
+## Review / Results (FDICnet Manager Feedback Layout Follow-up)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed the extra top/bottom padding on `.mega-menu`, which eliminates the detached white gap between the top nav and the panel.
+  - removed the open-state bottom accent-bar treatment and kept the panel anchored directly beneath the primary nav.
+  - changed `.mega-menu-inner` to `grid-template-columns: repeat(3, minmax(0, 1fr))` for equal desktop column widths.
+  - changed the panel border to side/bottom only so the white active tab can visually connect to the panel instead of feeling separated by an extra top edge.
+- Validation:
+  - browser verification with a cache-busted stylesheet confirmed `.mega-menu` now computes to `padding-top: 0px` and `padding-bottom: 0px`.
+  - browser verification confirmed the desktop panel now renders three equal-width columns (`309.664px / 309.664px / 309.664px` at the verified viewport).
+  - browser screenshot review confirmed the detached whitespace is gone and the bottom blue stripe is removed from the desktop mega-menu presentation.
+  - follow-up browser verification confirmed the open panel frame is once again shell-aligned and symmetrical at the viewport edges (`megaLeft = 64`, `megaRight = 995`, matching the shell bounds on both sides) after removing the full-viewport left-bleed column background and narrowing the clip-path allowance to the local L1 accent overflow.
+  - follow-up browser verification confirmed the panel now gets its extra balancing width from a frame-only pseudo-element (`::before left/right = -16px`) while the content grid remains shell-aligned (`contentLeftDelta = 0`, `contentRightDelta = 0`), which accommodates the selected L1 state without shifting the menu content.
+  - follow-up browser verification confirmed the frame extension now keys off the same offset as the active first top-nav item (`activeTabLeft = 52`, `actualFrameLeft = 52`), so the panel edge aligns with the active main-menu item while preserving text alignment inside the panel.
+  - updated the column surface colors to a more harmonious neutral progression: L1 `rgb(245, 245, 247)`, L2 `rgb(247, 247, 243)`, L3 `rgb(255, 255, 255)`.
+  - follow-up browser verification confirmed the L1 active stripe now extends flush to the panel frame edge (`stripeLeft = -12px`, `stripeWidth = 12px`) and no longer stops short of the mega-menu edge.
+  - removed the divider rows before overview links in both columns (`.l1-separator-item` and `.l2-separator-item` now `display: none`), reducing the false grouping cue.
+  - unified the L1 selected row background with the same active overlay family used by L2 (`selectedL1Bg = rgba(0, 110, 190, 0.14)` and hovered L2 `bg = rgba(0, 110, 190, 0.14)`), eliminating the prior gray-blue to white background flip.
+  - reduced desktop column top padding to `10px` and shifted the column surfaces to a clearer cool-neutral progression: L1 `rgb(237, 243, 247)`, L2 `rgb(247, 250, 252)`, L3 `rgb(255, 255, 255)`.
+  - final follow-up browser verification confirmed the first-column surface now extends to the left frame edge via `.mega-col--l1::before` with the same offset and width as the frame bleed (`left = -12px`, `width = 12px`) and the same background color as the L1 column (`rgb(237, 243, 247)`), eliminating the remaining exposed frame strip on the far left.
+  - final desktop-geometry verification confirmed:
+    - the active top-nav item no longer shows the bottom blue stripe (`topNavAfterOpacity = 0`).
+    - L1, L2, and L3 item rows now render at `36px` height on desktop.
+    - the selected L1 stripe now uses the same `4px` thickness family as L2 (`l1StripeShadow = 4px inset accent`).
+    - the first row in columns 1 and 2 aligns with the third-column content start (`l1Top = 139`, `l2Top = 139`, `menuDescriptionTop = 140`) and desktop column top padding is now `0px`.
+
+## Current Task (FDICnet Manager Feedback Implementation 1 2 6)
+- [x] Strengthen desktop top-nav tab active state, active cue, and spacing.
+- [x] Add a more defined mega-menu panel container treatment aligned to the shell/header.
+- [x] Increase hover/focus/active clarity while preserving stable open-menu behavior.
+- [x] Run browser verification and record results.
+
+## Review / Results (FDICnet Manager Feedback Implementation 1 2 6)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - increased desktop top-nav tab horizontal padding and made the active tab more explicit with heavier weight plus a persistent bottom cue while selected.
+  - added a neutral framed panel treatment to `.mega-menu-inner` with a subtle surface color, border, shadow, and more consistent vertical panel spacing.
+  - strengthened desktop hover/active affordances by increasing the shared overlay intensity, widening the L2 active stripe, enlarging row padding, and toning the third-column support copy down so it reads as context rather than primary nav.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - increased the desktop preview-clear delay from `120ms` to `180ms` so the menu is less likely to collapse preview state while users move between columns.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js` passed.
+  - browser verification at `1440x900` confirmed the active tab now renders with `font-weight: 600`, `padding-left/right: 20px`, and an active underline cue (`::after opacity: 1`) after forcing a cache-busted stylesheet reload.
+  - browser verification confirmed `.mega-menu-inner` now renders with `background: rgb(248, 248, 245)`, `1px` border, and panel shadow, producing the requested boxed/anchored panel treatment.
+  - browser verification confirmed hovered L2 rows render the stronger `rgba(0, 110, 190, 0.14)` background overlay and the menu remains open while traversing the panel.
+  - keyboard verification confirmed the top-nav still exposes a visible focus ring on `News & Events`.
+
+## Review / Results (FDICnet Manager Feedback Review)
+- Created branch `chore/fdicnet-manager-feedback-review`.
+- Reviewed the live desktop mega-menu implementation in `sites/fdicnet-main-menu` against the six manager feedback themes.
+- Recommendation summary:
+  - support items 1, 2, and 6 as valid improvements to visual hierarchy and interaction clarity.
+  - treat item 5 as mostly already satisfied by the current fixed grid columns unless the request is for equal-width L1/L2/L3 columns, which would need explicit design confirmation.
+  - push back for clarification on items 3 and 4 because both are ambiguous against the current component model:
+    - item 3 does not define whether the supporting sentence belongs under each visible L2 link, under each column heading, or in the existing third-column description area; adding helper copy under every L2 row would materially increase menu height and scanning cost.
+    - item 4 refers to swapping L2/L3 background colors, but the current desktop menu does not use two clearly distinct persistent L2/L3 background fills; the implementation uses a gray L1 column, white panel body, and state overlays/accents.
+- Validation:
+  - inspected live rendered menu states via browser automation at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html`.
+  - confirmed current selected top-nav button uses a white active tab treatment with no active underline, L1 uses an accent stripe, L2/L3 use hover/focus overlays, and the panel grid currently renders as `320px 320px minmax(280px, 1fr)`.
+
+## Current Task (FDICnet Manager Feedback Review)
+- [x] Create a dedicated branch for the feedback review.
+- [x] Inspect the current desktop mega-menu implementation against the six feedback items.
+- [x] Identify any feedback that is ambiguous, conflicts with existing interaction/a11y requirements, or should be pushed back on.
+- [x] Summarize recommendations and next-step guidance.
+
+## Review / Results (FDICnet Manager Feedback Review)
+- Created branch `chore/fdicnet-manager-feedback-review`.
+- Reviewed the live desktop mega-menu implementation in `sites/fdicnet-main-menu` against the six manager feedback themes.
+- Recommendation summary:
+  - support items 1, 2, and 6 as valid improvements to visual hierarchy and interaction clarity.
+  - treat item 5 as mostly already satisfied by the current fixed grid columns unless the request is for equal-width L1/L2/L3 columns, which would need explicit design confirmation.
+  - push back for clarification on items 3 and 4 because both are ambiguous against the current component model:
+    - item 3 does not define whether the supporting sentence belongs under each visible L2 link, under each column heading, or in the existing third-column description area; adding helper copy under every L2 row would materially increase menu height and scanning cost.
+    - item 4 refers to swapping L2/L3 background colors, but the current desktop menu does not use two clearly distinct persistent L2/L3 background fills; the implementation uses a gray L1 column, white panel body, and state overlays/accents.
+- Validation:
+  - inspected live rendered menu states via browser automation at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html`.
+  - confirmed current selected top-nav button uses a white active tab treatment with no active underline, L1 uses an accent stripe, L2/L3 use hover/focus overlays, and the panel grid currently renders as `320px 320px minmax(280px, 1fr)`.
+
 ## Current Task (FDICnet Desktop Overview Hover Parity)
 - [x] Diagnose why the first-column overview row does not match the second-column overview row on hover.
 - [x] Update the desktop mega-menu CSS so the first-column overview row gets the same hover/focus label treatment.
@@ -3353,3 +3437,181 @@
 - Browser validation:
   - mobile drawer focused controls show the expected shared focus ring.
   - desktop issue fix verified by CSS rule precedence and computed-style path; keyboard handoff behavior remains under active tuning in automation.
+
+## Current Task (FDICnet Manager Feedback Desktop Follow-up 2)
+- [ ] Fix desktop active L1 stripe overflow into the top nav.
+- [ ] Restore a modest gap between the main nav and mega-menu without breaking row alignment.
+- [ ] Extend the L3 surface to the right frame edge and soften the panel shadow.
+- [ ] Run browser verification and record results.
+
+## Review / Results (FDICnet Manager Feedback Desktop Follow-up 2)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - moved the desktop mega-menu down by `8px` (`top: calc(100% + 8px)`) so the panel no longer sits flush against the top nav and the L1 accent stripe no longer appears to intrude upward into the main menu.
+  - softened the desktop panel shadow to a wider, lower-opacity treatment (`0 18px 44px rgba(0, 18, 32, 0.08)`) so the panel feels less hard-edged.
+  - retained the earlier right-edge L3 surface extension and restored the internal top padding so the third-column content has breathing room below the main nav.
+- Validation:
+  - browser verification after a cache-busted stylesheet reload confirmed the panel gap is now `8px` between the active top-nav item and `.mega-menu-inner`.
+  - browser verification confirmed the selected L1 stripe remains constrained to the row (`selectedStripeTop = 0px`, `selectedStripeHeight = 36px`) and no longer visually collides with the top nav once the panel offset is restored.
+  - browser verification confirmed the L3 surface still reaches the frame edge (`l3BackgroundGap = 0`, `l3AfterWidth = 20px`).
+  - browser verification confirmed the desktop panel now uses the softer shadow `rgba(0, 18, 32, 0.08) 0px 18px 44px 0px`.
+
+## Current Task (FDICnet Manager Feedback Desktop Follow-up 3)
+- [x] Restore the active top-nav blue stripe while the mega-menu is open.
+- [x] Reattach the desktop mega-menu to the main nav so the panel overlaps the stripe.
+- [x] Run browser verification and record results.
+
+## Review / Results (FDICnet Manager Feedback Desktop Follow-up 3)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - restored the active top-nav blue underline for selected/open tabs by setting the selected-state `::after` cue back to visible.
+  - moved the underline itself below the tab (`bottom: -4px`) so it reads as a stripe under the main menu instead of a stripe inside the tab.
+  - reset the desktop mega-menu to `top: 100%` so the panel sits flush against the bottom edge of the main-menu items and overlaps only the underline area.
+- Validation:
+  - browser verification after a cache-busted stylesheet reload confirmed the selected/open top-nav item now renders the active underline (`tabAfterOpacity = 1`, `tabAfterHeight = 4px`, `tabAfterBottom = -4px`).
+  - browser verification confirmed the mega-menu now starts exactly at the tab bottom edge (`panelTopDelta = 0`) while still overlapping the `4px` underline area (`overlap = 4`).
+
+## Review / Results (FDICnet Manager Feedback Desktop Follow-up 2)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - moved the desktop mega-menu down by `8px` (`top: calc(100
+
+## Review / Results (FDICnet Manager Feedback Desktop Follow-up 4)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - restored the desktop `.fdic-nav` bottom accent stripe while the mega-menu is open instead of zeroing it out.
+  - moved the mega-menu to `top: calc(100% - 6px)` so the panel overlaps the nav stripe, not the menu items themselves.
+- Validation:
+  - browser verification after a cache-busted stylesheet reload confirmed the nav stripe remains present while open (`border-bottom: 6px rgb(132, 219, 255)`).
+  - browser verification confirmed the panel still starts at the item bottom edge (`panelVsTabBottom = 0`) while overlapping exactly the `6px` nav stripe (`panelVsNavBottom = -6`, `overlapStripe = 6`).
+
+## Review / Results (FDICnet Manager Feedback Desktop Follow-up 5)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed the selected/open tab-specific `::after` underline again so the active main-menu item no longer renders its own blue stripe.
+- Validation:
+  - browser verification after a cache-busted stylesheet reload confirmed the selected/open tab underline is effectively hidden (`selectedUnderlineOpacity ~= 0`) while the nav-level stripe remains present (`border-bottom-width = 6px`, `border-bottom-color = rgb(132, 219, 255)`).
+
+## Current Task (FDICnet Mega-Menu Row Height Clarification)
+- [x] Change desktop mega-menu rows from fixed `36px` height to `36px` minimum height with consistent padding.
+- [x] Preserve growth for wrapped row labels while keeping single-line rows at the intended compact height.
+- [x] Run browser verification against both single-line and wrapped desktop rows and record results.
+
+## Review / Results (FDICnet Mega-Menu Row Height Clarification)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed the fixed desktop `height: 36px` constraint from mega-menu rows and kept `min-height: 36px`.
+  - restored stable desktop vertical padding and an explicit `22px` line-height so single-line rows still resolve to `36px` while wrapped rows grow naturally.
+- Validation:
+  - browser verification confirmed a single-line L1 row (`Forms & Directives`) renders at `36px` with `7px` top/bottom padding.
+  - browser verification confirmed a single-line L2 row (`Open Data Plan`) renders at `36px`.
+  - browser verification confirmed the wrapped L2 row (`Offshore Outsourcing of Data Services by Insured Institutions & Associated Consumer Privacy Risks`) now grows to `78px` instead of being forced to `36px`.
+
+## Current Task (FDICnet Mega-Menu Scrim and Shadow Tuning)
+- [x] Lighten the desktop mega-menu scrim.
+- [x] Darken the desktop mega-menu drop shadow.
+- [x] Run browser verification and record results.
+
+## Review / Results (FDICnet Mega-Menu Scrim and Shadow Tuning)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - lightened the desktop mega-menu scrim from `rgba(0, 0, 0, 0.2)` to `rgba(0, 0, 0, 0.08)`.
+  - changed the desktop panel shadow token to `0 8px 16px rgba(0, 0, 0, 0.25)` to match the tighter, darker shadow direction.
+- Validation:
+  - browser verification confirmed the open-state scrim now computes to `rgba(0, 0, 0, 0.08)`.
+  - browser verification confirmed the panel shadow now computes to `rgba(0, 0, 0, 0.25) 0px 8px 16px 0px`.
+
+## Current Task (FDICnet Mega-Menu Shadow and L3 Hover Fill Fix)
+- [x] Allow the desktop mega-menu shadow blur to render fully instead of being clipped.
+- [x] Make the L3 hover/focus fill extend to the right frame edge with the same background color as the row.
+- [x] Run browser verification and record results.
+
+## Review / Results (FDICnet Mega-Menu Shadow and L3 Hover Fill Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - expanded the desktop mega-menu paint bounds from `clip-path: inset(-6px ...)` to `clip-path: inset(-24px ...)` so the configured shadow blur can render instead of being visibly clipped.
+  - changed the L3 hover/focus right-edge extension from an oversized viewport spill to a local `var(--layout-mega-frame-bleed)` extension using the exact same `rgba(0, 110, 190, 0.1)` fill as the hovered row.
+- Validation:
+  - browser verification confirmed the panel now uses the configured shadow with the expanded paint bounds (`clipPath = inset(-24px -12px)`, `boxShadow = rgba(0, 0, 0, 0.25) 0px 8px 16px 0px`).
+  - browser verification confirmed the hovered L3 row and its right-edge extension now match exactly (`l3HoverBg = rgba(0, 110, 190, 0.1)`, `l3HoverAfterBg = rgba(0, 110, 190, 0.1)`, `l3HoverAfterWidth = 12px`).
+
+## Current Task (FDICnet Mega-Menu Left Shadow Clip Fix)
+- [x] Expand the desktop mega-menu horizontal paint bounds so the left edge shadow is not clipped.
+- [x] Run browser verification against the open desktop menu and record results.
+
+## Review / Results (FDICnet Mega-Menu Left Shadow Clip Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - expanded the desktop mega-menu horizontal paint bounds to `clip-path: inset(-24px)` so the panel shadow can render fully on the left edge instead of being limited by the old `-12px` side insets.
+- Validation:
+  - browser verification confirmed the panel now computes with `clipPath = inset(-24px)` while preserving the configured `rgba(0, 0, 0, 0.25) 0px 8px 16px 0px` shadow.
+
+## Current Task (FDICnet Mobile Search Sheet Layout Fix)
+- [x] Convert the mobile search field to a stable inline row layout instead of reusing desktop absolute button positioning.
+- [x] Verify the mobile search sheet at phone width with the search overlay open.
+- [x] Record the result and prevention note.
+
+## Review / Results (FDICnet Mobile Search Sheet Layout Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed `.site-search-field--mobile` to a three-column inline grid so the input, clear button, and submit button align on one row in the mobile search sheet.
+  - made the mobile clear/submit controls use static positioning instead of the desktop absolute-positioned treatment.
+  - removed the desktop-only right padding from the mobile search input so the field width is used for the input itself rather than reserving space for overlaid buttons.
+- Validation:
+  - browser verification at `390x844` with the mobile search overlay open confirmed the field now computes as `display: grid` with columns `306px 36px 0px`.
+  - browser verification confirmed the mobile submit button now uses `position: static`, `transform: none`, and sits aligned to the input row instead of dropping down the sheet.
+
+## Current Task (FDICnet Mobile Search Field Consolidation)
+- [ ] Move the mobile search clear/submit controls back inside the field container so the sheet presents a single search control.
+- [ ] Verify the mobile search overlay at phone width and record results.
+
+## Current Task (FDICnet Mega-Menu Wide Viewport Shadow Clip Fix)
+- [x] Expand the desktop mega-menu paint bounds to cover the frame bleed plus shadow blur on wide viewports.
+- [x] Verify the open desktop menu in-browser and record results.
+
+## Review / Results (FDICnet Mega-Menu Wide Viewport Shadow Clip Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - expanded the desktop mega-menu paint bounds to `clip-path: inset(-40px)` so the shadow can render beyond both the `20px` frame bleed and the `16px` blur radius on wide viewports.
+- Validation:
+  - browser verification at `1440x900` confirmed the panel now computes with `clipPath = inset(-40px)`, `frameBleed = 20px`, and the configured shadow `rgba(0, 0, 0, 0.25) 0px 8px 16px 0px`.
+
+## Current Task (FDICnet Mega-Menu Animated Active Rail)
+- [ ] Replace the per-row active stripe with a column-level animated rail for desktop L1/L2.
+- [ ] Keep existing hover/focus/active row fills while animating the rail on mouse preview and keyboard focus.
+- [ ] Run targeted browser verification and record results.
+
+## Review / Results (FDICnet Mega-Menu Animated Active Rail)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - replaced the fixed per-row L1/L2 accent stripes with column-level `::after` rails on `.mega-col--l1` and `.mega-col--l2`.
+  - kept the existing row background and underline affordances while moving the blue rail itself onto a transitionable element that animates `transform`, `height`, and `opacity`.
+  - removed the old per-row L1/L2 accent stripe rendering so the rail is the single source of truth for the left-edge indicator.
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - added rail-sync helpers that measure the selected/active row and write the column rail CSS custom properties.
+  - updated desktop mouseover and focus-in handlers so the rail follows the currently hovered/focused L1/L2 item immediately, then continues to track render-state changes after preview updates.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/components.js` passed.
+  - browser verification on a fresh local origin (`http://127.0.0.1:4174`) confirmed the updated mega-menu component class is loaded and the column rail pseudo-elements expose transitions on `transform`, `height`, and `opacity`.
+
+## Current Task (FDICnet Mobile Search Overlay Repair)
+- [x] Inspect the mobile search sheet DOM/CSS at phone width to identify the layout root cause.
+- [x] Patch the mobile search field so input and action controls align correctly in the sheet.
+- [x] Verify the fixed mobile search layout in-browser and record the result.
+
+## Review / Results (FDICnet Mobile Search Overlay Repair)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed the phone-width `.mobile-search-sheet` from a full-height grid to a simple vertical flex layout so the header, field, and hint no longer stretch across the viewport.
+  - hid empty mobile search results and status blocks so the overlay does not reserve dead space when no query has been entered yet.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js` passed.
+  - browser verification at `390x844` confirmed the mobile search sheet now computes as `display: flex`, with the close button at `top: 16px`, the search field at `top: 70px`, and the hint at `top: 124px`.
+  - browser verification confirmed the submit button remains anchored inside the input row (`submitOffsetParentClass = mobile-search-input-row`) and the empty results/status blocks are hidden (`display: none`).
+
+## Current Task (FDICnet Inline Mobile Header Search)
+- [x] Move the mobile search UI from an overlay/dialog model into an inline masthead row.
+- [x] Make the phone-width header grow to fit the search field and push page content down in normal document flow.
+- [x] Verify the inline mobile search behavior in-browser and record the result.
+
+## Review / Results (FDICnet Inline Mobile Header Search)
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - moved `#mobileSearchRow` into the masthead shell so it renders as part of the header instead of as a page-covering overlay.
+  - removed the mobile search backdrop and close button markup because the search toggle now acts as the open/close control.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - converted the phone-width masthead layout to a wrapped in-flow layout so the search row can sit below the wordmark and controls.
+  - restyled the mobile search container as a normal full-width masthead row with no overlay background, no modal spacing, and no body-scroll lock.
+  - kept the mobile suggestions list inline beneath the field and hid empty results/status blocks until they have content.
+- Updated `sites/fdicnet-main-menu/events.js` and `sites/fdicnet-main-menu/init.js`:
+  - removed the mobile-search modal focus-trap path and the old requirement for backdrop/close elements that no longer exist.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/init.js`, `sites/fdicnet-main-menu/events.js`, and `sites/fdicnet-main-menu/script.js`.
+  - browser verification at `390x844` confirmed the masthead grows to `136px`, the inline mobile search row sits at `top: 76px` inside the blue header, and the main content begins immediately after the expanded masthead at `top: 136px`.
+  - browser screenshot verification confirmed the mobile search field now appears directly under the wordmark and controls inside the dark blue header, with the content area pushed down rather than covered.
