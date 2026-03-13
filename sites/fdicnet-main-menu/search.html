@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FDICNet Search Results</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"
+      integrity="sha384-6p9AefaqUhEVheRlj1mpAkbngHXy9mbYMrIdcIt4Jlc9lOLIablJq3bBsLOjGwZ7"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="fdic-header">
+      <div class="fdic-masthead">
+        <div class="fdic-shell">
+          <a class="fdic-wordmark" href="index.html" aria-label="FDICnet home">
+            <img src="assets/FDICnet.svg" width="140" height="35" alt="FDICnet" />
+          </a>
+        </div>
+      </div>
+    </header>
+    <main class="page-content">
+      <div class="fdic-shell">
+        <p><a href="index.html">Back to main menu prototype</a></p>
+        <h1>Search Results</h1>
+        <p id="searchSummary"></p>
+        <p>
+          This prototype page represents the future full-site search experience. The query is preserved in the URL
+          and displayed here so the unified masthead search flow has a real destination.
+        </p>
+      </div>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get("q") || "";
+      const summary = document.getElementById("searchSummary");
+      summary.textContent = query
+        ? `Showing prototype results for "${query}".`
+        : "No search query was provided.";
+    </script>
+  </body>
+</html>
