@@ -1,5 +1,54 @@
 # TODO
 
+## Current Task (FDICnet Review Findings Remediation)
+- [x] Capture baseline screenshots for desktop and mobile menu/search states before changes.
+- [x] Audit the reported accessibility and UX findings across the standalone prototype and shared menu runtime.
+- [x] Fix the confirmed ARIA, mobile search, search-submit, hover-intent, and drawer-state issues with minimal structural changes.
+- [x] Run targeted verification, compare against baseline screenshots, and record results.
+
+## Review / Results (FDICnet Review Findings Remediation)
+- Created branch `fix/fdicnet-a11y-review-findings`.
+- Captured baseline screenshots before editing in `tmp/review-baseline/`:
+  - `desktop-initial.png`
+  - `desktop-menu-open.png`
+  - `desktop-search-open.png`
+  - `mobile-initial.png`
+  - `mobile-drawer-open.png`
+  - `mobile-search-open.png`
+- Updated `sites/fdicnet-main-menu/index.html` and `sites/fdicnet-main-menu/components/fdicnet-main-menu/fdicnet-main-menu.twig`:
+  - added the missing static combobox ARIA contract for desktop and mobile search inputs on initial render.
+  - changed the search submit button label from full-site search wording to launcher behavior (`Open first matching result`).
+  - aligned the Twig shell with the current inline mobile-search architecture by removing the stale modal/backdrop/close markup instead of adding modal semantics back to the standalone prototype.
+  - marked `#megaMenuScrim` as presentational with `role="presentation"`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - removed the dead-end `search.html` fallback from search suggestions and submit behavior.
+  - made Enter / submit activate the first matching menu destination instead of routing to the stub search page.
+  - synchronized combobox ARIA state for both desktop and mobile inputs, including close/reset paths.
+  - removed obsolete mobile-search backdrop/close element references and listeners.
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - rendered desktop L1 items with children as real `button` elements that control the next column, while keeping overview rows as links.
+  - switched hover-preview event dispatch to `pointerover` and carried `pointerType` through the custom events.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - kept the existing hover-intent delay for mouse hover, but skip that delay for non-mouse pointer types.
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js` and `sites/fdicnet-main-menu/state.js`:
+  - persisted mobile drawer scroll positions by drill path and restored them when navigating back.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `overscroll-behavior: contain` to the shared search results list.
+- Validation:
+  - `node --check` passed for `script.js`, `events.js`, `components.js`, `mobile-drawer.js`, `init.js`, and `state.js`.
+  - browser verification confirmed both search inputs expose `aria-expanded="false"`, `aria-controls`, `aria-autocomplete="list"`, and `aria-haspopup="listbox"` before interaction.
+  - browser verification confirmed the desktop L1 primary rows now render as `BUTTON` elements with `aria-controls="l2List"` and per-row `aria-expanded`, while the overview row remains an anchor.
+  - browser verification confirmed desktop search submit stays on `index.html`, closes the suggestion panel, and activates a matching menu destination instead of navigating to `search.html`.
+  - browser verification confirmed the current mobile search UI opens inline in the masthead with no `mobileSearchBackdrop` or `mobileSearchClose` elements, matching the intended interaction model.
+  - browser verification confirmed mobile drawer scroll position is restored after drilling into `Knowledge Base > International Affairs` and backing out (`scrollTop` restored to `15`).
+  - captured post-change comparison screenshots in `tmp/review-after/`:
+    - `desktop-initial.png`
+    - `desktop-menu-open.png`
+    - `desktop-search-open.png`
+    - `mobile-initial.png`
+    - `mobile-drawer-open.png`
+    - `mobile-search-open.png`
+
 ## Current Task (FDICnet Manager Feedback Layout Follow-up)
 - [x] Remove the detached whitespace and stripe treatment between the desktop top nav and mega-menu.
 - [x] Make the desktop mega-menu columns equal width and keep the panel visually anchored to the active top-level item.

@@ -18,6 +18,8 @@
     closeHideTimer: null,
     mobileDrillPath: [],
     lastMobileDrillPath: null,
+    mobileDrillScrollPositions: {},
+    lastRenderedMobileDrillPathKey: "[]",
   };
 
   function getPanelConfig(siteContent, activePanelKey) {

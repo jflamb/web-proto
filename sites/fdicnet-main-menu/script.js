@@ -49,8 +49,6 @@ let desktopSearchStatus = null;
 let mobileSearchToggle = null;
 let mobileSearchRow = null;
 let mobileSearchInput = null;
-let mobileSearchBackdrop = null;
-let mobileSearchClose = null;
 let mobileSearchClear = null;
 let mobileSearchSubmit = null;
 let mobileSearchResults = null;
@@ -96,8 +94,6 @@ function refreshDomRefs() {
   mobileSearchToggle = document.getElementById("mobileSearchToggle");
   mobileSearchRow = document.getElementById("mobileSearchRow");
   mobileSearchInput = document.getElementById("mobileSearchInput");
-  mobileSearchBackdrop = document.getElementById("mobileSearchBackdrop");
-  mobileSearchClose = document.getElementById("mobileSearchClose");
   mobileSearchClear = document.getElementById("mobileSearchClear");
   mobileSearchSubmit = document.getElementById("mobileSearchSubmit");
   mobileSearchResults = document.getElementById("mobileSearchResults");
@@ -138,8 +134,6 @@ function getDom() {
     mobileSearchToggle,
     mobileSearchRow,
     mobileSearchInput,
-    mobileSearchBackdrop,
-    mobileSearchClose,
     mobileSearchClear,
     mobileSearchSubmit,
     mobileSearchResults,
@@ -525,12 +519,6 @@ function syncSearchClearButtons(value = null) {
   if (mobileSearchClear) mobileSearchClear.hidden = !hasValue;
 }
 
-function getSearchResultsUrl(query) {
-  const url = new URL("search.html", window.location.href);
-  url.searchParams.set("q", query);
-  return url.toString();
-}
-
 function isTopLevelSearchEntry(entry) {
   return entry?.l1Index === null && entry?.l2Index === null && entry?.l3Index === null;
 }
@@ -538,32 +526,29 @@ function isTopLevelSearchEntry(entry) {
 function buildSearchActions(query) {
   const trimmedQuery = query.trim();
   if (!trimmedQuery) return [];
-  const menuMatches = getLauncherMatches(trimmedQuery).map((entry) => ({ type: "menu", entry }));
-  return [
-    ...menuMatches,
-    {
-      type: "search-all",
-      query: trimmedQuery,
-      label: `Search all FDICnet for "${trimmedQuery}"`,
-      href: getSearchResultsUrl(trimmedQuery),
-    },
-  ];
+  return getLauncherMatches(trimmedQuery).map((entry) => ({ type: "menu", entry }));
 }
 
 function syncSearchComboboxState() {
-  const input = getSearchInputElement();
-  const results = getSearchResultsElement();
-  if (!(input instanceof HTMLElement) || !(results instanceof HTMLElement)) return;
-  input.setAttribute("role", "combobox");
-  input.setAttribute("aria-expanded", searchSuggestions.length > 0 ? "true" : "false");
-  input.setAttribute("aria-controls", results.id);
-  input.setAttribute("aria-autocomplete", "list");
-  input.setAttribute("aria-haspopup", "listbox");
-  if (searchActiveIndex >= 0) {
-    input.setAttribute("aria-activedescendant", `site-search-option-${searchActiveIndex}`);
-  } else {
-    input.removeAttribute("aria-activedescendant");
-  }
+  const isDesktopSurface = activeSearchSurface === "desktop";
+  const surfaces = [
+    { input: desktopSearchInput, results: desktopSearchResults, isActive: isDesktopSurface },
+    { input: mobileSearchInput, results: mobileSearchResults, isActive: !isDesktopSurface },
+  ];
+
+  surfaces.forEach(({ input, results, isActive }) => {
+    if (!(input instanceof HTMLElement) || !(results instanceof HTMLElement)) return;
+    input.setAttribute("role", "combobox");
+    input.setAttribute("aria-expanded", isActive && searchSuggestions.length > 0 ? "true" : "false");
+    input.setAttribute("aria-controls", results.id);
+    input.setAttribute("aria-autocomplete", "list");
+    input.setAttribute("aria-haspopup", "listbox");
+    if (isActive && searchActiveIndex >= 0) {
+      input.setAttribute("aria-activedescendant", `site-search-option-${searchActiveIndex}`);
+    } else {
+      input.removeAttribute("aria-activedescendant");
+    }
+  });
 }
 
 function setDesktopSearchPanelOpen(isOpen) {
@@ -610,6 +595,7 @@ function closeMobileSearch({ restoreFocus = true } = {}) {
   if (mobileSearchResults) mobileSearchResults.innerHTML = "";
   if (mobileSearchStatus) mobileSearchStatus.textContent = "";
   syncSearchClearButtons();
+  syncSearchComboboxState();
   if (restoreFocus && searchReturnFocus instanceof HTMLElement && searchReturnFocus.isConnected) {
     searchReturnFocus.focus();
   }
@@ -626,7 +612,7 @@ function renderSearchSuggestions() {
   results.innerHTML = "";
 
   if (searchSuggestions.length === 0) {
-    status.textContent = query ? `No menu matches for "${query}".` : "";
+    status.textContent = query ? `No menu destinations match "${query}".` : "";
     if (activeSearchSurface === "desktop") {
       closeDesktopSearchPanel();
     }
@@ -636,7 +622,7 @@ function renderSearchSuggestions() {
 
   searchSuggestions.forEach((item, index) => {
     const li = document.createElement("li");
-    li.className = `site-search-item site-search-option${item.type === "search-all" ? " site-search-option--action" : ""}`;
+    li.className = "site-search-item site-search-option";
     li.id = `site-search-option-${index}`;
     li.setAttribute("role", "option");
     li.setAttribute("aria-selected", "false");
@@ -657,7 +643,7 @@ function renderSearchSuggestions() {
     results.appendChild(li);
   });
 
-  status.textContent = `${searchSuggestions.length} suggestion${searchSuggestions.length === 1 ? "" : "s"} available.`;
+  status.textContent = `${searchSuggestions.length} menu result${searchSuggestions.length === 1 ? "" : "s"} available.`;
   results.scrollTop = 0;
   if (activeSearchSurface === "desktop") {
     setDesktopSearchPanelOpen(true);
@@ -717,12 +703,6 @@ function ensureSearchActiveOptionVisible() {
   } else if (optionBottom > containerBottom) {
     results.scrollTop = optionBottom - results.clientHeight;
   }
-}
-
-function navigateToSearchResults(query) {
-  const trimmedQuery = query.trim();
-  if (!trimmedQuery) return;
-  window.location.href = getSearchResultsUrl(trimmedQuery);
 }
 
 function getSearchResultTarget(entry) {
@@ -832,11 +812,24 @@ function activateSearchEntry(entry) {
 function activateSearchSuggestion(index) {
   if (!Number.isFinite(index) || index < 0 || index >= searchSuggestions.length) return;
   const suggestion = searchSuggestions[index];
-  if (suggestion.type === "search-all") {
-    navigateToSearchResults(suggestion.query);
+  activateSearchEntry(suggestion.entry);
+}
+
+function submitSearchQuery(surface) {
+  activeSearchSurface = surface;
+  clearSearchDebounce();
+  const query = getSearchQuery();
+  if (!query.trim()) return;
+
+  searchSuggestions = buildSearchActions(query);
+  searchActiveIndex = searchActiveIndex >= 0 && searchActiveIndex < searchSuggestions.length ? searchActiveIndex : -1;
+  renderSearchSuggestions();
+
+  if (searchSuggestions.length === 0) {
     return;
   }
-  activateSearchEntry(suggestion.entry);
+
+  activateSearchSuggestion(searchActiveIndex >= 0 ? searchActiveIndex : 0);
 }
 
 function isMobileViewport() {
@@ -1145,7 +1138,7 @@ function initializeSiteSearch() {
       if (searchActiveIndex >= 0) {
         activateSearchSuggestion(searchActiveIndex);
       } else {
-        navigateToSearchResults(getSearchQuery());
+        submitSearchQuery(surface);
       }
       return;
     }
@@ -1193,15 +1186,13 @@ function initializeSiteSearch() {
   desktopSearchInput?.addEventListener("input", () => handleInput("desktop"));
   desktopSearchInput?.addEventListener("keydown", (event) => handleKeyboardNavigation(event, "desktop"));
   desktopSearchClear?.addEventListener("click", () => clearSearch("desktop"));
-  desktopSearchSubmit?.addEventListener("click", () => navigateToSearchResults(desktopSearchInput?.value || ""));
+  desktopSearchSubmit?.addEventListener("click", () => submitSearchQuery("desktop"));
   bindResultsClick(desktopSearchResults, "desktop");
 
   mobileSearchInput?.addEventListener("input", () => handleInput("mobile"));
   mobileSearchInput?.addEventListener("keydown", (event) => handleKeyboardNavigation(event, "mobile"));
   mobileSearchClear?.addEventListener("click", () => clearSearch("mobile"));
-  mobileSearchSubmit?.addEventListener("click", () => navigateToSearchResults(mobileSearchInput?.value || ""));
-  mobileSearchClose?.addEventListener("click", () => closeMobileSearch());
-  mobileSearchBackdrop?.addEventListener("click", () => closeMobileSearch());
+  mobileSearchSubmit?.addEventListener("click", () => submitSearchQuery("mobile"));
   bindResultsClick(mobileSearchResults, "mobile");
 
   document.addEventListener("pointerdown", (event) => {
@@ -1243,6 +1234,7 @@ function initializeSiteSearch() {
   });
 
   syncSearchClearButtons();
+  syncSearchComboboxState();
 }
 
 function syncTopNavState() {

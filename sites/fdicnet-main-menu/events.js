@@ -45,6 +45,7 @@
       l1Column,
     } = getDom();
     const HOVER_INTENT_DELAY_MS = 140;
+    const fineHoverMediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
     let topNavPreviewTimer = null;
     let l1PreviewTimer = null;
     let l2PreviewTimer = null;
@@ -64,12 +65,26 @@
       }
     }
 
-    function scheduleHoverIntent(kind, callback) {
+    function getHoverIntentDelay(pointerType = "mouse") {
+      if (!fineHoverMediaQuery.matches) {
+        return 0;
+      }
+      if (pointerType && pointerType !== "mouse") {
+        return 0;
+      }
+      return HOVER_INTENT_DELAY_MS;
+    }
+
+    function scheduleHoverIntent(kind, callback, delay = HOVER_INTENT_DELAY_MS) {
       clearPreviewTimer(kind);
+      if (delay <= 0) {
+        callback();
+        return;
+      }
       const timer = window.setTimeout(() => {
         clearPreviewTimer(kind);
         callback();
-      }, HOVER_INTENT_DELAY_MS);
+      }, delay);
       if (kind === "topNav") topNavPreviewTimer = timer;
       if (kind === "l1") l1PreviewTimer = timer;
       if (kind === "l2") l2PreviewTimer = timer;
@@ -158,11 +173,11 @@
     if (topNav) {
       topNav.addEventListener("fdic-top-nav-preview", (event) => {
         if (isMobileViewport()) return;
-        const { panelKey, navIndex } = event.detail || {};
+        const { panelKey, navIndex, pointerType } = event.detail || {};
         if (!panelKey) return;
         scheduleHoverIntent("topNav", () => {
           deps.previewTopNavPanel(panelKey, Number(navIndex || 0));
-        });
+        }, getHoverIntentDelay(pointerType));
       });
 
       topNav.addEventListener("fdic-top-nav-activate", (event) => {
@@ -187,7 +202,7 @@
     if (megaMenuHost) {
       megaMenuHost.addEventListener("fdic-mega-l1-preview", (event) => {
         if (isMobileViewport()) return;
-        const { index, fromFocus } = event.detail || {};
+        const { index, fromFocus, pointerType } = event.detail || {};
         if (!Number.isFinite(index)) return;
         if (fromFocus) {
           clearPreviewTimer("l1");
@@ -196,7 +211,7 @@
         }
         scheduleHoverIntent("l1", () => {
           deps.setSelectedL1(index, { restoreFocus: false });
-        });
+        }, getHoverIntentDelay(pointerType));
       });
 
       megaMenuHost.addEventListener("fdic-mega-l1-roving", (event) => {
@@ -212,7 +227,7 @@
 
       megaMenuHost.addEventListener("fdic-mega-l2-preview", (event) => {
         if (isMobileViewport()) return;
-        const { index, fromFocus } = event.detail || {};
+        const { index, fromFocus, pointerType } = event.detail || {};
         if (!Number.isFinite(index)) return;
         if (fromFocus) {
           clearPreviewTimer("l2");
@@ -221,7 +236,7 @@
         }
         scheduleHoverIntent("l2", () => {
           setPreviewL2(index, { fromFocus: false, restoreFocus: false });
-        });
+        }, getHoverIntentDelay(pointerType));
       });
 
       megaMenuHost.addEventListener("fdic-mega-l2-overview-preview", (event) => {

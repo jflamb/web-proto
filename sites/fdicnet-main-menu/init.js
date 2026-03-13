@@ -69,8 +69,6 @@
         desktopSearchPanel,
         desktopSearchResults,
         desktopSearchStatus,
-        mobileSearchBackdrop,
-        mobileSearchClose,
         mobileSearchSubmit,
         mobileSearchResults,
         mobileSearchStatus,
