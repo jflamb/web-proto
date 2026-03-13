@@ -3,6 +3,7 @@
     const {
       menuState,
       getDom,
+      refreshDomRefs,
       isMobileViewport,
       isPhoneViewport,
       setMobileSearchOpen,
@@ -32,6 +33,7 @@
       navToggle,
       mobileSearchToggle,
       mobileSearchRow,
+      mobileNavBackdrop,
       mobileNavMediaQuery,
       phoneSearchMediaQuery,
       topNav,
@@ -90,6 +92,31 @@
       schedulePreviewClear();
     }
 
+    function focusMobileDrillReturnTarget(previousPath) {
+      if (!Array.isArray(previousPath) || previousPath.length === 0) {
+        return false;
+      }
+      const targetPath = JSON.stringify(previousPath);
+      const triggers = [...navList.querySelectorAll(".mobile-drill-trigger")];
+      const matchingTrigger = triggers.find((trigger) => trigger.dataset.mobileDrillPath === targetPath);
+      if (matchingTrigger instanceof HTMLElement) {
+        matchingTrigger.focus();
+        return true;
+      }
+      return false;
+    }
+
+    function getMobileSearchFocusables() {
+      const searchSheet = mobileSearchRow?.querySelector(".mobile-search-sheet");
+      if (!(searchSheet instanceof HTMLElement)) return [];
+      return [...searchSheet.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])')].filter(
+        (item) => item instanceof HTMLElement
+          && !item.hasAttribute("disabled")
+          && !item.hasAttribute("hidden")
+          && item.getAttribute("aria-hidden") !== "true"
+      );
+    }
+
     if (navToggle) {
       navToggle.addEventListener("click", () => {
         if (isMobileViewport()) {
@@ -125,23 +152,17 @@
         closeMobileNav();
         if (navToggle) navToggle.focus();
       });
-      mobileNavBackdrop.addEventListener("keydown", (event) => {
-        if (!isMobileViewport()) return;
-        if (!menuState.mobileNavOpen) return;
-        if (event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        closeMobileNav();
-        if (navToggle) navToggle.focus();
-      });
     }
 
     mobileNavMediaQuery.addEventListener("change", () => {
+      refreshDomRefs();
       syncMobileNavState();
       renderTopNav();
       renderMenuPanel();
     });
 
     phoneSearchMediaQuery.addEventListener("change", () => {
+      refreshDomRefs();
       syncMobileSearchState();
     });
 
@@ -237,13 +258,16 @@
 
       if (event.key === "ArrowLeft" && menuState.mobileNavOpen && menuState.mobileDrillPath.length > 0) {
         event.preventDefault();
+        const previousPath = [...menuState.mobileDrillPath];
         menuState.mobileDrillPath = menuState.mobileDrillPath.slice(0, -1);
         renderMobileDrawerPanel();
-        const firstFocusable = navList.querySelector(
-          ".mobile-drill-trigger, .mobile-drill-link, .mobile-drill-current-link, .mobile-drill-back"
-        );
-        if (firstFocusable instanceof HTMLElement) {
-          firstFocusable.focus();
+        if (!focusMobileDrillReturnTarget(previousPath)) {
+          const firstFocusable = navList.querySelector(
+            ".mobile-drill-trigger, .mobile-drill-link, .mobile-drill-current-link, .mobile-drill-back"
+          );
+          if (firstFocusable instanceof HTMLElement) {
+            firstFocusable.focus();
+          }
         }
         return;
       }
@@ -303,6 +327,25 @@
     });
 
     document.addEventListener("keydown", (event) => {
+      if (event.key === "Tab" && isPhoneViewport() && menuState.mobileSearchOpen) {
+        const focusables = getMobileSearchFocusables();
+        if (focusables.length > 0) {
+          const activeElement = document.activeElement;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (event.shiftKey && activeElement === first) {
+            event.preventDefault();
+            last.focus();
+            return;
+          }
+          if (!event.shiftKey && activeElement === last) {
+            event.preventDefault();
+            first.focus();
+            return;
+          }
+        }
+      }
+
       if (event.key === "Tab" && isMobileViewport() && menuState.mobileNavOpen) {
         const focusables = [
           navToggle,
@@ -336,10 +379,13 @@
       if (isMobileViewport() && menuState.mobileNavOpen) {
         if (menuState.mobileDrillPath.length > 0) {
           event.preventDefault();
+          const previousPath = [...menuState.mobileDrillPath];
           menuState.mobileDrillPath = menuState.mobileDrillPath.slice(0, -1);
           renderMobileDrawerPanel();
-          const button = navList.querySelector(".mobile-drill-trigger");
-          if (button) button.focus();
+          if (!focusMobileDrillReturnTarget(previousPath)) {
+            const button = navList.querySelector(".mobile-drill-trigger");
+            if (button) button.focus();
+          }
           return;
         }
       }

@@ -5,7 +5,6 @@
       reduceMotionMediaQuery,
       MOBILE_STAGGER_MAX_ITEMS,
       MOBILE_STAGGER_STEP_MS,
-      refreshDomRefs,
       isMobileViewport,
       getNavList,
       getMobilePanelKeys,
@@ -110,12 +109,25 @@
         } else {
           const current = document.createElement("span");
           current.className = "mobile-drill-crumb-current";
-          current.setAttribute("aria-current", "page");
+          current.setAttribute("aria-current", "location");
           current.textContent = node.label || "Section";
           li.appendChild(current);
         }
 
         crumbList.appendChild(li);
+
+        if (!isCurrent) {
+          const separator = document.createElement("li");
+          separator.className = "mobile-drill-context-separator";
+          separator.setAttribute("aria-hidden", "true");
+
+          const separatorGlyph = document.createElement("span");
+          separatorGlyph.className = "mobile-drill-context-separator-icon ph ph-caret-right";
+          separatorGlyph.setAttribute("aria-hidden", "true");
+
+          separator.appendChild(separatorGlyph);
+          crumbList.appendChild(separator);
+        }
       });
 
       context.appendChild(crumbList);
@@ -130,11 +142,12 @@
     function createMobileDrillList() {
       const list = document.createElement("ul");
       list.className = "mobile-drill-list";
+      list.setAttribute("role", "list");
       return list;
     }
 
     function appendMobileDrillItem(list, label, nextPath, options = {}) {
-      const { hasChildren = true, href = "#" } = options;
+      const { hasChildren = true, href = "#", targetId = "" } = options;
       const li = document.createElement("li");
       li.className = "mobile-drill-item";
 
@@ -142,6 +155,7 @@
         const link = document.createElement("a");
         link.className = "mobile-drill-link";
         link.href = href || "#";
+        if (targetId) link.dataset.mobileTargetId = targetId;
         link.textContent = label || "Link";
         li.appendChild(link);
         list.appendChild(li);
@@ -153,6 +167,7 @@
       button.className = "mobile-drill-trigger";
       button.dataset.mobileDrillAction = "set-path";
       button.dataset.mobileDrillPath = encodeMobilePath(nextPath);
+      if (targetId) button.dataset.mobileTargetId = targetId;
       button.setAttribute("aria-haspopup", "true");
       button.setAttribute("aria-controls", "fdicMobileDrawerPanel");
       button.setAttribute("aria-expanded", "false");
@@ -171,13 +186,14 @@
       list.appendChild(li);
     }
 
-    function appendMobileDrillLinkItem(list, label, href) {
+    function appendMobileDrillLinkItem(list, label, href, targetId = "") {
       const li = document.createElement("li");
       li.className = "mobile-drill-link-item";
 
       const link = document.createElement("a");
       link.className = "mobile-drill-current-link";
       link.href = href || "#";
+      if (targetId) link.dataset.mobileTargetId = targetId;
       link.textContent = label || "Overview";
 
       li.appendChild(link);
@@ -195,6 +211,7 @@
         appendMobileDrillItem(list, panelMeta?.label || panelKey, [panelKey], {
           hasChildren,
           href: panelConfig?.overviewHref || "#",
+          targetId: `panel:${panelKey}`,
         });
       });
       panelContainer.appendChild(list);
@@ -214,6 +231,7 @@
         appendMobileDrillItem(list, l1Item.label || "Section", [panelKey, l1Index], {
           hasChildren,
           href: l1Item.href || l1Item.overviewHref || "#",
+          targetId: `l1:${panelKey}:${l1Index}`,
         });
       });
 
@@ -230,6 +248,7 @@
         appendMobileDrillItem(list, overviewItem.label || "Overview", [panelKey, 0], {
           hasChildren: Array.isArray(overviewItem.l2) && overviewItem.l2.length > 0,
           href: overviewItem.href || overviewItem.overviewHref || "#",
+          targetId: `l1:${panelKey}:0`,
         });
       }
       panelContainer.appendChild(list);
@@ -251,9 +270,15 @@
         appendMobileDrillItem(list, l2Item.label || "Link", [panelKey, l1Index, l2Index], {
           hasChildren,
           href: l2Item.href || "#",
+          targetId: `l2:${panelKey}:${l1Index}:${l2Index}`,
         });
       });
-      appendMobileDrillLinkItem(list, l1Item.label || "Section", l1Item.href || l1Item.overviewHref || "#");
+      appendMobileDrillLinkItem(
+        list,
+        l1Item.label || "Section",
+        l1Item.href || l1Item.overviewHref || "#",
+        `l2overview:${panelKey}:${l1Index}`
+      );
       panelContainer.appendChild(list);
     }
 
@@ -270,21 +295,28 @@
 
       const list = document.createElement("ul");
       list.className = "mobile-drill-link-list";
+      list.setAttribute("role", "list");
 
-      (l2Item.l3 || []).forEach((l3Item) => {
+      (l2Item.l3 || []).forEach((l3Item, l3Index) => {
         const li = document.createElement("li");
         li.className = "mobile-drill-link-item";
 
         const link = document.createElement("a");
         link.className = "mobile-drill-link";
         link.href = l3Item.href || "#";
+        link.dataset.mobileTargetId = `l3:${panelKey}:${l1Index}:${l2Index}:${l3Index}`;
         link.textContent = l3Item.label || "Sub-link";
 
         li.appendChild(link);
         list.appendChild(li);
       });
 
-      appendMobileDrillLinkItem(list, l2Item.label || "Link", l2Item.href || "#");
+      appendMobileDrillLinkItem(
+        list,
+        l2Item.label || "Link",
+        l2Item.href || "#",
+        `l2:${panelKey}:${l1Index}:${l2Index}`
+      );
       panelContainer.appendChild(list);
     }
 
@@ -382,7 +414,6 @@
     }
 
     function renderMobileDrawerPanel() {
-      refreshDomRefs();
       if (!isMobileViewport()) return;
       if (!menuState.mobileNavOpen) return;
       syncMobileToggleButton();

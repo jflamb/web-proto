@@ -13,6 +13,7 @@
       renderPageContent,
       renderMenuPanel,
       setupEvents,
+      initializeSiteSearch,
       openMenu,
     } = deps;
 
@@ -59,9 +60,20 @@
         pageTitle,
         pageIntro,
         desktopSearchInput,
+        desktopSearchClear,
         mobileSearchToggle,
         mobileSearchRow,
         mobileSearchInput,
+        mobileSearchClear,
+        desktopSearchSubmit,
+        desktopSearchPanel,
+        desktopSearchResults,
+        desktopSearchStatus,
+        mobileSearchBackdrop,
+        mobileSearchClose,
+        mobileSearchSubmit,
+        mobileSearchResults,
+        mobileSearchStatus,
         mobileNavBackdrop,
       } = getDom();
 
@@ -79,9 +91,20 @@
         ["pageTitle", pageTitle],
         ["pageIntro", pageIntro],
         ["desktopSearchInput", desktopSearchInput],
+        ["desktopSearchClear", desktopSearchClear],
+        ["desktopSearchSubmit", desktopSearchSubmit],
+        ["desktopSearchPanel", desktopSearchPanel],
+        ["desktopSearchResults", desktopSearchResults],
+        ["desktopSearchStatus", desktopSearchStatus],
         ["mobileSearchToggle", mobileSearchToggle],
         ["mobileSearchRow", mobileSearchRow],
         ["mobileSearchInput", mobileSearchInput],
+        ["mobileSearchClear", mobileSearchClear],
+        ["mobileSearchBackdrop", mobileSearchBackdrop],
+        ["mobileSearchClose", mobileSearchClose],
+        ["mobileSearchSubmit", mobileSearchSubmit],
+        ["mobileSearchResults", mobileSearchResults],
+        ["mobileSearchStatus", mobileSearchStatus],
         ["mobileNavBackdrop", mobileNavBackdrop],
       ];
       return requiredElements.filter(([, element]) => !element).map(([name]) => name);
@@ -139,6 +162,7 @@
       renderPageContent();
       renderMenuPanel();
       setupEvents();
+      initializeSiteSearch();
       const { megaMenu } = getDom();
       megaMenu.hidden = true;
       megaMenu.setAttribute("aria-hidden", "true");

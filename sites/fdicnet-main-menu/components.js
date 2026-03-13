@@ -260,6 +260,7 @@ class FDICMegaMenu extends HTMLElement {
   }
 
   updateView({
+    panelKey = "",
     panelLabel = "Site menu",
     isMobile = false,
     l1Items = [],
@@ -313,6 +314,7 @@ class FDICMegaMenu extends HTMLElement {
 
       link.className = "l1-item";
       link.href = item.overviewHref || "#";
+      link.dataset.launcherId = `l1:${panelKey}:${index}`;
       link.dataset.column = "l1";
       link.dataset.index = String(index);
       link.dataset.selected = index === selectedL1Index ? "true" : "false";
@@ -355,6 +357,7 @@ class FDICMegaMenu extends HTMLElement {
 
       overviewLink.className = "l1-item l1-item--overview";
       overviewLink.href = overviewItem?.overviewHref || overviewItem?.href || "#";
+      overviewLink.dataset.launcherId = `l1:${panelKey}:0`;
       overviewLink.dataset.column = "l1";
       overviewLink.dataset.index = "0";
       overviewLink.dataset.selected = selectedL1Index === 0 ? "true" : "false";
@@ -368,16 +371,18 @@ class FDICMegaMenu extends HTMLElement {
     }
 
     this.l2List.innerHTML = "";
+    const shouldHighlightL2 = showingPreview && !previewingOverview;
     l2Items.forEach((item, index) => {
       const li = document.createElement("li");
       li.setAttribute("role", "none");
       const link = document.createElement("a");
       const label = document.createElement("span");
-      const isActive = index === activeL2Index;
+      const isActive = shouldHighlightL2 && index === activeL2Index;
       const hasNextLevel = Array.isArray(item.l3) && item.l3.length > 0;
 
       link.className = "l2-item";
       link.href = item.href || "#";
+      link.dataset.launcherId = `l2:${panelKey}:${selectedL1Index}:${index}`;
       link.dataset.column = "l2";
       link.dataset.index = String(index);
       link.dataset.active = isActive ? "true" : "false";
@@ -421,6 +426,7 @@ class FDICMegaMenu extends HTMLElement {
 
       overviewLink.className = "l2-item l2-item--overview";
       overviewLink.href = l2Overview.href || "#";
+      overviewLink.dataset.launcherId = `l2overview:${panelKey}:${selectedL1Index}`;
       overviewLink.dataset.column = "l2";
       overviewLink.dataset.active = previewingOverview ? "true" : "false";
       overviewLink.tabIndex = previewingOverview || l2Items.length === 0 ? 0 : -1;
@@ -436,8 +442,9 @@ class FDICMegaMenu extends HTMLElement {
     this.l3Description.hidden = !l3Description;
 
     this.l3List.innerHTML = "";
-    this.l3List.hidden = !showingPreview || previewingOverview;
-    if (!showingPreview || previewingOverview) return;
+    const showL3List = showingPreview && !previewingOverview && l3Items.length > 0;
+    this.l3List.hidden = !showL3List;
+    if (!showL3List) return;
 
     l3Items.forEach((item, index) => {
       const li = document.createElement("li");
@@ -446,6 +453,7 @@ class FDICMegaMenu extends HTMLElement {
       link.className = "l3-item";
       link.href = item.href || "#";
       link.textContent = item.label || "Sub-link";
+      link.dataset.launcherId = `l3:${panelKey}:${selectedL1Index}:${activeL2Index}:${index}`;
       link.dataset.column = "l3";
       link.dataset.index = String(index);
       link.tabIndex = index === 0 ? 0 : -1;
