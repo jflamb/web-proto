@@ -16,6 +16,7 @@
     l1FocusIndex: 0,
     closeHideTimer: null,
     mobileDrillPath: [],
+    lastMobileDrillPath: null,
   };
 
   function getPanelConfig(siteContent, activePanelKey) {

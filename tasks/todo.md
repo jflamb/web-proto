@@ -1,5 +1,23 @@
 # TODO
 
+## Current Task (FDICnet Preserve Mobile Drill Position Across Close/Reopen)
+- [x] Persist last mobile drill path on drawer close.
+- [x] Restore preserved drill path on reopen when still valid.
+- [x] Keep fallback behavior to active panel/root when no valid preserved path exists.
+- [x] Validate close/reopen from L2/L3 restores prior location.
+
+## Review / Results (FDICnet Preserve Mobile Drill Position Across Close/Reopen)
+- Updated `sites/fdicnet-main-menu/state.js`:
+  - added `menuState.lastMobileDrillPath` to persist last closed drawer location.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added `getValidMobileDrillPath(...)` to sanitize/trim drill paths against current content.
+  - `setMobileNavOpen(true)` now restores the current valid path, then saved path, then active-panel fallback.
+  - `setMobileNavOpen(false)` now snapshots `lastMobileDrillPath` before close transition.
+  - `resetPanelSelection()` now clears saved mobile drill path to avoid stale cross-panel restores after desktop panel resets.
+- Validation (Chrome DevTools MCP, mobile viewport):
+  - close/reopen from L3 path `["news-events",1,1]` restores to `["news-events",1,1]`.
+  - close/reopen via backdrop from L2 path `["news-events",2]` restores to `["news-events",2]`.
+
 ## Current Task (FDICnet Unified Focus Ring Strategy)
 - [x] Define a single tokenized focus ring strategy with standard and contained variants.
 - [x] Apply tokens across desktop mega-menu and mobile drawer interactive controls.
