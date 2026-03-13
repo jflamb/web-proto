@@ -1,7 +1,6 @@
 (function initFDICnetMainMenuSDC() {
   const runtimeAlreadyPresent =
-    typeof window.FDICMenuState !== "undefined" ||
-    typeof window.createFDICMenuInitializer === "function" ||
+    typeof window.FDICMenuRuntime !== "undefined" ||
     Boolean(document.querySelector('script[src$="/sites/fdicnet-main-menu/script.js"], script[src$="sites/fdicnet-main-menu/script.js"], script[src$="/script.js"], script[src="script.js"]'));
 
   if (runtimeAlreadyPresent) {
@@ -16,8 +15,10 @@
   const baseUrl = currentScript?.src || window.location.href;
   const externalScriptUrls = [
     "https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js",
+    "../../runtime.js",
     "../../components.js",
     "../../state.js",
+    "../../search.js",
     "../../mobile-drawer.js",
     "../../events.js",
     "../../init.js",

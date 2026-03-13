@@ -1,4 +1,9 @@
 (function initFDICMenuEventsModule() {
+  const runtime = window.FDICMenuRuntime;
+  if (!runtime) {
+    throw new Error("FDICMenuRuntime missing. Ensure runtime.js is loaded before events.js.");
+  }
+
   function bindFDICMenuEvents(deps) {
     const {
       menuState,
@@ -440,5 +445,7 @@
     navList.addEventListener("focusout", scheduleMenuSystemFocusExitCheck);
   }
 
-  window.bindFDICMenuEvents = bindFDICMenuEvents;
+  runtime.registerModule("events", {
+    bindFDICMenuEvents,
+  });
 })();

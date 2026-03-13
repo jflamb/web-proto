@@ -1,5 +1,38 @@
 # TODO
 
+## Current Task (FDICnet Architecture Cleanup Follow-up)
+- [x] Add a guardrail so standalone `index.html` and the Twig component shell stay in sync.
+- [x] Extract launcher search behavior out of `script.js` into a dedicated module with a cleaner integration boundary.
+- [x] Centralize responsive breakpoint values and reduce ad hoc window-global module wiring.
+- [x] Remove brittle generated menu-description fallback behavior and rely on explicit content data or neutral fallback copy.
+- [x] Run syntax and parity verification, then record results.
+
+## Review / Results (FDICnet Architecture Cleanup Follow-up)
+- Added `sites/fdicnet-main-menu/runtime.js`:
+  - centralizes breakpoint values and reduced-motion query configuration for the JS runtime.
+  - provides a single `window.FDICMenuRuntime` registry instead of multiple ad hoc window globals.
+- Added `sites/fdicnet-main-menu/search.js`:
+  - moved launcher search indexing, search state, combobox ARIA syncing, keyboard handling, submit behavior, and mobile-search open/close coordination out of `script.js`.
+  - keeps the existing search behavior but gives `script.js` a smaller integration surface (`applyHeaderContent`, `initializeSiteSearch`, `openMobileSearch`, `closeMobileSearch`).
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - switched module lookup from separate window globals to the shared runtime registry.
+  - removed the brittle `getGeneratedMenuDescription()` keyword matcher and now uses explicit content descriptions or empty fallback copy.
+  - removed the in-file launcher search implementation in favor of the new search module.
+- Updated `sites/fdicnet-main-menu/state.js`, `sites/fdicnet-main-menu/mobile-drawer.js`, `sites/fdicnet-main-menu/events.js`, and `sites/fdicnet-main-menu/init.js`:
+  - register their public APIs with `FDICMenuRuntime` instead of publishing separate globals.
+- Updated `sites/fdicnet-main-menu/index.html` and `sites/fdicnet-main-menu/components/fdicnet-main-menu/fdicnet-main-menu.js`:
+  - load the new `runtime.js` and `search.js` files in the correct order.
+  - updated the SDC bootstrap to detect/load the shared runtime registry rather than the old global module names.
+- Updated `sites/fdicnet-main-menu/components/fdicnet-main-menu/fdicnet-main-menu.twig`:
+  - fixed the remaining structural drift by moving `mobileSearchRow` back inside the masthead shell to match `index.html`.
+- Added `sites/fdicnet-main-menu/verify-sync.mjs`:
+  - compares normalized standalone-body markup and Twig shell markup to catch future structural drift.
+  - checks that the CSS media-query values still match the shared runtime breakpoint config.
+- Validation:
+  - `node --check` passed for `runtime.js`, `search.js`, `state.js`, `mobile-drawer.js`, `events.js`, `init.js`, `script.js`, and `components/fdicnet-main-menu/fdicnet-main-menu.js`.
+  - `node sites/fdicnet-main-menu/verify-sync.mjs` passed.
+  - browser smoke verification confirmed the runtime registry modules load, desktop search still opens and routes to the first matching destination, and mobile search still opens inline in the masthead.
+
 ## Current Task (FDICnet Review Findings Remediation)
 - [x] Capture baseline screenshots for desktop and mobile menu/search states before changes.
 - [x] Audit the reported accessibility and UX findings across the standalone prototype and shared menu runtime.
