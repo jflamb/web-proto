@@ -1,5 +1,19 @@
 # TODO
 
+## Current Task (FDICnet Mega-Menu Link Color)
+- [x] Shift desktop mega-menu item resting color from hyperlink blue to primary text color.
+- [x] Preserve clear hover, focus, underline, and active affordances after the color change.
+- [x] Run targeted browser verification for desktop mega-menu readability and interaction states.
+
+## Review / Results (FDICnet Mega-Menu Link Color)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed desktop mega-menu row text and caret color from link blue to the primary text token for L1, L2, and L3 items.
+  - kept hover, focus, selected, and active affordances intact by preserving background states, underline behavior, focus rings, and accent stripes.
+  - moved underline decoration color to `currentColor` so the interactive cue stays visible with the new primary-text resting color.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js`.
+  - browser verification confirmed the open desktop mega-menu now renders L1/L2 items in primary text color while preserving hover/open behavior and visible interaction affordances.
+
 ## Current Task (FDICnet DOM Ref Refresh Reduction)
 - [x] Audit hot-path `refreshDomRefs()` usage in the main menu runtime.
 - [x] Remove redundant runtime refreshes and keep ref refresh at startup plus breakpoint changes.
