@@ -119,6 +119,12 @@ Use this file to record correction-driven learning.
 - Prevention rule: Do not use meaningful text characters in CSS-generated breadcrumb separators; render explicit decorative markup with `aria-hidden` instead.
 - Actionable check for future tasks: For breadcrumb or stepper UI, inspect separators and confirm assistive tech only receives the labels, not decorative punctuation.
 
+- Date: 2026-03-13
+- Trigger / correction: User reported the bottom overview link in second- and third-level mobile drill views did not gain underline on hover after the mobile underline treatment change.
+- Root cause: The interaction selector update covered `.mobile-drill-link` and `.mobile-drill-current-link` focus/active states, but missed the hover state for the overview-row variant.
+- Prevention rule: When multiple UI variants share one interaction pattern, verify every variant-specific class is covered for every intended state, not just the primary class.
+- Actionable check for future tasks: After changing shared hover/focus/active styling, test one example each of the default link, current/overview link, and breadcrumb variants in the browser.
+
 - Date: 2026-03-12
 - Trigger / correction: User reported the mobile breadcrumb current item used `aria-current="page"` even though the breadcrumb represents in-menu section location, not page navigation.
 - Root cause: Breadcrumb semantics were chosen from common page-navigation patterns instead of the actual drill-in menu context used by this component.

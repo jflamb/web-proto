@@ -1,5 +1,42 @@
 # TODO
 
+## Current Task (FDICnet Mobile Overview Hover Underline)
+- [x] Diagnose why the bottom overview link in second- and third-level mobile drill views does not gain underline on hover.
+- [x] Fix the selector/state mismatch so overview links share the same hover/focus underline treatment as other mobile drawer links.
+- [x] Run targeted mobile browser verification and record results.
+
+## Review / Results (FDICnet Mobile Overview Hover Underline)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.mobile-drill-current-link:hover` to the shared mobile underline-interaction selector so the overview row at the bottom of deeper drill views now behaves like the other mobile drawer link variants.
+- Validation:
+  - browser verification at `390x844` confirmed the second-level `News` overview row and third-level `Global Messages` overview row now gain `text-decoration-line: underline` on hover.
+
+## Current Task (FDICnet Mobile Drawer Underline Treatment)
+- [x] Remove default underlines from mobile drawer links and crumbs to match the desktop mega-menu navigation pattern.
+- [x] Preserve clear interaction affordances by showing underline only during hover, focus, and pressed states where applicable.
+- [x] Run targeted mobile browser verification and record results.
+
+## Review / Results (FDICnet Mobile Drawer Underline Treatment)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed default underlines from `.mobile-drill-crumb`, `.mobile-drill-current-link`, and `.mobile-drill-link` so the mobile drawer now matches the desktop mega-menu’s resting navigation treatment.
+  - added underline back only for hover, focus-visible, and active states on crumb and link-style rows to preserve a clear interactive cue during user interaction.
+- Validation:
+  - browser verification at `390x844` confirmed the mobile drawer still opens and drills correctly.
+  - computed-style checks confirmed crumb/current/link rows render with `text-decoration-line: none` at rest and gain `underline` during interaction states.
+
+## Current Task (FDICnet Mobile Drawer Link Color)
+- [x] Align mobile drawer navigation/link resting color with the desktop mega-menu primary-text treatment.
+- [x] Preserve underline, hover, focus, and current-item affordances after the mobile color shift.
+- [x] Run targeted mobile browser verification and record results.
+
+## Review / Results (FDICnet Mobile Drawer Link Color)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed the mobile drill breadcrumb button, current-link row, and leaf-link resting color from `var(--menu-link)` to `var(--ds-text-primary)` so the mobile drawer now matches the desktop mega-menu color model.
+  - kept underline affordances intact for crumb and link states, so interactive rows still read as actionable even with the new resting color.
+- Validation:
+  - browser verification at `390x844` confirmed the mobile drawer still opens and renders drill items correctly.
+  - computed-style checks confirmed `.mobile-drill-crumb`, `.mobile-drill-current-link`, and `.mobile-drill-link` now render as `rgb(33, 33, 35)` with underline affordances preserved where expected.
+
 ## Current Task (FDICnet PR Merge Conflict Resolution)
 - [x] Merge the latest `origin/main` into `feat/fdicnet-menu-launcher` and surface conflicting files.
 - [x] Resolve conflicts while preserving the current FDICnet menu/search behavior on this branch.
