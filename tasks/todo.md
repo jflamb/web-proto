@@ -5,6 +5,23 @@
 - [x] Remove column-level spacing workaround used to avoid overlap.
 - [x] Validate geometry: no close-button intersection with first L3 link target.
 
+## Current Task (FDICnet Remove Desktop Mega-Menu Close Button)
+- [x] Remove close button markup and desktop toolbar row.
+- [x] Remove close-button event handling and related styles.
+- [x] Validate mega-menu layout returns to prior alignment (no extra top push-down).
+
+## Review / Results (FDICnet Remove Desktop Mega-Menu Close Button)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - removed `.mega-menu-toolbar` and `.mega-menu-close` markup from desktop mega-menu.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - removed click handler branch for `.mega-menu-close`.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed `.mega-menu-toolbar` and `.mega-menu-close` styles.
+  - removed related column spacing adjustments tied to close-button placement.
+- Validation:
+  - syntax checks passed for `components.js`, `events.js`, and `script.js`.
+  - browser check confirms no close button or toolbar remains and mega-menu top alignment is restored (no added push-down row).
+
 ## Review / Results (FDICnet Close Button Outside Column Hit Targets)
 - Updated `sites/fdicnet-main-menu/components.js`:
   - moved `.mega-menu-close` into a new `.mega-menu-toolbar` above the three-column grid.
