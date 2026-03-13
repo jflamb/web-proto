@@ -3615,3 +3615,20 @@
   - `node --check` passed for `sites/fdicnet-main-menu/init.js`, `sites/fdicnet-main-menu/events.js`, and `sites/fdicnet-main-menu/script.js`.
   - browser verification at `390x844` confirmed the masthead grows to `136px`, the inline mobile search row sits at `top: 76px` inside the blue header, and the main content begins immediately after the expanded masthead at `top: 136px`.
   - browser screenshot verification confirmed the mobile search field now appears directly under the wordmark and controls inside the dark blue header, with the content area pushed down rather than covered.
+
+## Current Task (FDICnet Main Menu README)
+- [x] Inspect the current fdicnet-main-menu implementation and deployment-relevant files.
+- [x] Author a thorough README.md for design, implementation, behavior, and Drupal single-directory-component deployment.
+- [x] Review the README against the implementation and record the result.
+
+## Review / Results (FDICnet Main Menu README)
+- Added `sites/fdicnet-main-menu/README.md` with contributor-oriented documentation covering:
+  - the static prototype architecture and file responsibilities
+  - the YAML content model and DOM contract
+  - desktop mega-menu, mobile drawer, and shared search behavior
+  - accessibility expectations and regression-prone areas
+  - local development and verification guidance
+  - detailed Drupal Single Directory Component deployment guidance, including the current wrapper architecture and its drift risks
+- Review notes:
+  - verified the README content against `index.html`, `content.yaml`, `state.js`, `components.js`, `mobile-drawer.js`, `events.js`, `script.js`, `init.js`, and the Drupal wrapper files under `components/fdicnet-main-menu`.
+  - explicitly documented that the current SDC Twig wrapper still lags the latest static mobile-search markup, so contributors understand the present integration risk before deploying to Drupal.
