@@ -1313,12 +1313,12 @@ body.mobile-search-open {
     appearance: none;
     border: 0;
     background: transparent;
-    color: var(--menu-link);
+    color: var(--ds-text-primary);
     font: inherit;
     font-size: inherit;
     line-height: inherit;
     padding: 0;
-    text-decoration: underline;
+    text-decoration: none;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
     cursor: pointer;
@@ -1374,14 +1374,14 @@ body.mobile-search-open {
     align-items: center;
     background: var(--ds-background-base);
     border-top: 1px solid var(--ds-border-divider);
-    color: var(--menu-link);
+    color: var(--ds-text-primary);
     display: flex;
     font-size: var(--ds-font-size-md);
     font-weight: 600;
     line-height: 1.375;
     min-height: 40px;
     padding: 8px var(--ds-spacing-md);
-    text-decoration: underline;
+    text-decoration: none;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
     width: 100%;
@@ -1445,10 +1445,10 @@ body.mobile-search-open {
   .mobile-drill-link {
     display: flex;
     justify-content: space-between;
-    color: var(--menu-link);
+    color: var(--ds-text-primary);
     font-weight: 400;
     min-height: 40px;
-    text-decoration: underline;
+    text-decoration: none;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
   }
@@ -1469,6 +1469,19 @@ body.mobile-search-open {
   .mobile-drill-link:hover,
   .mobile-drill-back:hover {
     box-shadow: inset 0 0 0 999px var(--menu-hover-overlay);
+  }
+
+  .mobile-drill-crumb:hover,
+  .mobile-drill-crumb:focus-visible,
+  .mobile-drill-crumb:active,
+  .mobile-drill-link:hover,
+  .mobile-drill-link:focus-visible,
+  .mobile-drill-link:active,
+  .mobile-drill-current-link:hover,
+  .mobile-drill-current-link:focus-visible,
+  .mobile-drill-current-link:active {
+    text-decoration: underline;
+    text-decoration-color: currentColor;
   }
 
   .mobile-drill-trigger:active,
