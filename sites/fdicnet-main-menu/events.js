@@ -106,17 +106,6 @@
       return false;
     }
 
-    function getMobileSearchFocusables() {
-      const searchSheet = mobileSearchRow?.querySelector(".mobile-search-sheet");
-      if (!(searchSheet instanceof HTMLElement)) return [];
-      return [...searchSheet.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])')].filter(
-        (item) => item instanceof HTMLElement
-          && !item.hasAttribute("disabled")
-          && !item.hasAttribute("hidden")
-          && item.getAttribute("aria-hidden") !== "true"
-      );
-    }
-
     if (navToggle) {
       navToggle.addEventListener("click", () => {
         if (isMobileViewport()) {
@@ -327,25 +316,6 @@
     });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Tab" && isPhoneViewport() && menuState.mobileSearchOpen) {
-        const focusables = getMobileSearchFocusables();
-        if (focusables.length > 0) {
-          const activeElement = document.activeElement;
-          const first = focusables[0];
-          const last = focusables[focusables.length - 1];
-          if (event.shiftKey && activeElement === first) {
-            event.preventDefault();
-            last.focus();
-            return;
-          }
-          if (!event.shiftKey && activeElement === last) {
-            event.preventDefault();
-            first.focus();
-            return;
-          }
-        }
-      }
-
       if (event.key === "Tab" && isMobileViewport() && menuState.mobileNavOpen) {
         const focusables = [
           navToggle,

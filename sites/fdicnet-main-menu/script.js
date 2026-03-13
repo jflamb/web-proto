@@ -1603,7 +1603,7 @@ function cancelPreviewClear() {
   }
 }
 
-/** Schedule a preview reset after a short delay (120 ms).
+/** Schedule a preview reset after a short delay (180 ms).
  *  The delay lets the pointer briefly cross column boundaries
  *  (e.g. L2 → L3) without flashing the preview on and off. */
 function schedulePreviewClear() {
@@ -1611,7 +1611,7 @@ function schedulePreviewClear() {
   menuState.previewClearTimer = window.setTimeout(() => {
     menuState.previewClearTimer = null;
     clearPreviewL2();
-  }, 120);
+  }, 180);
 }
 
 function getMegaMenuViewModel() {
