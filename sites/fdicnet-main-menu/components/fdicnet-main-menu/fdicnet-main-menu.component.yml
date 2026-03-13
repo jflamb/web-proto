@@ -1,0 +1,14 @@
+name: FDICnet Main Menu
+description: Drupal-friendly single directory component wrapper for the FDICnet menu prototype.
+status: experimental
+props:
+  type: object
+  properties:
+    page_title:
+      type: string
+      title: Page title
+      default: ""
+    page_intro:
+      type: string
+      title: Intro HTML
+      default: ""
