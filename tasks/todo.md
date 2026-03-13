@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (FDICnet Reposition Desktop Mega-Menu Close Button)
+- [x] Move close button to the upper-right corner of the overall mega-menu container.
+- [x] Remove L3 vertical-offset workaround that caused column alignment drift.
+- [x] Validate close button no longer overlaps L3 click targets.
+
+## Review / Results (FDICnet Reposition Desktop Mega-Menu Close Button)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - moved `.mega-menu-close` out of the L3 column into `.mega-menu-inner` so it sits in the mega-menu corner instead of inside column content.
+  - removed temporary `l3-no-description` class toggling.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - made `.mega-menu-inner` positioning context for the close button.
+  - removed L3 top-padding workaround.
+  - added right-side gutter on L3 list (`.menu-list--l3 { padding-right: 52px; }`) so close button corner space does not overlap link hit targets.
+- Validation:
+  - desktop geometry check confirmed no overlap between close button and first L3 item (`overlapArea: 0`) while keeping top-right placement.
+
 ## Current Task (FDICnet Desktop Close Button Overlap Fix)
 - [x] Prevent desktop mega-menu close button from overlapping L3 link hit targets.
 - [x] Preserve close button visibility and accessibility.
