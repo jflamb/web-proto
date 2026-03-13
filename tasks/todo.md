@@ -1,5 +1,24 @@
 # TODO
 
+## Current Task (FDICnet Desktop Mega-Menu Close Affordance)
+- [x] Add an explicit close button in the desktop mega-menu panel.
+- [x] Wire close-button activation to existing menu close behavior with sensible focus return.
+- [x] Validate click and keyboard activation of the close control in browser.
+
+## Review / Results (FDICnet Desktop Mega-Menu Close Affordance)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - added a `button.mega-menu-close` (aria-label: `Close menu`) inside the desktop L3 panel header area.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added click handling for `.mega-menu-close` to call `closeMenu()` and return focus to the active top-level nav button.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - styled `.mega-menu-close` with hover/focus affordance using shared focus token.
+  - increased right padding for `.menu-description` to avoid overlap with the close button.
+  - hid `.mega-menu-close` in mobile breakpoint.
+- Validation:
+  - `node --check` passed for `components.js`, `events.js`, and `script.js`.
+  - browser checks confirmed close button is present and visible in desktop mega-menu.
+  - scripted activation of close control closes menu and restores focus to active top-nav button.
+
 ## Current Task (FDICnet Preserve Mobile Drill Position Across Close/Reopen)
 - [x] Persist last mobile drill path on drawer close.
 - [x] Restore preserved drill path on reopen when still valid.

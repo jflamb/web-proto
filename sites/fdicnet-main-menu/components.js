@@ -200,6 +200,9 @@ class FDICMegaMenu extends HTMLElement {
             </section>
 
             <section class="mega-col mega-col--l3" aria-labelledby="l3Heading">
+              <button type="button" class="mega-menu-close" aria-label="Close menu">
+                <span class="ph ph-x" aria-hidden="true"></span>
+              </button>
               <h2 id="l3Heading" class="sr-only">Resources</h2>
               <div id="l3Description" class="menu-description"></div>
               <ul id="l3List" class="menu-list menu-list--l3" role="list"></ul>
