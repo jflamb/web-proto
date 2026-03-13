@@ -1,5 +1,383 @@
 # TODO
 
+## Current Task (FDICnet DOM Ref Refresh Reduction)
+- [x] Audit hot-path `refreshDomRefs()` usage in the main menu runtime.
+- [x] Remove redundant runtime refreshes and keep ref refresh at startup plus breakpoint changes.
+- [x] Run targeted syntax and static verification for the ref-caching change.
+
+## Review / Results (FDICnet DOM Ref Refresh Reduction)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - removed redundant `refreshDomRefs()` calls from stable render, search, top-nav, and mobile-drawer runtime paths so those functions now rely on the cached refs established at startup.
+  - simplified the event binder contract to pass the shared `getDom()` accessor directly instead of re-refreshing refs on every event lookup.
+  - stopped the mobile drawer controller from re-refreshing refs just to return `navList`.
+  - restored the event-binder contract fields for `mobileNavMediaQuery` and `phoneSearchMediaQuery` inside `getDom()`, which fixed the `bindFDICMenuEvents(...)` startup crash that had broken desktop hover opening.
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - removed the stale in-controller `refreshDomRefs()` call that was left behind after the controller injection contract was pruned.
+  - this fixed the mobile drawer render crash that had been leaving the off-canvas menu visually blank.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added explicit `refreshDomRefs()` calls only on mobile-nav and phone-search media-query breakpoint changes before rerendering state.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js` and `sites/fdicnet-main-menu/events.js`.
+  - `node --check` passed for `sites/fdicnet-main-menu/mobile-drawer.js`.
+  - `rg -n "refreshDomRefs\\(" sites/fdicnet-main-menu/script.js sites/fdicnet-main-menu/events.js sites/fdicnet-main-menu/init.js` now shows only the intentional refreshes: startup/init-time wiring, `setupEvents()` initialization, and breakpoint-change handlers.
+  - browser validation confirmed hovering `Career Development & Training` opens the mega-menu, updates the top-nav button to `aria-expanded="true"`, and renders the `Career Development & Training menu` region.
+  - browser validation at 390px width confirmed tapping `Open menu` renders the mobile drill view with `News`, `Events`, `Podcasts & Media`, and `News & Events Overview` instead of a blank drawer.
+
+## Current Task (FDICnet Mobile Drawer Close Timeout)
+- [x] Add a fallback hide timeout for the animated mobile drawer close path when `transitionend` does not fire.
+- [x] Clear stale mobile drawer close listeners and timers on reopen or viewport changes.
+- [x] Run targeted syntax and code-path verification for the guarded close behavior.
+
+## Review / Results (FDICnet Mobile Drawer Close Timeout)
+- Updated [state.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/state.js):
+  - added `mobileNavCloseHideTimer` to track the fallback hide timeout for the mobile drawer close animation.
+- Updated [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js):
+  - mobile drawer close now mirrors the desktop mega-menu safeguard with a `240ms` timeout that hides the drawer and removes the drawer panel if `transitionend` is skipped.
+  - mobile reopen, viewport exit, and repeated close attempts now clear any stale close listener/timer before continuing, preventing a visible-but-inert drawer state during rapid toggles.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js` and `sites/fdicnet-main-menu/state.js`.
+  - static path review confirmed the fallback timer is cleared on reopen and non-mobile reset, and forcibly hides the drawer if the transition callback never arrives.
+
+## Current Task (FDICnet Mobile Modal Focus and Backdrop Semantics)
+- [x] Add a real Tab trap for the mobile search dialog so `aria-modal="true"` is accurate.
+- [x] Remove fake button semantics from the mobile nav backdrop and keep it click-only.
+- [x] Run targeted syntax and browser verification for mobile search focus cycling and backdrop semantics.
+
+## Review / Results (FDICnet Mobile Modal Focus and Backdrop Semantics)
+- Updated [events.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/events.js):
+  - added a dedicated mobile-search focusables helper and Tab-wrapping logic for the mobile search sheet.
+  - removed the obsolete keyboard handler that existed only because the mobile nav backdrop was incorrectly modeled as a button.
+- Updated [index.html](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/index.html) and [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js):
+  - stripped `role="button"`, `tabindex`, and `aria-label` from the mobile nav backdrop.
+  - removed now-unneeded backdrop `tabIndex` state management from the mobile nav sync logic.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/events.js` and `sites/fdicnet-main-menu/script.js`.
+  - browser verification confirmed the mobile search dialog keeps focus cycling inside the sheet on `Tab` / `Shift+Tab`.
+  - browser verification confirmed the mobile nav backdrop no longer exposes interactive button semantics.
+
+## Current Task (FDICnet Search Combobox ARIA Roles)
+- [x] Complete the ARIA combobox pattern for desktop and mobile search inputs.
+- [x] Expose the suggestions as a listbox with option roles that match `aria-activedescendant`.
+- [x] Run targeted syntax and browser verification for the live combobox/listbox/option role wiring.
+
+## Review / Results (FDICnet Search Combobox ARIA Roles)
+- Updated [index.html](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/index.html):
+  - added `role="combobox"` to both search inputs.
+  - changed both suggestion result lists to `role="listbox"`.
+- Updated [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js) and [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - reinforced combobox state with `aria-haspopup="listbox"`.
+  - changed each rendered suggestion row to a real `role="option"` node with `aria-selected`.
+  - moved `aria-activedescendant` targeting to the option node so the active descendant belongs to the owning listbox pattern.
+  - flattened each suggestion so the `option` itself is the clickable node, removing nested buttons inside listbox options.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js`.
+  - browser verification confirmed the live search DOM now exposes `role="combobox"` on the input, `role="listbox"` on the results list, and `role="option"` / `aria-selected` on suggestions.
+
+## Current Task (FDICnet L1 Hover Description Fallback)
+- [x] Diagnose why hovering a column-1 item with no active column-2 item leaves column 3 blank.
+- [x] Add a generated L1 description fallback so column 1 can populate column 3 without requiring explicit L1 descriptions in `content.yaml`.
+- [x] Run targeted syntax and browser verification for desktop column-1 hover behavior.
+
+## Review / Results (FDICnet L1 Hover Description Fallback)
+- Updated [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js):
+  - added a menu-description fallback generator for labels that do not have explicit description text in the content model.
+  - the default desktop column-3 fallback now uses generated copy for the selected L1 item, so hovering or selecting a first-column section can show matching context before any L2 item is previewed.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js`.
+  - browser verification confirmed hovering `Training & Onboarding` shows a matching third-column description for that L1 section instead of leaving column 3 blank.
+
+## Current Task (FDICnet Default Column 3 Context)
+- [x] Diagnose why column 3 shows the first L2 description even when only the L1 section is selected.
+- [x] Change the default desktop column-3 fallback to use the selected L1 context instead of `selectedL2Index = 0`.
+- [x] Run targeted syntax and browser verification for initial/open desktop description state.
+
+## Review / Results (FDICnet Default Column 3 Context)
+- Updated [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js):
+  - when no L2 item is being previewed, column 3 no longer borrows the first L2 item's description by default.
+  - the non-preview fallback now uses the selected L1 context (`selectedL1.description` or overview description when present), which avoids mismatched copy on initial open.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js`.
+  - browser verification confirmed the desktop menu opens without showing an unrelated first-L2 description when only the L1 section is selected.
+
+## Current Task (FDICnet Default L2 Active State)
+- [x] Diagnose why the first L2 item appears active immediately when the desktop mega-menu opens.
+- [x] Restrict L2 active styling to real L2 preview/focus states instead of the default `selectedL2Index`.
+- [x] Run targeted syntax and browser verification for initial-open desktop menu state.
+
+## Review / Results (FDICnet Default L2 Active State)
+- Updated [components.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/components.js):
+  - L2 items now render with active styling only when the user is actually previewing an L2 row.
+  - the initial desktop open state no longer highlights the first L2 item just because `selectedL2Index` defaults to `0`.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/components.js`.
+  - browser verification confirmed the desktop menu opens with no L2 item visually active until the user focuses or hovers a row in column 2.
+
+## Current Task (FDICnet Column Alignment and L3 Description Rules)
+- [x] Fix the first-row alignment mismatch between desktop columns 1 and 2.
+- [x] Hide the column-3 description whenever actual L3 items are present, while preserving leaf-L2 description fallback.
+- [x] Run targeted syntax and browser verification for row alignment and column-3 behavior.
+
+## Review / Results (FDICnet Column Alignment and L3 Description Rules)
+- Updated [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - nudged the desktop column-2 list up by 1px so its first row aligns with the first row in column 1.
+- Updated [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js):
+  - restored the original rule that column-3 descriptions stay hidden when the active L2 item has real L3 children.
+  - kept the new leaf fallback so L2 items without L3 children still show their own description in column 3.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js`.
+  - browser verification confirmed the L1/L2 first-row top positions now match and `Global Messages` shows only its L3 list while `FDICNews` still shows its description with no L3 list.
+
+## Current Task (FDICnet Leaf L2 Description Fallback)
+- [x] Inspect the desktop mega-menu column-3 rendering logic for L2 items without child links.
+- [x] Show the active leaf L2 item's description in column 3 when there are no L3 child items to render.
+- [x] Run targeted syntax and browser verification for leaf-L2 preview behavior.
+
+## Review / Results (FDICnet Leaf L2 Description Fallback)
+- Updated [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js):
+  - changed the mega-menu view model so a previewed L2 leaf item contributes its own description text to column 3 instead of blanking the description whenever preview mode is active.
+- Updated [components.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/components.js):
+  - column 3 now hides the L3 list only when there are no actual L3 child items, allowing the description-only state for leaf L2 entries.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js` and `sites/fdicnet-main-menu/components.js`.
+  - browser verification confirmed a leaf L2 item such as `FDICNews` keeps the third-column description visible even though there are no L3 child links to render.
+
+## Current Task (FDICnet Menu Description Refresh)
+- [x] Audit the `fdicnet-main-menu` content source for third-column descriptions that are missing or placeholder-quality.
+- [x] Generate plausible replacement descriptions for every menu item that can surface description text in the third column.
+- [x] Run targeted validation for YAML integrity, placeholder removal, and live rendering in the mega menu.
+
+## Review / Results (FDICnet Menu Description Refresh)
+- Updated [content.yaml](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/content.yaml):
+  - replaced all 921 placeholder third-column descriptions with generated one-sentence descriptions tied to each item label and parent menu context.
+  - used category-sensitive phrasing for common content types such as FAQs, training, policies, forms, calendars/events, benefits, support, and tools.
+  - removed the remaining `"... resources."` / `View all resources.` filler copy across the menu corpus.
+- Validation:
+  - `ruby -e 'require "yaml"; YAML.load_file(...)'` passed for `sites/fdicnet-main-menu/content.yaml`.
+  - static scan confirmed `remaining_placeholders 0` across all 921 description fields.
+  - browser smoke test confirmed the menu still loads and the third column now renders the updated copy, e.g. `FDICNews` shows `View updates, schedules, and related materials for FDICNews in News.`
+
+## Current Task (FDICnet Search Acronym Ranking)
+- [x] Diagnose why `pla` fails to surface `Professional Learning Account (PLA)` in the search suggestions.
+- [x] Update title-only ranking so explicit acronym aliases and exact title tokens outrank incidental substring matches.
+- [x] Run targeted verification for `pla` result ordering and syntax.
+
+## Review / Results (FDICnet Search Acronym Ranking)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added title alias extraction for parenthetical acronyms like `(PLA)` and a normalized acronym derived from the visible title words.
+  - adjusted title-only ranking so exact title matches still win first, followed by explicit acronym aliases, then title-prefix matches, exact title-token matches, and finally generic substring matches.
+  - this prevents entries like `Professional Learning Account (PLA)` from being crowded out by unrelated `pla` substrings inside words such as `workplace` or `templates`.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js` passed.
+  - browser verification confirmed typing `pla` now surfaces `Professional Learning Account (PLA)` as the first menu suggestion.
+
+## Current Task (FDICnet Search Clear Button)
+- [x] Replace the browser-native search clear affordance with explicit Phosphor `X` buttons on desktop and mobile.
+- [x] Match the clear button interaction styling to the existing go button and hide it when the search query is empty.
+- [x] Run targeted verification for DOM requirements, syntax, and native cancel suppression.
+
+## Review / Results (FDICnet Search Clear Button)
+- Updated `sites/fdicnet-main-menu/index.html` and `sites/fdicnet-main-menu/styles.css`:
+  - added explicit desktop/mobile clear buttons using the Phosphor `ph-x` icon beside the existing submit control.
+  - matched the clear button hover/focus treatment to the go button and disabled the native WebKit search cancel affordance.
+- Updated `sites/fdicnet-main-menu/script.js` and `sites/fdicnet-main-menu/init.js`:
+  - wired the clear buttons into the shared search state so they only appear when the query is non-empty.
+  - clearing now resets suggestions/status, preserves the appropriate desktop/mobile surface, and returns focus to the active search input.
+- Validation:
+  - `node --check` passed for `sites/fdicnet-main-menu/script.js` and `sites/fdicnet-main-menu/init.js`.
+  - static scan confirms `desktopSearchClear` and `mobileSearchClear` are required init elements and the native `::-webkit-search-cancel-button` is suppressed.
+
+## Current Task (FDICnet Unified Search-to-Navigate)
+- [x] Replace the standalone launcher with desktop anchored suggestions and a mobile search overlay.
+- [x] Reuse the menu-content index for title-only debounced suggestion matching plus a final full-site search action.
+- [x] Route menu suggestions into the existing menu state and full-site submits into a canonical prototype search results page.
+- [x] Run targeted syntax and browser verification for desktop debounce, search submit, and mobile overlay activation.
+
+## Review / Results (FDICnet Unified Search-to-Navigate)
+- Updated `sites/fdicnet-main-menu/index.html`, `sites/fdicnet-main-menu/script.js`, `sites/fdicnet-main-menu/styles.css`, `sites/fdicnet-main-menu/init.js`, and `sites/fdicnet-main-menu/state.js`:
+  - removed the standalone launcher modal.
+  - turned the masthead search into a desktop autocomplete with debounced menu suggestions and a final `Search all FDICnet for "..."` action row.
+  - replaced the phone-only inline search row with a full mobile search overlay that uses the same suggestion model.
+  - kept menu suggestion activation wired into the existing desktop/mobile menu path logic.
+- Added `sites/fdicnet-main-menu/search.html`:
+  - canonical prototype destination for full-site search submits, preserving the raw query in `?q=`.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - removed obsolete launcher guard logic so global pointer/escape handlers work with the new search model.
+- Validation:
+  - `node --check` passed for `script.js`, `events.js`, `init.js`, `state.js`, `mobile-drawer.js`, and `components.js`.
+  - desktop browser verification confirmed debouncing (`rto` shows no immediate results, then resolves to `Return to Office (RTO)` plus the full-site action after the delay).
+  - desktop browser verification confirmed raw-query submit navigates to `search.html?q=budget+guidance`.
+  - desktop browser verification confirmed selecting `Global Digest FAQ` still opens the correct menu path and focuses the matching L3 row.
+  - mobile browser verification confirmed the search icon opens the overlay, `Global Messages` resolves after the debounce delay, and activating the first suggestion closes the overlay, opens the mobile menu, and focuses the matched row.
+
+## Current Task (FDICnet Menu Launcher Refinement)
+- [x] Tighten launcher matching to visible-title substring behavior with stable ordering.
+- [x] Simplify launcher result rows by removing type chips and hiding path text for top-level items.
+- [x] Fix launcher results scrolling so keyboard movement only scrolls when the active row leaves the viewport.
+- [x] Run targeted syntax and browser verification for `rto`, top-level rows, and launcher scrolling.
+
+## Review / Results (FDICnet Menu Launcher Refinement)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - replaced fuzzy weighted launcher scoring with strict normalized title-only substring matching.
+  - result ordering is now exact title match, then title prefix match, then other title substring matches, with alphabetical tie-breaks.
+  - removed unconditional `scrollIntoView()` on active-row changes and added explicit overflow checks so the list only scrolls when the active option leaves the visible area.
+  - launcher rows now omit path text for top-level items and no longer render type chips.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed the launcher kind-chip styling.
+  - capped the results pane with a stable `max-height` so the dialog stays fixed while only the list scrolls.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js` passed.
+  - browser verification confirmed typing `rto` now returns only `Return to Office (RTO)`.
+  - browser verification confirmed top-level `About` renders without a path line, while deeper `About` results still show their path.
+  - browser verification confirmed launcher result chips are gone and the results list stays at `scrollTop = 0` for nearby moves, then scrolls only after arrowing far enough to move the active row past the visible list bounds.
+
+## Current Task (FDICnet Menu Launcher)
+- [x] Create a feature branch for the launcher exploration and capture the implementation plan.
+- [x] Add a keyboard-invoked launcher UI for `fdicnet-main-menu` with accessible open/close and focus handling.
+- [x] Build a searchable index from all menu content and render ranked suggestions as the user types.
+- [x] Route launcher selections into the existing menu state so matching content opens in context.
+- [x] Run targeted syntax/browser verification and record results.
+
+## Review / Results (FDICnet Menu Launcher)
+- Created branch `feat/fdicnet-menu-launcher`.
+- Updated `sites/fdicnet-main-menu/index.html` and `sites/fdicnet-main-menu/styles.css`:
+  - added a modal launcher overlay with search input, results list, status text, backdrop, and responsive styling.
+- Updated `sites/fdicnet-main-menu/script.js`, `sites/fdicnet-main-menu/init.js`, and `sites/fdicnet-main-menu/state.js`:
+  - added launcher open/close state, keyboard shortcuts (`Ctrl+/`, `Cmd+G`), one-time menu-content indexing from `content.yaml`, ranked suggestion rendering, focus restoration, and launcher selection routing into existing desktop/mobile menu state.
+- Updated `sites/fdicnet-main-menu/components.js` and `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added stable launcher target ids to desktop and mobile menu items so launcher selections can focus the matched row after opening the correct path.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - guarded the existing global pointer/keyboard handlers so the launcher modal owns `Escape` and click behavior while open.
+- Validation:
+  - `node --check` passed for `script.js`, `init.js`, `events.js`, `components.js`, `mobile-drawer.js`, and `state.js`.
+  - Desktop browser check: `Ctrl+/` opens the launcher, searching `Global Digest FAQ` ranks the deep resource first, and `Enter` opens `News & Events > News > Global Messages` with focus on the `Global Digest FAQ` L3 row.
+  - Mobile browser check: `Ctrl+/` opens the launcher at 390px width, searching `Global Messages` returns the direct match first, and `Enter` opens the mobile drawer at the `News` drill view with focus on the matched `Global Messages` trigger.
+
+## Current Task (FDICnet Main Menu Review Fixes)
+- [x] Restore correct hidden/inactive behavior for the mobile backdrop.
+- [x] Rewire `mobileNavBackdrop` into the event binder contract.
+- [x] Render desktop L2 overview entries so existing overview state/keyboard paths work.
+- [x] Run targeted syntax and browser verification for the repaired flows.
+
+## Review / Results (FDICnet Main Menu Review Fixes)
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - restored `mobileNavBackdrop` in the `getDom()` contract passed to `bindFDICMenuEvents(...)`, so the backdrop close handlers bind to the real node again.
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - rendered the configured L2 overview row (and separator) in the desktop mega-menu, using the existing `l2Overview`/`.l2-item--overview` state and keyboard paths.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.mobile-nav-backdrop[hidden] { display: none !important; }` inside the mobile breakpoint so the author rule no longer overrides the hidden state.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/*.js` passed.
+  - uncached browser evaluation confirms desktop `#l2List` now includes `News Overview`.
+  - uncached mobile snapshot no longer exposes a closed backdrop control, and `document.getElementById('mobileNavBackdrop').click()` closes the drawer (`aria-expanded="false"`, backdrop hidden).
+
+## Current Task (FDICnet Main Menu Code Review)
+- [x] Read repo guidance, project notes, and lessons relevant to `fdicnet-main-menu`.
+- [x] Inspect the site’s HTML, CSS, JS, and content wiring for defects and regressions.
+- [x] Run targeted verification (`node --check`, browser snapshot/evaluation) to confirm findings.
+
+## Review / Results (FDICnet Main Menu Code Review)
+- Findings identified:
+  - mobile backdrop hidden-state regression: author CSS overrides the `hidden` attribute, leaving the closed "Close menu" control exposed to the accessibility tree.
+  - mobile backdrop close handlers are not wired because `script.js` does not pass `mobileNavBackdrop` into the event module’s `getDom()` contract.
+  - desktop L2 overview support is partially implemented in state/events code but never rendered, so configured overview links are unreachable on desktop.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/*.js` passed.
+  - Playwright mobile snapshot/evaluation confirmed the closed backdrop is still exposed as a "Close menu" button while `hidden === true`.
+  - Desktop browser snapshot confirmed `News Overview` is not rendered in the L2 column even though `content.yaml` defines it.
+
+## Current Task (FDICnet Missing Small Font Token)
+- [x] Confirm `--ds-font-size-sm` is used in `styles.css` without a matching `:root` definition.
+- [x] Add the missing small font token to the shared design-token block.
+- [x] Run targeted verification for token definition and usage coverage.
+
+## Review / Results (FDICnet Missing Small Font Token)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `--ds-font-size-sm: 14px;` to the shared `:root` design-token block.
+  - this resolves `.mobile-drill-context { font-size: var(--ds-font-size-sm); }` against an explicit token instead of inherited fallback.
+- Validation:
+  - static scan confirms `--ds-font-size-sm` is now defined once in `:root` and consumed by `.mobile-drill-context`.
+
+## Current Task (FDICnet Mobile Drill Back Focus Restoration)
+- [x] Confirm `ArrowLeft` and drill-back focus currently fall back to the first mobile item.
+- [x] Restore focus to the opener trigger that matches the previously active drill path after backing out.
+- [x] Run targeted verification for syntax and focus-target selection.
+
+## Review / Results (FDICnet Mobile Drill Back Focus Restoration)
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added `focusMobileDrillReturnTarget(previousPath)` to match parent-view triggers by `data-mobile-drill-path`.
+  - `ArrowLeft` drill-back now restores focus to the trigger that originally opened the current view, with the existing first-focusable fallback retained if no matching trigger exists.
+  - aligned the `Escape` drill-back path with the same return-focus behavior so both keyboard back paths behave consistently.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/events.js` passed.
+  - code inspection confirms both back-navigation branches capture the pre-back path and use it to restore the matching opener trigger when available.
+
+## Current Task (FDICnet Mobile Drill List Semantics)
+- [x] Confirm which mobile drawer list creation paths omit `role="list"`.
+- [x] Add explicit list semantics to all mobile drill `<ul>` containers affected by `list-style: none`.
+- [x] Run targeted verification for syntax and attribute coverage.
+
+## Review / Results (FDICnet Mobile Drill List Semantics)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added `role="list"` to the shared `.mobile-drill-list` factory used for root, L1, and L2 drill views.
+  - added `role="list"` to the explicit `.mobile-drill-link-list` used for L3 link views.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+  - static scan confirms both mobile drill list creation paths now set `role="list"`.
+
+## Current Task (FDICnet Duplicate Desktop Min-Height Media Query)
+- [x] Confirm whether the duplicated `@media (min-width: 769px)` block in `styles.css` is identical and redundant.
+- [x] Remove the redundant duplicate block while preserving the existing desktop row sizing cascade.
+- [x] Run targeted verification for selector coverage and syntax.
+
+## Review / Results (FDICnet Duplicate Desktop Min-Height Media Query)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed the second, identical `@media (min-width: 769px)` block that repeated desktop `min-height` and vertical padding rules for `.l1-item`, `.l2-item`, and `.menu-list--l3 .l3-item`.
+  - kept the earlier matching block in place as the single source of truth for desktop menu row sizing.
+- Validation:
+  - static scan confirms only one copy of that desktop row-sizing media query remains.
+  - spot check of the surviving block confirms the selectors and values are unchanged.
+
+## Current Task (FDICnet Breadcrumb aria-current Semantics)
+- [x] Confirm the current breadcrumb node uses `aria-current="page"` in the mobile drawer.
+- [x] Change the current breadcrumb node to use `aria-current="location"` for section context.
+- [x] Run targeted verification for syntax and rendered attribute usage.
+
+## Review / Results (FDICnet Breadcrumb aria-current Semantics)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - changed the current breadcrumb node from `aria-current="page"` to `aria-current="location"` to better reflect drill-in section context within the mobile menu.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+  - static scan confirms the breadcrumb renderer now sets `aria-current="location"`.
+
+## Current Task (FDICnet Mobile Breadcrumb Separator Accessibility)
+- [x] Inspect breadcrumb separator rendering in `mobile-drawer.js` and `styles.css`.
+- [x] Replace CSS text-content separator with explicit markup that is hidden from assistive tech.
+- [x] Run targeted verification for syntax and separator usage.
+
+## Review / Results (FDICnet Mobile Breadcrumb Separator Accessibility)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - breadcrumb rendering now inserts an explicit separator list item between crumbs.
+  - separator markup is marked `aria-hidden="true"` and uses an icon glyph instead of spoken text.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed the `content: ">"` pseudo-element separator.
+  - added styles for `.mobile-drill-context-separator` and `.mobile-drill-context-separator-icon`.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+  - static scan confirms the old `.mobile-drill-context-item + .mobile-drill-context-item::before` rule is gone and the new separator classes are in use.
+
+## Current Task (FDICnet Mobile Backdrop Scope Guard)
+- [x] Confirm whether `events.js` references `mobileNavBackdrop` without binding it from `getDom()`.
+- [x] Patch the `getDom()` destructure so mobile backdrop handlers use an in-scope DOM reference.
+- [x] Run targeted verification for syntax and reference consistency.
+
+## Review / Results (FDICnet Mobile Backdrop Scope Guard)
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added `mobileNavBackdrop` to the local `getDom()` destructure used by `bindFDICMenuEvents(...)`.
+  - this fixes the runtime `ReferenceError` path in the mobile backdrop `click` and `keydown` handlers.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/events.js` passed.
+  - static reference check confirms `mobileNavBackdrop` is now both destructured and used within the same scope.
+
 ## Current Task (FDICnet Menu Density Compromise)
 - [x] Set desktop/tablet mega-menu row minimum height to 36px.
 - [x] Keep mobile primary drill rows at 44px.

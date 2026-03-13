@@ -50,22 +50,52 @@
             <button id="mobileSearchToggle" class="icon-button icon-button--search-toggle" type="button" aria-expanded="false" aria-controls="mobileSearchRow" aria-label="Open search">
               <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
             </button>
-            <label class="search-input">
-              <span class="sr-only">Search</span>
-              <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-              <input id="desktopSearchInput" type="search" placeholder="Search FDICnet" />
-            </label>
+            <div class="site-search-field">
+              <label class="search-input">
+                <span class="sr-only">Search</span>
+                <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                <input id="desktopSearchInput" type="search" role="combobox" placeholder="Search FDICnet" autocomplete="off" />
+              </label>
+              <button id="desktopSearchClear" class="search-clear" type="button" aria-label="Clear search" hidden>
+                <i class="ph ph-x" aria-hidden="true"></i>
+              </button>
+              <button id="desktopSearchSubmit" class="search-submit" type="button" aria-label="Search all FDICnet">
+                <i class="ph ph-arrow-right" aria-hidden="true"></i>
+              </button>
+              <section id="desktopSearchPanel" class="site-search-panel" hidden aria-label="Search suggestions">
+                <ul id="desktopSearchResults" class="site-search-results" role="listbox" aria-label="Matching menu content"></ul>
+                <p id="desktopSearchStatus" class="site-search-status" role="status" aria-live="polite"></p>
+              </section>
+            </div>
           </div>
         </div>
       </div>
-      <div id="mobileSearchRow" class="mobile-search-row" hidden>
-        <div class="fdic-shell">
-          <label class="search-input search-input--mobile">
-            <span class="sr-only">Search</span>
-            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-            <input id="mobileSearchInput" type="search" placeholder="Search FDICnet" />
-          </label>
-        </div>
+      <div id="mobileSearchRow" class="mobile-search-overlay" hidden>
+        <div id="mobileSearchBackdrop" class="mobile-search-backdrop"></div>
+        <section class="mobile-search-sheet" role="dialog" aria-modal="true" aria-labelledby="mobileSearchTitle">
+          <div class="mobile-search-sheet-header">
+            <h2 id="mobileSearchTitle" class="sr-only">Search FDICnet</h2>
+            <button id="mobileSearchClose" class="mobile-search-close" type="button" aria-label="Close search">
+              <i class="ph ph-x" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="site-search-field site-search-field--mobile">
+            <label class="search-input search-input--mobile">
+              <span class="sr-only">Search</span>
+              <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+              <input id="mobileSearchInput" type="search" role="combobox" placeholder="Search FDICnet" autocomplete="off" />
+            </label>
+            <button id="mobileSearchClear" class="search-clear" type="button" aria-label="Clear search" hidden>
+              <i class="ph ph-x" aria-hidden="true"></i>
+            </button>
+            <button id="mobileSearchSubmit" class="search-submit" type="button" aria-label="Search all FDICnet">
+              <i class="ph ph-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+          <p class="mobile-search-shortcut-hint">Search menu destinations or the full site.</p>
+          <ul id="mobileSearchResults" class="site-search-results" role="listbox" aria-label="Matching menu content"></ul>
+          <p id="mobileSearchStatus" class="site-search-status" role="status" aria-live="polite"></p>
+        </section>
       </div>
 
       <fdic-top-nav id="fdicTopNav"></fdic-top-nav>
@@ -73,9 +103,6 @@
         id="mobileNavBackdrop"
         class="mobile-nav-backdrop"
         hidden
-        role="button"
-        tabindex="-1"
-        aria-label="Close menu"
       ></div>
 
       <fdic-mega-menu id="fdicMegaMenu"></fdic-mega-menu>
