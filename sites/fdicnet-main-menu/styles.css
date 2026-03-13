@@ -695,7 +695,7 @@ body.mobile-search-open {
 .l1-item,
 .l2-item,
 .l3-item {
-  color: var(--fdic-link);
+  color: var(--menu-text-primary);
   text-decoration: none;
   background: transparent;
   border: 0;
@@ -714,7 +714,7 @@ body.mobile-search-open {
   padding: 8px 16px 8px 0;
   display: flex;
   align-items: center;
-  color: var(--menu-link);
+  color: var(--menu-text-primary);
   font-weight: 400;
   line-height: 1.4;
   justify-content: space-between;
@@ -841,21 +841,21 @@ body.mobile-search-open {
   justify-content: center;
   font-size: 20px;
   line-height: 1;
-  color: var(--menu-link);
+  color: var(--menu-text-primary);
   opacity: 1;
 }
 
 .l1-item:hover .l1-label,
 .l1-item:focus-visible .l1-label {
   text-decoration: underline;
-  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-color: currentColor;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
 
 .l1-item[data-selected="true"] .l1-label {
   text-decoration: underline;
-  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-color: currentColor;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -907,7 +907,7 @@ body.mobile-search-open {
   margin: 0;
   max-width: none;
   padding: 8px 16px 8px 24px;
-  color: var(--menu-link);
+  color: var(--menu-text-primary);
   text-decoration: none;
 }
 
@@ -929,7 +929,7 @@ body.mobile-search-open {
 
 .l2-item[data-active="true"] .l2-label {
   text-decoration: underline;
-  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-color: currentColor;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -937,13 +937,13 @@ body.mobile-search-open {
 .l2-item:hover,
 .l3-item:hover {
   background: var(--menu-hover-overlay);
-  color: var(--menu-link);
+  color: var(--menu-text-primary);
 }
 
 .l2-item:hover .l2-label,
 .l2-item:focus-visible .l2-label {
   text-decoration: underline;
-  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-color: currentColor;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -970,7 +970,7 @@ body.mobile-search-open {
   margin: 0;
   max-width: none;
   padding: 8px 8px 8px 24px;
-  color: var(--menu-link);
+  color: var(--menu-text-primary);
   text-decoration: none;
   position: relative;
 }
@@ -990,7 +990,7 @@ body.mobile-search-open {
 .menu-list--l3 .l3-item:hover,
 .menu-list--l3 .l3-item:focus-visible {
   text-decoration: underline;
-  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-color: currentColor;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
