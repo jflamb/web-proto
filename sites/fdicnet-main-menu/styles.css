@@ -424,6 +424,7 @@ body {
   justify-content: center;
   cursor: pointer;
   border-radius: 3px;
+  z-index: 2;
 }
 
 .mega-menu-close .ph {
@@ -739,6 +740,10 @@ body {
   color: var(--menu-link);
   text-decoration: none;
   position: relative;
+}
+
+.mega-col--l3.l3-no-description .menu-list--l3 {
+  padding-top: 40px;
 }
 
 .menu-list--l3 .l3-item:hover,
