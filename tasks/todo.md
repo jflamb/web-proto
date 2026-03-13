@@ -1,5 +1,19 @@
 # TODO
 
+## Current Task (FDICnet Standardize Mega/Mobile Menu Text to 16px)
+- [x] Set desktop mega-menu link label text to 16px.
+- [x] Set mobile drawer menu row text to 16px.
+- [x] Verify readability and target sizing remain acceptable.
+
+## Review / Results (FDICnet Standardize Mega/Mobile Menu Text to 16px)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - set `--ds-font-size-md` to `16px` (mobile drawer row typography token).
+  - set mega-menu row typography (`.l1-item`, `.l2-item`, `.l3-item`) to `16px`.
+  - set third-column description text (`.menu-description`) to `16px` for consistency with menu content.
+- Validation:
+  - desktop computed styles: L1/L2/description render at `16px`.
+  - mobile computed styles: drill trigger/back/crumb text render at `16px` and row min-heights remain unchanged.
+
 ## Current Task (FDICnet Close Button Outside Column Hit Targets)
 - [x] Move desktop close button into a top-right mega-menu toolbar above columns.
 - [x] Remove column-level spacing workaround used to avoid overlap.
