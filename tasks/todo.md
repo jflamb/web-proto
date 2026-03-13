@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (FDICnet PR Merge Conflict Resolution)
+- [x] Merge the latest `origin/main` into `feat/fdicnet-menu-launcher` and surface conflicting files.
+- [x] Resolve conflicts while preserving the current FDICnet menu/search behavior on this branch.
+- [x] Run targeted verification and push the resolved branch.
+
+## Review / Results (FDICnet PR Merge Conflict Resolution)
+- Resolved merge conflicts in the FDICnet menu prototype files by preserving the current branch implementation of:
+  - unified search-to-navigate behavior
+  - mobile drawer and desktop mega-menu interaction fixes
+  - accessibility and layout refinements made on `feat/fdicnet-menu-launcher`
+- Restored the task log entry after the merge so the resolution work remained tracked.
+- Validation:
+  - `node --check` passed for `script.js`, `events.js`, `init.js`, `mobile-drawer.js`, `components.js`, and `state.js`.
+  - conflict-marker scan confirmed no remaining merge markers in `sites/fdicnet-main-menu` or `tasks/todo.md`.
+  - browser verification confirmed desktop hover still opens `Career Development & Training` and mobile menu open still renders drill items at 390px width.
+
 ## Current Task (FDICnet Mega-Menu Link Color)
 - [x] Shift desktop mega-menu item resting color from hyperlink blue to primary text color.
 - [x] Preserve clear hover, focus, underline, and active affordances after the color change.
