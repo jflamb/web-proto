@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (FDICnet Close Button Outside Column Hit Targets)
+- [x] Move desktop close button into a top-right mega-menu toolbar above columns.
+- [x] Remove column-level spacing workaround used to avoid overlap.
+- [x] Validate geometry: no close-button intersection with first L3 link target.
+
+## Review / Results (FDICnet Close Button Outside Column Hit Targets)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - moved `.mega-menu-close` into a new `.mega-menu-toolbar` above the three-column grid.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.mega-menu-toolbar` as a dedicated top row with right-aligned close control.
+  - removed prior close-button overlap workarounds from column content (`.menu-list--l3` right gutter and extra description padding).
+  - keeps toolbar hidden in mobile.
+- Validation:
+  - desktop geometry check confirms close button remains inside toolbar row and does not intersect first L3 link hitbox (`overlapArea: 0`).
+  - close button still closes mega-menu and returns focus to active top-nav button.
+
 ## Current Task (FDICnet Reposition Desktop Mega-Menu Close Button)
 - [x] Move close button to the upper-right corner of the overall mega-menu container.
 - [x] Remove L3 vertical-offset workaround that caused column alignment drift.
