@@ -1,4 +1,9 @@
 (function initFDICMenuBootstrapModule() {
+  const runtime = window.FDICMenuRuntime;
+  if (!runtime) {
+    throw new Error("FDICMenuRuntime missing. Ensure runtime.js is loaded before init.js.");
+  }
+
   function createFDICMenuInitializer(deps) {
     const {
       menuState,
@@ -69,8 +74,6 @@
         desktopSearchPanel,
         desktopSearchResults,
         desktopSearchStatus,
-        mobileSearchBackdrop,
-        mobileSearchClose,
         mobileSearchSubmit,
         mobileSearchResults,
         mobileSearchStatus,
@@ -173,5 +176,7 @@
     return { init };
   }
 
-  window.createFDICMenuInitializer = createFDICMenuInitializer;
+  runtime.registerModule("init", {
+    createFDICMenuInitializer,
+  });
 })();

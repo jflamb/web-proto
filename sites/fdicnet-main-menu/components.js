@@ -3,7 +3,7 @@ class FDICTopNav extends HTMLElement {
     super();
     this.handleClick = this.handleClick.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
-    this.handleMouseOver = this.handleMouseOver.bind(this);
+    this.handlePointerOver = this.handlePointerOver.bind(this);
   }
 
   connectedCallback() {
@@ -18,13 +18,13 @@ class FDICTopNav extends HTMLElement {
     }
     this.addEventListener("click", this.handleClick);
     this.addEventListener("keydown", this.handleKeydown);
-    this.addEventListener("mouseover", this.handleMouseOver);
+    this.addEventListener("pointerover", this.handlePointerOver);
   }
 
   disconnectedCallback() {
     this.removeEventListener("click", this.handleClick);
     this.removeEventListener("keydown", this.handleKeydown);
-    this.removeEventListener("mouseover", this.handleMouseOver);
+    this.removeEventListener("pointerover", this.handlePointerOver);
   }
 
   get navList() {
@@ -158,7 +158,7 @@ class FDICTopNav extends HTMLElement {
     }
   }
 
-  handleMouseOver(event) {
+  handlePointerOver(event) {
     const target = event.target instanceof HTMLElement ? event.target : null;
     if (!target) return;
     const button = target.closest(".fdic-nav-item--button");
@@ -169,6 +169,7 @@ class FDICTopNav extends HTMLElement {
         detail: {
           panelKey: button.dataset.panelKey || "",
           navIndex: Number(button.dataset.navIndex || 0),
+          pointerType: typeof event.pointerType === "string" ? event.pointerType : "mouse",
         },
       })
     );
@@ -179,7 +180,7 @@ class FDICMegaMenu extends HTMLElement {
   constructor() {
     super();
     this.handleFocusIn = this.handleFocusIn.bind(this);
-    this.handleMouseOver = this.handleMouseOver.bind(this);
+    this.handlePointerOver = this.handlePointerOver.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
     this.isMobileView = false;
   }
@@ -209,13 +210,13 @@ class FDICMegaMenu extends HTMLElement {
       `;
     }
     this.addEventListener("focusin", this.handleFocusIn);
-    this.addEventListener("mouseover", this.handleMouseOver);
+    this.addEventListener("pointerover", this.handlePointerOver);
     this.addEventListener("keydown", this.handleKeydown);
   }
 
   disconnectedCallback() {
     this.removeEventListener("focusin", this.handleFocusIn);
-    this.removeEventListener("mouseover", this.handleMouseOver);
+    this.removeEventListener("pointerover", this.handlePointerOver);
     this.removeEventListener("keydown", this.handleKeydown);
   }
 
@@ -343,34 +344,41 @@ class FDICMegaMenu extends HTMLElement {
       const index = hasOverviewRow ? orderIndex + 1 : orderIndex;
       const li = document.createElement("li");
       li.setAttribute("role", "none");
-      const link = document.createElement("a");
-      const label = document.createElement("span");
       const hasNextLevel = Array.isArray(item.l2) && item.l2.length > 0;
+      const control = document.createElement(hasNextLevel ? "button" : "a");
+      const label = document.createElement("span");
 
-      link.className = "l1-item";
-      link.href = item.overviewHref || "#";
-      link.dataset.launcherId = `l1:${panelKey}:${index}`;
-      link.dataset.column = "l1";
-      link.dataset.index = String(index);
-      link.dataset.selected = index === selectedL1Index ? "true" : "false";
-      link.tabIndex = index === boundedL1FocusIndex ? 0 : -1;
+      control.className = "l1-item";
+      control.dataset.launcherId = `l1:${panelKey}:${index}`;
+      control.dataset.column = "l1";
+      control.dataset.index = String(index);
+      control.dataset.selected = index === selectedL1Index ? "true" : "false";
+      control.tabIndex = index === boundedL1FocusIndex ? 0 : -1;
+      if (hasNextLevel) {
+        control.type = "button";
+        control.setAttribute("aria-controls", "l2List");
+        control.setAttribute("aria-expanded", index === selectedL1Index ? "true" : "false");
+        control.setAttribute("aria-haspopup", "true");
+      } else {
+        control.href = item.overviewHref || "#";
+      }
 
       label.className = "l1-label";
       label.textContent = item.label || "Section";
 
-      link.append(label);
+      control.append(label);
       if (hasNextLevel) {
         const caret = document.createElement("span");
         caret.className = "l1-caret ph ph-caret-right";
         caret.setAttribute("aria-hidden", "true");
-        link.append(caret);
+        control.append(caret);
       } else {
         const spacer = document.createElement("span");
         spacer.className = "menu-caret-spacer";
         spacer.setAttribute("aria-hidden", "true");
-        link.append(spacer);
+        control.append(spacer);
       }
-      li.appendChild(link);
+      li.appendChild(control);
       this.l1List.appendChild(li);
     });
 
@@ -552,7 +560,7 @@ class FDICMegaMenu extends HTMLElement {
     if (!target) return;
 
     const l1Item = target.closest(".l1-item");
-    if (l1Item instanceof HTMLAnchorElement) {
+    if (l1Item instanceof HTMLElement) {
       if (l1Item.classList.contains("l1-item--overview")) return;
       this.updateColumnRailTarget(this.l1Column, l1Item);
       this.dispatchEvent(
@@ -582,19 +590,23 @@ class FDICMegaMenu extends HTMLElement {
     );
   }
 
-  handleMouseOver(event) {
+  handlePointerOver(event) {
     if (this.isMobileView) return;
     const target = event.target instanceof HTMLElement ? event.target : null;
     if (!target) return;
 
     const l1Item = target.closest(".l1-item");
-    if (l1Item instanceof HTMLAnchorElement) {
+    if (l1Item instanceof HTMLElement) {
       if (l1Item.classList.contains("l1-item--overview")) return;
       this.updateColumnRailTarget(this.l1Column, l1Item);
       this.dispatchEvent(
         new CustomEvent("fdic-mega-l1-preview", {
           bubbles: true,
-          detail: { index: Number(l1Item.dataset.index || 0), fromFocus: false },
+          detail: {
+            index: Number(l1Item.dataset.index || 0),
+            fromFocus: false,
+            pointerType: typeof event.pointerType === "string" ? event.pointerType : "mouse",
+          },
         })
       );
       return;
@@ -613,7 +625,11 @@ class FDICMegaMenu extends HTMLElement {
     this.dispatchEvent(
       new CustomEvent("fdic-mega-l2-preview", {
         bubbles: true,
-        detail: { index: Number(l2Item.dataset.index || 0), fromFocus: false },
+        detail: {
+          index: Number(l2Item.dataset.index || 0),
+          fromFocus: false,
+          pointerType: typeof event.pointerType === "string" ? event.pointerType : "mouse",
+        },
       })
     );
   }

@@ -55,6 +55,10 @@
                 id="desktopSearchInput"
                 type="search"
                 role="combobox"
+                aria-expanded="false"
+                aria-controls="desktopSearchResults"
+                aria-autocomplete="list"
+                aria-haspopup="listbox"
                 placeholder="Search FDICnet"
                 autocomplete="off"
               />
@@ -62,7 +66,7 @@
             <button id="desktopSearchClear" class="search-clear" type="button" aria-label="Clear search" hidden>
               <i class="ph ph-x" aria-hidden="true"></i>
             </button>
-            <button id="desktopSearchSubmit" class="search-submit" type="button" aria-label="Search all FDICnet">
+            <button id="desktopSearchSubmit" class="search-submit" type="button" aria-label="Open first matching result">
               <i class="ph ph-arrow-right" aria-hidden="true"></i>
             </button>
             <section id="desktopSearchPanel" class="site-search-panel" hidden aria-label="Search suggestions">
@@ -71,43 +75,39 @@
             </section>
           </div>
         </div>
+        <div id="mobileSearchRow" class="mobile-search-overlay" hidden>
+          <section class="mobile-search-sheet" aria-labelledby="mobileSearchTitle">
+            <h2 id="mobileSearchTitle" class="sr-only">Search FDICnet</h2>
+            <div class="site-search-field site-search-field--mobile">
+              <div class="mobile-search-input-row">
+                <label class="search-input search-input--mobile">
+                  <span class="sr-only">Search</span>
+                  <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                  <input
+                    id="mobileSearchInput"
+                    type="search"
+                    role="combobox"
+                    aria-expanded="false"
+                    aria-controls="mobileSearchResults"
+                    aria-autocomplete="list"
+                    aria-haspopup="listbox"
+                    placeholder="Search FDICnet"
+                    autocomplete="off"
+                  />
+                </label>
+                <button id="mobileSearchClear" class="search-clear" type="button" aria-label="Clear search" hidden>
+                  <i class="ph ph-x" aria-hidden="true"></i>
+                </button>
+                <button id="mobileSearchSubmit" class="search-submit" type="button" aria-label="Open first matching result">
+                  <i class="ph ph-arrow-right" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <ul id="mobileSearchResults" class="site-search-results" role="listbox" aria-label="Matching menu content"></ul>
+            <p id="mobileSearchStatus" class="site-search-status" role="status" aria-live="polite"></p>
+          </section>
+        </div>
       </div>
-    </div>
-
-    <div id="mobileSearchRow" class="mobile-search-overlay" hidden>
-      <div id="mobileSearchBackdrop" class="mobile-search-backdrop"></div>
-      <section class="mobile-search-sheet" role="dialog" aria-modal="true" aria-labelledby="mobileSearchTitle">
-        <div class="mobile-search-sheet-header">
-          <h2 id="mobileSearchTitle" class="sr-only">Search FDICnet</h2>
-          <button id="mobileSearchClose" class="mobile-search-close" type="button" aria-label="Close search">
-            <i class="ph ph-x" aria-hidden="true"></i>
-          </button>
-        </div>
-
-        <div class="site-search-field site-search-field--mobile">
-          <label class="search-input search-input--mobile">
-            <span class="sr-only">Search</span>
-            <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-            <input
-              id="mobileSearchInput"
-              type="search"
-              role="combobox"
-              placeholder="Search FDICnet"
-              autocomplete="off"
-            />
-          </label>
-          <button id="mobileSearchClear" class="search-clear" type="button" aria-label="Clear search" hidden>
-            <i class="ph ph-x" aria-hidden="true"></i>
-          </button>
-          <button id="mobileSearchSubmit" class="search-submit" type="button" aria-label="Search all FDICnet">
-            <i class="ph ph-arrow-right" aria-hidden="true"></i>
-          </button>
-        </div>
-
-        <p class="mobile-search-shortcut-hint">Search menu destinations or the full site.</p>
-        <ul id="mobileSearchResults" class="site-search-results" role="listbox" aria-label="Matching menu content"></ul>
-        <p id="mobileSearchStatus" class="site-search-status" role="status" aria-live="polite"></p>
-      </section>
     </div>
 
     <fdic-top-nav id="fdicTopNav"></fdic-top-nav>
@@ -115,7 +115,7 @@
     <fdic-mega-menu id="fdicMegaMenu"></fdic-mega-menu>
   </header>
 
-  <div id="megaMenuScrim" class="mega-menu-scrim" aria-hidden="true"></div>
+  <div id="megaMenuScrim" class="mega-menu-scrim" aria-hidden="true" role="presentation"></div>
 
   <main class="page-content">
     <div class="fdic-shell">

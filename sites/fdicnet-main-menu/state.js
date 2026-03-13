@@ -1,4 +1,9 @@
 (function initFDICMenuStateModule() {
+  const runtime = window.FDICMenuRuntime;
+  if (!runtime) {
+    throw new Error("FDICMenuRuntime missing. Ensure runtime.js is loaded before state.js.");
+  }
+
   const menuState = {
     siteContent: null,
     activePanelKey: null,
@@ -18,6 +23,8 @@
     closeHideTimer: null,
     mobileDrillPath: [],
     lastMobileDrillPath: null,
+    mobileDrillScrollPositions: {},
+    lastRenderedMobileDrillPathKey: "[]",
   };
 
   function getPanelConfig(siteContent, activePanelKey) {
@@ -66,7 +73,7 @@
     );
   }
 
-  window.FDICMenuState = {
+  runtime.registerModule("state", {
     menuState,
     getPanelConfig,
     getPanelConfigByKey,
@@ -76,5 +83,5 @@
     getVisibleL2Index,
     getVisibleL2,
     getL2Overview,
-  };
+  });
 })();
