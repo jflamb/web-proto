@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (FDICnet Menu Density Compromise)
+- [x] Set desktop/tablet mega-menu row minimum height to 36px.
+- [x] Keep mobile primary drill rows at 44px.
+- [x] Reduce mobile secondary rows to 40px.
+- [x] Validate computed min-heights across desktop and mobile.
+
+## Review / Results (FDICnet Menu Density Compromise)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - desktop/tablet (`min-width: 769px`): mega-menu row controls (`.l1-item`, `.l2-item`, `.l3-item`) now use `min-height: 36px` with tighter top/bottom padding.
+  - mobile (`max-width: 768px`):
+    - primary drill controls remain `44px` (`.mobile-drill-trigger`, `.mobile-drill-back`).
+    - secondary rows reduced to `40px` (`.mobile-drill-link`, `.mobile-drill-current-link`).
+- Validation (computed styles):
+  - desktop: L1/L2 rows = `36px` min-height.
+  - mobile: root/L2 triggers and back = `44px`; root leaf/current-link rows = `40px`.
+
 ## Current Task (FDICnet Standardize Mega/Mobile Menu Text to 16px)
 - [x] Set desktop mega-menu link label text to 16px.
 - [x] Set mobile drawer menu row text to 16px.
