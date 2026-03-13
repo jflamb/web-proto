@@ -45,7 +45,13 @@ let mobileSearchToggle = null;
 let mobileSearchRow = null;
 let mobileSearchInput = null;
 let mobileNavBackdrop = null;
+let mainContent = null;
+let mastheadControls = null;
+let mastheadWordmark = null;
+let menuLiveRegion = null;
 let mobileDrawerController = null;
+let liveAnnouncementTimer = null;
+let lastLiveAnnouncement = "";
 
 function refreshDomRefs() {
   topNav = document.getElementById("fdicTopNav");
@@ -67,6 +73,10 @@ function refreshDomRefs() {
   mobileSearchRow = document.getElementById("mobileSearchRow");
   mobileSearchInput = document.getElementById("mobileSearchInput");
   mobileNavBackdrop = document.getElementById("mobileNavBackdrop");
+  mainContent = document.querySelector("main.page-content");
+  mastheadControls = document.querySelector(".fdic-controls");
+  mastheadWordmark = document.querySelector(".fdic-wordmark");
+  menuLiveRegion = document.getElementById("menuLiveRegion");
 }
 
 refreshDomRefs();
@@ -92,6 +102,10 @@ function getDom() {
     mobileSearchRow,
     mobileSearchInput,
     mobileNavBackdrop,
+    mainContent,
+    mastheadControls,
+    mastheadWordmark,
+    menuLiveRegion,
   };
 }
 
@@ -101,6 +115,37 @@ function getPanelConfig() {
 
 function getPanelConfigByKey(panelKey) {
   return selectPanelConfigByKey(menuState.siteContent, panelKey);
+}
+
+function getValidMobileDrillPath(path) {
+  if (!Array.isArray(path)) return null;
+  if (path.length === 0) return [];
+
+  const [panelKey, l1Index, l2Index] = path;
+  if (typeof panelKey !== "string" || panelKey.length === 0) return null;
+
+  const panelConfig = getPanelConfigByKey(panelKey);
+  if (!panelConfig) return null;
+
+  if (typeof l1Index !== "number") {
+    return [panelKey];
+  }
+
+  const l1Items = panelConfig.l1 || [];
+  if (l1Index < 0 || l1Index >= l1Items.length) {
+    return [panelKey];
+  }
+
+  if (typeof l2Index !== "number") {
+    return [panelKey, l1Index];
+  }
+
+  const l2Items = l1Items[l1Index]?.l2 || [];
+  if (l2Index < 0 || l2Index >= l2Items.length) {
+    return [panelKey, l1Index];
+  }
+
+  return [panelKey, l1Index, l2Index];
 }
 
 function getMobilePanelKeys() {
@@ -114,6 +159,42 @@ function getPanelL1() {
 function getDefaultL1Index(panel = getPanelConfig()) {
   const l1Items = panel?.l1 || [];
   return l1Items.length > 1 ? 1 : 0;
+}
+
+function announceMenuContext(message) {
+  const text = typeof message === "string" ? message.trim() : "";
+  if (!text || !menuLiveRegion) return;
+  if (text === lastLiveAnnouncement) return;
+  lastLiveAnnouncement = text;
+  if (liveAnnouncementTimer) {
+    window.clearTimeout(liveAnnouncementTimer);
+    liveAnnouncementTimer = null;
+  }
+  menuLiveRegion.textContent = "";
+  liveAnnouncementTimer = window.setTimeout(() => {
+    menuLiveRegion.textContent = text;
+    liveAnnouncementTimer = null;
+  }, 20);
+}
+
+function resetMenuAnnouncementState() {
+  lastLiveAnnouncement = "";
+  if (liveAnnouncementTimer) {
+    window.clearTimeout(liveAnnouncementTimer);
+    liveAnnouncementTimer = null;
+  }
+}
+
+function announceDesktopPanelContext(panelKey) {
+  const panelConfig = getPanelConfigByKey(panelKey);
+  if (!panelConfig) return;
+  const panelLabel = (menuState.siteContent?.header?.nav || []).find(
+    (item) => item.kind === "menu" && (item.panelKey || item.id) === panelKey
+  )?.label || panelConfig.overviewLabel || "Menu";
+  const l1Items = panelConfig.l1 || [];
+  const hasOverviewRow = l1Items.length > 1;
+  const visibleItemCount = hasOverviewRow ? l1Items.length - 1 : l1Items.length;
+  announceMenuContext(`${panelLabel}, ${visibleItemCount} item${visibleItemCount === 1 ? "" : "s"}.`);
 }
 
 function applyHeaderContent() {
@@ -165,6 +246,23 @@ function syncMobileSearchState({ focus = false } = {}) {
 function setMobileSearchOpen(isOpen, { focus = false } = {}) {
   menuState.mobileSearchOpen = Boolean(isOpen);
   syncMobileSearchState({ focus });
+}
+
+function setInertState(element, isInert) {
+  if (!element) return;
+  if (isInert) {
+    element.setAttribute("inert", "");
+  } else {
+    element.removeAttribute("inert");
+  }
+}
+
+function syncMobileBackgroundInertState() {
+  const shouldInert = isMobileViewport() && menuState.mobileNavOpen;
+  setInertState(mainContent, shouldInert);
+  setInertState(mastheadControls, shouldInert);
+  setInertState(mastheadWordmark, shouldInert);
+  setInertState(mobileSearchRow, shouldInert);
 }
 
 function syncMobileToggleButton() {
@@ -241,6 +339,7 @@ function initializeMobileDrawerController() {
     syncMobileToggleButton,
     ensureMobileMenuFocus,
     triggerLightHaptic,
+    announceMenuContext,
   });
 }
 
@@ -257,9 +356,11 @@ function syncMobileNavState() {
     if (mobileNavBackdrop) {
       mobileNavBackdrop.hidden = true;
       mobileNavBackdrop.classList.remove("is-visible");
+      mobileNavBackdrop.tabIndex = -1;
     }
     navToggle.setAttribute("aria-expanded", "false");
     syncMobileToggleButton();
+    syncMobileBackgroundInertState();
     return;
   }
   menuState.menuOpen = false;
@@ -271,7 +372,9 @@ function syncMobileNavState() {
   if (mobileNavBackdrop) {
     mobileNavBackdrop.hidden = !menuState.mobileNavOpen;
     mobileNavBackdrop.classList.toggle("is-visible", menuState.mobileNavOpen);
+    mobileNavBackdrop.tabIndex = menuState.mobileNavOpen ? 0 : -1;
   }
+  syncMobileBackgroundInertState();
 
   if (menuState.mobileNavOpen) {
     navList.hidden = false;
@@ -316,13 +419,28 @@ function syncMobileNavState() {
 function setMobileNavOpen(isOpen) {
   const nextOpen = Boolean(isOpen);
   if (nextOpen && !menuState.mobileNavOpen) {
-    menuState.mobileDrillPath = [];
+    const currentPath = getValidMobileDrillPath(menuState.mobileDrillPath);
+    const savedPath = getValidMobileDrillPath(menuState.lastMobileDrillPath);
+
+    if (Array.isArray(currentPath) && currentPath.length > 0) {
+      menuState.mobileDrillPath = currentPath;
+    } else if (Array.isArray(savedPath)) {
+      menuState.mobileDrillPath = savedPath;
+    } else {
+      menuState.mobileDrillPath = menuState.activePanelKey ? [menuState.activePanelKey] : [];
+    }
   }
+
+  if (!nextOpen) {
+    menuState.lastMobileDrillPath = Array.isArray(menuState.mobileDrillPath) ? [...menuState.mobileDrillPath] : [];
+  }
+
   menuState.mobileNavOpen = nextOpen;
   syncMobileNavState();
 }
 
 function closeMobileNav() {
+  resetMenuAnnouncementState();
   setMobileNavOpen(false);
 }
 
@@ -387,6 +505,7 @@ function resetPanelSelection() {
   menuState.previewingOverview = false;
   menuState.l1FocusIndex = defaultL1Index;
   menuState.mobileDrillPath = [];
+  menuState.lastMobileDrillPath = null;
 }
 
 function renderTopNav() {
@@ -404,9 +523,20 @@ function renderTopNav() {
   applyTopNavRoving();
 }
 
-function activateTopNavPanel(panelKey, navIndex, { focusMenu = false } = {}) {
+function activateTopNavPanel(panelKey, navIndex, { focusMenu = false, forceOpen = false } = {}) {
   menuState.topNavFocusIndex = navIndex;
   if (menuState.activePanelKey === panelKey) {
+    if (menuState.menuOpen && forceOpen) {
+      if (!focusSelectedL1()) {
+        const fallbackTarget = megaMenu?.querySelector(".l1-item, .l2-item, .l3-item");
+        if (fallbackTarget instanceof HTMLElement) {
+          fallbackTarget.focus();
+        }
+      }
+      closeMobileNav();
+      return;
+    }
+
     if (menuState.menuOpen) {
       closeMenu();
     } else {
@@ -418,6 +548,7 @@ function activateTopNavPanel(panelKey, navIndex, { focusMenu = false } = {}) {
 
   menuState.activePanelKey = panelKey;
   resetPanelSelection();
+  announceDesktopPanelContext(panelKey);
   syncTopNavState();
   applyTopNavRoving();
   renderMenuPanel();
@@ -432,6 +563,7 @@ function previewTopNavPanel(panelKey, navIndex) {
   if (menuState.activePanelKey !== panelKey) {
     menuState.activePanelKey = panelKey;
     resetPanelSelection();
+    announceDesktopPanelContext(panelKey);
     renderMenuPanel();
   }
   syncTopNavState();
@@ -450,6 +582,18 @@ function handleTopNavRovingRequest({ key, currentIndex, itemCount }) {
   applyTopNavRoving({ focus: true });
 }
 
+function focusActiveTopNavButton() {
+  const items = getTopNavItems();
+  if (items.length === 0) return;
+  const activeIndex = getActiveTopNavIndex(items);
+  if (activeIndex >= 0) {
+    menuState.topNavFocusIndex = activeIndex;
+  } else if (menuState.topNavFocusIndex < 0 || menuState.topNavFocusIndex >= items.length) {
+    menuState.topNavFocusIndex = 0;
+  }
+  applyTopNavRoving({ focus: true });
+}
+
 function renderMobileDrawerPanel() {
   mobileDrawerController?.renderMobileDrawerPanel();
 }
@@ -462,6 +606,7 @@ function openMenu({ focusMenu = false } = {}) {
   refreshDomRefs();
   if (menuState.menuOpen) return;
   menuState.menuOpen = true;
+  menuState.menuOpenGuardUntil = performance.now() + 320;
   megaMenu.removeAttribute("aria-hidden");
   if (menuState.closeTransitionHandler) {
     megaMenu.removeEventListener("transitionend", menuState.closeTransitionHandler);
@@ -493,21 +638,40 @@ function openMenu({ focusMenu = false } = {}) {
 
 function scheduleMenuSystemFocusExitCheck() {
   refreshDomRefs();
-  window.requestAnimationFrame(() => {
-    if (!menuState.menuOpen || isMobileViewport()) return;
-    const activeElement = document.activeElement;
-    if (
-      activeElement &&
-      (megaMenu.contains(activeElement) || navList.contains(activeElement))
-    ) {
-      return;
-    }
-    closeMenu();
-  });
+  const runCheck = (attempt = 0) => {
+    window.requestAnimationFrame(() => {
+      if (!menuState.menuOpen || isMobileViewport()) return;
+      const activeElement = document.activeElement;
+      if (
+        activeElement &&
+        (megaMenu.contains(activeElement) || navList.contains(activeElement))
+      ) {
+        return;
+      }
+
+      const guardActive = Number(menuState.menuOpenGuardUntil || 0) > performance.now();
+      if (guardActive && attempt < 6) {
+        runCheck(attempt + 1);
+        return;
+      }
+
+      // During keyboard-driven rerenders, focus can briefly fall back to body
+      // for multiple frames. Retry before treating it as a real focus exit.
+      if ((activeElement === document.body || activeElement === document.documentElement) && attempt < 3) {
+        runCheck(attempt + 1);
+        return;
+      }
+      closeMenu();
+    });
+  };
+
+  runCheck();
 }
 
 function closeMenu() {
+  resetMenuAnnouncementState();
   refreshDomRefs();
+  menuState.menuOpenGuardUntil = 0;
   if (isMobileViewport()) {
     menuState.menuOpen = false;
     header.classList.remove("menu-open");
@@ -572,6 +736,18 @@ function getL2Overview(selectedL1) {
 }
 
 function setSelectedL1(index, { restoreFocus = false } = {}) {
+  const selectionUnchanged = (
+    menuState.selectedL1Index === index
+    && menuState.previewL2Index === null
+    && !menuState.previewingOverview
+  );
+  if (selectionUnchanged) {
+    if (restoreFocus) {
+      megaMenuHost?.focusL1Index(index);
+    }
+    return;
+  }
+
   refreshDomRefs();
   menuState.selectedL1Index = index;
   menuState.l1FocusIndex = index;
@@ -586,7 +762,12 @@ function setSelectedL1(index, { restoreFocus = false } = {}) {
 
 function setPreviewL2(index, { restoreFocus = false, fromFocus = false } = {}) {
   const previewChanged = menuState.previewL2Index !== index || menuState.previewingOverview;
-  if (!previewChanged) return;
+  if (!previewChanged) {
+    if (restoreFocus) {
+      megaMenuHost?.focusL2Index(index);
+    }
+    return;
+  }
   menuState.previewingOverview = false;
   menuState.previewL2Index = index;
   renderDesktopColumns();
@@ -596,7 +777,12 @@ function setPreviewL2(index, { restoreFocus = false, fromFocus = false } = {}) {
 }
 
 function setPreviewOverview({ restoreFocus = false, fromFocus = false } = {}) {
-  if (menuState.previewL2Index === null && menuState.previewingOverview) return;
+  if (menuState.previewL2Index === null && menuState.previewingOverview) {
+    if (restoreFocus) {
+      megaMenuHost?.focusL2Overview();
+    }
+    return;
+  }
   menuState.previewL2Index = null;
   menuState.previewingOverview = true;
   renderDesktopColumns();
@@ -636,11 +822,18 @@ function schedulePreviewClear() {
 
 function getMegaMenuViewModel() {
   const panel = getPanelConfig();
+  const panelLabel = (menuState.siteContent?.header?.nav || []).find(
+    (item) => item.kind === "menu" && (item.panelKey || item.id) === menuState.activePanelKey
+  )?.label || panel?.overviewLabel || "Menu";
   const selectedL1 = getSelectedL1();
   const l2Overview = getL2Overview(selectedL1);
   const showingPreview = menuState.previewL2Index !== null;
   const selectedL2 = selectedL1?.l2?.[menuState.selectedL2Index] || null;
   const previewL2 = getVisibleL2();
+  const activeL2ForHeading = showingPreview && !menuState.previewingOverview ? previewL2 : selectedL2;
+  const l1HeadingLabel = `${panelLabel} sections`;
+  const l2HeadingLabel = `${selectedL1?.label || "Section"} links`;
+  const l3HeadingLabel = `${activeL2ForHeading?.label || "Section"} resources`;
   const descriptionText = menuState.previewingOverview
     ? l2Overview?.description || ""
     : showingPreview
@@ -660,6 +853,9 @@ function getMegaMenuViewModel() {
     showingPreview,
     l3Items: showingPreview && !menuState.previewingOverview ? (previewL2?.l3 || []) : [],
     l3Description: descriptionText,
+    l1HeadingLabel,
+    l2HeadingLabel,
+    l3HeadingLabel,
   };
 }
 
@@ -735,6 +931,7 @@ function setupEvents() {
     activateTopNavPanel,
     previewTopNavPanel,
     handleTopNavRovingRequest,
+    focusActiveTopNavButton,
     getMobileDrawerFocusableItems,
     handleMobileDelegatedClick: (target) => mobileDrawerController?.handleDelegatedMobileDrillClick(target),
     scheduleMenuSystemFocusExitCheck,

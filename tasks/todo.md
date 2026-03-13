@@ -1,5 +1,436 @@
 # TODO
 
+## Current Task (FDICnet Menu Density Compromise)
+- [x] Set desktop/tablet mega-menu row minimum height to 36px.
+- [x] Keep mobile primary drill rows at 44px.
+- [x] Reduce mobile secondary rows to 40px.
+- [x] Validate computed min-heights across desktop and mobile.
+
+## Review / Results (FDICnet Menu Density Compromise)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - desktop/tablet (`min-width: 769px`): mega-menu row controls (`.l1-item`, `.l2-item`, `.l3-item`) now use `min-height: 36px` with tighter top/bottom padding.
+  - mobile (`max-width: 768px`):
+    - primary drill controls remain `44px` (`.mobile-drill-trigger`, `.mobile-drill-back`).
+    - secondary rows reduced to `40px` (`.mobile-drill-link`, `.mobile-drill-current-link`).
+- Validation (computed styles):
+  - desktop: L1/L2 rows = `36px` min-height.
+  - mobile: root/L2 triggers and back = `44px`; root leaf/current-link rows = `40px`.
+
+## Current Task (FDICnet Standardize Mega/Mobile Menu Text to 16px)
+- [x] Set desktop mega-menu link label text to 16px.
+- [x] Set mobile drawer menu row text to 16px.
+- [x] Verify readability and target sizing remain acceptable.
+
+## Review / Results (FDICnet Standardize Mega/Mobile Menu Text to 16px)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - set `--ds-font-size-md` to `16px` (mobile drawer row typography token).
+  - set mega-menu row typography (`.l1-item`, `.l2-item`, `.l3-item`) to `16px`.
+  - set third-column description text (`.menu-description`) to `16px` for consistency with menu content.
+- Validation:
+  - desktop computed styles: L1/L2/description render at `16px`.
+  - mobile computed styles: drill trigger/back/crumb text render at `16px` and row min-heights remain unchanged.
+
+## Current Task (FDICnet Close Button Outside Column Hit Targets)
+- [x] Move desktop close button into a top-right mega-menu toolbar above columns.
+- [x] Remove column-level spacing workaround used to avoid overlap.
+- [x] Validate geometry: no close-button intersection with first L3 link target.
+
+## Current Task (FDICnet Remove Desktop Mega-Menu Close Button)
+- [x] Remove close button markup and desktop toolbar row.
+- [x] Remove close-button event handling and related styles.
+- [x] Validate mega-menu layout returns to prior alignment (no extra top push-down).
+
+## Review / Results (FDICnet Remove Desktop Mega-Menu Close Button)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - removed `.mega-menu-toolbar` and `.mega-menu-close` markup from desktop mega-menu.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - removed click handler branch for `.mega-menu-close`.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed `.mega-menu-toolbar` and `.mega-menu-close` styles.
+  - removed related column spacing adjustments tied to close-button placement.
+- Validation:
+  - syntax checks passed for `components.js`, `events.js`, and `script.js`.
+  - browser check confirms no close button or toolbar remains and mega-menu top alignment is restored (no added push-down row).
+
+## Review / Results (FDICnet Close Button Outside Column Hit Targets)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - moved `.mega-menu-close` into a new `.mega-menu-toolbar` above the three-column grid.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.mega-menu-toolbar` as a dedicated top row with right-aligned close control.
+  - removed prior close-button overlap workarounds from column content (`.menu-list--l3` right gutter and extra description padding).
+  - keeps toolbar hidden in mobile.
+- Validation:
+  - desktop geometry check confirms close button remains inside toolbar row and does not intersect first L3 link hitbox (`overlapArea: 0`).
+  - close button still closes mega-menu and returns focus to active top-nav button.
+
+## Current Task (FDICnet Reposition Desktop Mega-Menu Close Button)
+- [x] Move close button to the upper-right corner of the overall mega-menu container.
+- [x] Remove L3 vertical-offset workaround that caused column alignment drift.
+- [x] Validate close button no longer overlaps L3 click targets.
+
+## Review / Results (FDICnet Reposition Desktop Mega-Menu Close Button)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - moved `.mega-menu-close` out of the L3 column into `.mega-menu-inner` so it sits in the mega-menu corner instead of inside column content.
+  - removed temporary `l3-no-description` class toggling.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - made `.mega-menu-inner` positioning context for the close button.
+  - removed L3 top-padding workaround.
+  - added right-side gutter on L3 list (`.menu-list--l3 { padding-right: 52px; }`) so close button corner space does not overlap link hit targets.
+- Validation:
+  - desktop geometry check confirmed no overlap between close button and first L3 item (`overlapArea: 0`) while keeping top-right placement.
+
+## Current Task (FDICnet Desktop Close Button Overlap Fix)
+- [x] Prevent desktop mega-menu close button from overlapping L3 link hit targets.
+- [x] Preserve close button visibility and accessibility.
+- [x] Validate no overlap in browser with representative panel state.
+
+## Review / Results (FDICnet Desktop Close Button Overlap Fix)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - toggles `l3-no-description` on `.mega-col--l3` when the L3 description is hidden.
+  - removes `l3-no-description` in mobile view cleanup path.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `z-index` on `.mega-menu-close` and reserved top list space when description is hidden:
+    - `.mega-col--l3.l3-no-description .menu-list--l3 { padding-top: 40px; }`
+- Validation:
+  - desktop browser check on `Benefits > Retirement > Saving for Retirement` confirmed no intersection between close button and first L3 link hitbox (`overlapArea: 0`).
+
+## Current Task (FDICnet Desktop Mega-Menu Close Affordance)
+- [x] Add an explicit close button in the desktop mega-menu panel.
+- [x] Wire close-button activation to existing menu close behavior with sensible focus return.
+- [x] Validate click and keyboard activation of the close control in browser.
+
+## Review / Results (FDICnet Desktop Mega-Menu Close Affordance)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - added a `button.mega-menu-close` (aria-label: `Close menu`) inside the desktop L3 panel header area.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added click handling for `.mega-menu-close` to call `closeMenu()` and return focus to the active top-level nav button.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - styled `.mega-menu-close` with hover/focus affordance using shared focus token.
+  - increased right padding for `.menu-description` to avoid overlap with the close button.
+  - hid `.mega-menu-close` in mobile breakpoint.
+- Validation:
+  - `node --check` passed for `components.js`, `events.js`, and `script.js`.
+  - browser checks confirmed close button is present and visible in desktop mega-menu.
+  - scripted activation of close control closes menu and restores focus to active top-nav button.
+
+## Current Task (FDICnet Preserve Mobile Drill Position Across Close/Reopen)
+- [x] Persist last mobile drill path on drawer close.
+- [x] Restore preserved drill path on reopen when still valid.
+- [x] Keep fallback behavior to active panel/root when no valid preserved path exists.
+- [x] Validate close/reopen from L2/L3 restores prior location.
+
+## Review / Results (FDICnet Preserve Mobile Drill Position Across Close/Reopen)
+- Updated `sites/fdicnet-main-menu/state.js`:
+  - added `menuState.lastMobileDrillPath` to persist last closed drawer location.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added `getValidMobileDrillPath(...)` to sanitize/trim drill paths against current content.
+  - `setMobileNavOpen(true)` now restores the current valid path, then saved path, then active-panel fallback.
+  - `setMobileNavOpen(false)` now snapshots `lastMobileDrillPath` before close transition.
+  - `resetPanelSelection()` now clears saved mobile drill path to avoid stale cross-panel restores after desktop panel resets.
+- Validation (Chrome DevTools MCP, mobile viewport):
+  - close/reopen from L3 path `["news-events",1,1]` restores to `["news-events",1,1]`.
+  - close/reopen via backdrop from L2 path `["news-events",2]` restores to `["news-events",2]`.
+
+## Current Task (FDICnet Unified Focus Ring Strategy)
+- [x] Define a single tokenized focus ring strategy with standard and contained variants.
+- [x] Apply tokens across desktop mega-menu and mobile drawer interactive controls.
+- [x] Validate mobile clipping is resolved and desktop focus visibility remains clear.
+
+## Review / Results (FDICnet Unified Focus Ring Strategy)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - introduced shared focus tokens:
+    - `--focus-ring-standard-shadow` (desktop/outset)
+    - `--focus-ring-contained-shadow` (mobile/inset)
+    - `--menu-focus-ring-shadow` (single consumption token)
+  - switched menu focus styles to consume `--menu-focus-ring-shadow` across:
+    - top-level header controls (`.icon-button`, `.fdic-nav-item`, `.fdic-nav-toggle`)
+    - desktop mega-menu rows (`.l1-item`, `.l2-item`, `.l3-item`)
+    - mobile drawer rows/crumbs (`.mobile-drill-*`, `.mobile-drill-crumb`)
+  - on mobile breakpoint (`max-width: 768px`), set `--menu-focus-ring-shadow` to contained/inset variant to avoid clipping in drawer contexts.
+- Validation:
+  - syntax checks passed for related JS modules.
+  - browser validation via Chrome DevTools MCP confirmed:
+    - mobile focused drawer trigger uses inset ring shadow (`inset ...`) from contained token
+    - desktop focused L2 item uses standard outset ring shadow (`0 0 0 ...`) from standard token
+
+## Current Task (FDICnet Mobile Breadcrumb Best-Practice Upgrade)
+- [x] Replace visible `You are here:` text with semantic breadcrumb UI.
+- [x] Make parent breadcrumb nodes clickable to drill up.
+- [x] Keep current breadcrumb node non-clickable and SR-friendly.
+- [x] Validate breadcrumb navigation behavior in mobile drawer.
+
+## Review / Results (FDICnet Mobile Breadcrumb Best-Practice Upgrade)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - replaced plain context text with a semantic breadcrumb nav (`<nav aria-label="Current location"><ol>...</ol></nav>`).
+  - parent crumbs now render as buttons wired to `data-mobile-drill-action="set-path"` for direct drill-up.
+  - current crumb renders as non-clickable text with `aria-current="page"`.
+  - retained orientation phrase as screen-reader-only text (`sr-only`) rather than visible label.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added breadcrumb styling for list layout, separators, clickable crumb links, and current crumb emphasis.
+  - added focus-visible styling for crumb buttons consistent with menu focus tokens.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+  - Mobile browser checks confirmed:
+    - deeper path exposes clickable parent crumbs (`News & Events`, `News`) and non-clickable current crumb (`Global Messages`).
+    - clicking `News` updates drill path from `[panel, l1, l2]` -> `[panel, l1]`.
+    - clicking `News & Events` updates drill path from `[panel, l1]` -> `[panel]`.
+
+## Current Task (FDICnet Mobile Current-Context Indicator)
+- [x] Add visible current-context breadcrumb text to the mobile drawer drill views.
+- [x] Place context indicator above the list content (not below it).
+- [x] Verify context updates across L1/L2/L3 drill levels.
+
+## Review / Results (FDICnet Mobile Current-Context Indicator)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added `renderMobileDrillContext(...)` that renders a lightweight path line (`You are here: ...`) from the active drill path.
+  - added `getMobileContextLabels(...)` to derive labels from panel/L1/L2 state.
+  - integrated context rendering for panel-level, L1-level, and L2-level drill screens.
+  - positioned the context row before the drill list.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `.mobile-drill-context` styling (compact secondary text with divider) to visually separate context from list rows.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+  - Browser validation at mobile viewport confirmed:
+    - L1: `You are here: News & Events`
+    - L2: `You are here: News & Events > News`
+    - L3: `You are here: News & Events > News > Global Messages`
+
+## Current Task (FDICnet ArrowUp Exit to Active Top Nav)
+- [x] Update desktop mega-menu ArrowUp behavior at column start to focus the active top-level nav button.
+- [x] Verify no regressions for ArrowDown/ArrowRight/ArrowLeft/Escape paths.
+
+## Review / Results (FDICnet ArrowUp Exit to Active Top Nav)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - when `ArrowUp` is pressed on the first item in an L1/L2/L3 column, the mega-menu now emits `fdic-mega-focus-active-top-nav` instead of wrapping to the last item.
+- Updated `sites/fdicnet-main-menu/events.js` + `sites/fdicnet-main-menu/script.js`:
+  - added handling to focus the currently active top-level nav button while leaving the mega-menu open.
+- Validation:
+  - `node --check` passed for `components.js`, `events.js`, `script.js`.
+  - Browser checks confirmed:
+    - top-of-L1 `ArrowUp` moves focus to active top nav button and keeps menu open
+    - top-of-L2 `ArrowUp` does the same
+    - re-entry (`ArrowDown`) and column traversal (`ArrowRight`, `ArrowDown`) still work
+
+## Current Task (FDICnet Mega-Menu ArrowDown Second-Press Close Regression)
+- [x] Reproduce: Tab to top-nav button, `ArrowDown` to open, `ArrowDown` again closes unexpectedly.
+- [x] Fix focus/rerender behavior so in-menu arrow navigation does not trigger close.
+- [x] Validate keyboard sequence and no-regression paths in browser.
+
+## Review / Results (FDICnet Mega-Menu ArrowDown Second-Press Close Regression)
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - focus-driven L1/L2 preview handlers now request focus restoration (`restoreFocus: true`) so keyboard navigation survives render updates.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - `setSelectedL1`, `setPreviewL2`, and `setPreviewOverview` now short-circuit unchanged-state calls while still restoring focus when requested.
+  - prevents rerender loops and avoids transient focus loss that triggered menu close checks.
+- Validation:
+  - `node --check` passed for `events.js` and `script.js`.
+  - Browser sequence confirmed stable:
+    - top-nav focused `ArrowDown` opens/focuses mega-menu
+    - second `ArrowDown` advances within L1 and keeps menu open
+    - `ArrowRight` to L2 + `ArrowDown` keeps menu open with visible focus ring
+
+## Current Task (FDICnet Top-Nav ArrowDown Open Regression)
+- [x] Reproduce desktop ArrowDown open failure from focused top-nav item.
+- [x] Fix menu open/close focus race so ArrowDown reliably opens and keeps mega-menu visible.
+- [x] Validate keyboard path in browser (`ArrowDown`, `ArrowUp`, `ArrowLeft/Right`, `Escape`) and ensure no regressions.
+
+## Review / Results (FDICnet Top-Nav ArrowDown Open Regression)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - ArrowDown activation now sets `forceOpenOnActivate` in addition to `focusMenuOnActivate`.
+  - activation event detail now includes `forceOpen`.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - forwarded `forceOpen` from `fdic-top-nav-activate` to orchestration.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - `activateTopNavPanel(...)` now treats `forceOpen` as a non-toggle intent when the active panel is already open, keeping menu open and moving focus into L1.
+- Validation:
+  - `node --check` passed for `components.js`, `events.js`, `script.js`.
+  - Browser checks confirmed:
+    - closed top-nav + `ArrowDown` opens mega-menu and focuses L1
+    - open active panel + `ArrowDown` keeps mega-menu open and focuses L1
+    - click on active top-nav button still closes the menu (toggle behavior preserved)
+
+## Current Task (FDICnet Mobile Drill aria-expanded Transition Feedback)
+- [x] Set active mobile drill trigger `aria-expanded=\"true\"` before drill re-render.
+- [x] Add immediate live-region transition announcement for drill trigger activation.
+- [ ] Run browser + SR behavior validation.
+
+## Review / Results (FDICnet Mobile Drill aria-expanded Transition Feedback)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - when a `.mobile-drill-trigger` is activated, it now sets `aria-expanded=\"true\"` before the panel re-renders.
+  - emits immediate live-region text (`Opening {label}.`) prior to render transition.
+- Result: screen reader users get deterministic expansion feedback even though the next panel is rebuilt.
+- Validation note:
+  - JS syntax checks pending in this commit step.
+
+## Current Task (FDICnet Mobile Drawer Landmark/Heading Parity)
+- [x] Add named landmark/heading structure per mobile drill level.
+- [ ] Run browser validation for screen-reader landmark orientation.
+
+## Review / Results (FDICnet Mobile Drawer Landmark/Heading Parity)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - each mobile drill render now creates a named `<section>` region with an `sr-only` `<h2>` and `aria-labelledby`.
+  - heading text is context-specific by level (e.g., main sections, panel sections, L1/L2 links).
+- Validation note:
+  - JS syntax checks pass.
+  - Browser/SR runtime validation pending due local Playwright launcher profile conflict.
+
+## Current Task (FDICnet Live Region Announcements)
+- [x] Add a visually hidden polite live region for menu context announcements.
+- [x] Announce desktop top-level panel switches with item counts.
+- [x] Announce mobile drill-level transitions with context + item counts.
+- [ ] Run browser validation for SR announcements.
+
+## Review / Results (FDICnet Live Region Announcements)
+- Updated `sites/fdicnet-main-menu/index.html`:
+  - added `#menuLiveRegion` (`aria-live=\"polite\"`, `aria-atomic=\"true\"`) using existing `.sr-only` treatment.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added `announceMenuContext(...)` utility with dedupe + delayed text swap for reliable SR announcements.
+  - added desktop switch announcements in top-level panel activation/preview flows.
+  - passed announcement callback into mobile drawer controller.
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added mobile drill context announcement helper for root/L1/L2/L3 states, including item counts and back-target context.
+- Validation note:
+  - JS syntax checks pass.
+  - Browser/SR runtime validation still pending due local Playwright launcher profile conflict.
+
+## Current Task (FDICnet Menu Consistency + A11y Staged Delivery)
+- [x] Stage 1 (Priority 1): Add hover-intent delay and consistent desktop hover traversal behavior.
+- [x] Stage 2 (Priority 2): Align IA cues between desktop and mobile (path context, overview placement, state continuity).
+- [x] Stage 3 (Priority 3): Improve accessibility parity (ARIA semantics, mobile back key support, focus containment).
+- [x] Stage 4 (Priority 4): Visual/readability polish for dense labels and cross-mode affordance consistency.
+- [x] Validate each stage in browser before commit.
+- [x] Push branch and open pull request.
+
+## Review / Results (Stage 1 - Priority 1)
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added hover-intent delay (`140ms`) for desktop top-nav panel preview.
+  - added hover-intent delay (`140ms`) for desktop L1 and L2 preview switching.
+  - preserved immediate focus-driven behavior for keyboard interactions (no delay on focus previews).
+  - added timer cancellation guards on pointer exits and global pointerdown to prevent stale delayed previews.
+- Browser validation:
+  - Desktop hover traversal still works, now with intentional delay to reduce accidental fly-over panel switches.
+
+## Review / Results (Stage 2 - Priority 2)
+- Updated `sites/fdicnet-main-menu/components.js` + `script.js`:
+  - added desktop mega-menu path context line (`Panel / L1 / L2`) that updates with current preview/selection.
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js` + `styles.css`:
+  - aligned mobile L1 ordering with desktop by moving the Overview row to the bottom and adding a separator.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - preserved top-panel continuity for mobile open state by defaulting first open path to `[activePanelKey]` instead of resetting to root.
+- Browser validation:
+  - Desktop: context path renders and updates when hovering top nav.
+  - Mobile: drawer opens directly into active panel L1 list and places Overview at bottom with separator.
+
+## Review / Results (Stage 3 - Priority 3)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - added `aria-haspopup=\"true\"` to top-nav menu buttons.
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added `id=\"fdicMobileDrawerPanel\"` to drawer panel container.
+  - added mobile drill trigger semantics: `aria-haspopup`, `aria-controls`, `aria-expanded`, and clearer `aria-label`.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - added `ArrowLeft` back-navigation for mobile drill depth.
+  - added mobile drawer focus trap for `Tab`/`Shift+Tab` to keep focus in drawer/toggle while open.
+- Browser validation:
+  - `ArrowLeft` reduces drill depth by one level and keeps focus in drawer.
+  - repeated `Tab` navigation stays trapped inside drawer/toggle while open.
+  - ARIA attribute checks pass for desktop top-nav and mobile drill triggers.
+
+## Review / Results (Stage 4 - Priority 4)
+- Updated `sites/fdicnet-main-menu/components.js` + `styles.css`:
+  - added fixed chevron-column spacing for childless desktop L1/L2 rows via `.menu-caret-spacer`.
+  - increased desktop menu row rhythm (`line-height: 1.45`, `min-height: 44px`).
+- Updated `sites/fdicnet-main-menu/styles.css` (mobile):
+  - increased mobile drill row rhythm (`line-height: 1.45`, `min-height: 46px`).
+  - reserved right-side spacing for no-child mobile link rows with `::after` spacer.
+- Browser validation:
+  - Desktop no-child rows retain consistent right-column spacing.
+  - Mobile no-child rows maintain consistent trailing spacing and touch-target height.
+
+## Current Task (FDICnet Open-State Nav/Mega-Menu Gap Removal)
+- [x] Remove residual spacing between top nav and mega-menu in open state.
+
+## Review / Results (FDICnet Open-State Nav/Mega-Menu Gap Removal)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed open-state top-nav accent handling to collapse border height:
+    - `.fdic-header.menu-open .fdic-nav { border-bottom-width: 0; border-bottom-color: transparent; }`
+- Result: no visible gap remains between the top nav and the open mega-menu panel.
+
+## Current Task (FDICnet Closed-State Main Menu Accent Line)
+- [x] Add light-blue accent line directly below top nav when mega-menu is closed.
+- [x] Suppress that line while mega-menu is open to avoid double accents.
+- [x] Scope behavior to desktop/tablet menu mode.
+
+## Review / Results (FDICnet Closed-State Main Menu Accent Line)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added desktop/tablet (`min-width: 769px`) `border-bottom: 6px solid var(--menu-bottom-accent)` on `.fdic-nav`.
+  - added `.fdic-header.menu-open .fdic-nav { border-bottom-color: transparent; }` so open mega-menu state uses only the panel accent treatment.
+
+## Current Task (FDICnet Mega-Menu Header Overlap Fix)
+- [x] Align desktop/tablet mega-menu top offset to actual header height.
+
+## Review / Results (FDICnet Mega-Menu Header Overlap Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - changed desktop/tablet `.mega-menu` top anchor from fixed token calc to `top: 100%` relative to `.fdic-header`.
+- Result: mega-menu now opens directly below the top-level header/nav stack without overlapping it.
+
+## Current Task (FDICnet Always-Visible Child Chevrons)
+- [x] Keep chevrons visible at rest for items that render a chevron (items with children).
+- [x] Remove hover/selected-only chevron opacity gating in desktop menu styles.
+
+## Review / Results (FDICnet Always-Visible Child Chevrons)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `.l1-caret` now has default `opacity: 1`.
+  - removed hover/focus/selected opacity toggles for `.l1-caret` and `.l2-caret`.
+- Result: chevrons are visible in normal state for all items that have children; childless items still render no chevron.
+
+## Current Task (FDICnet Mobile Chevron Child-Only Rendering)
+- [x] Show mobile drill chevron only when the next level has content.
+- [x] Render no-child mobile drill rows as direct links instead of drill triggers.
+- [x] Run syntax sanity check.
+
+## Review / Results (FDICnet Mobile Chevron Child-Only Rendering)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - `appendMobileDrillItem(...)` now conditionally renders:
+    - drill button with right chevron when child content exists
+    - direct link (no chevron) when no child content exists
+  - applied child-content checks at root, L1, and L2 mobile drill render levels.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js` passed.
+
+## Current Task (FDICnet Conditional Right Chevron Rendering)
+- [x] Show L1 chevron only when L2 content exists.
+- [x] Show L2 chevron only when L3 content exists.
+- [x] Run syntax sanity check.
+
+## Review / Results (FDICnet Conditional Right Chevron Rendering)
+- Updated `sites/fdicnet-main-menu/components.js` render logic:
+  - L1 rows now append right chevron only when `item.l2` has entries.
+  - L2 rows now append right chevron only when `item.l3` has entries.
+- Verification:
+  - `node --check sites/fdicnet-main-menu/components.js` passed.
+
+## Current Task (FDICnet Content YAML Full Hierarchy Alignment)
+- [x] Translate provided IA outline into menu YAML schema.
+- [x] Update `sites/fdicnet-main-menu/content.yaml` to match provided labels and hierarchy.
+- [x] Run YAML parse/sanity checks for structure compatibility.
+- [x] Add review/results summary.
+
+## Review / Results (FDICnet Content YAML Full Hierarchy Alignment)
+- Updated `sites/fdicnet-main-menu/content.yaml` with the provided full hierarchy:
+  - top-level panels preserved as `News & Events`, `Career Development & Training`, `Knowledge Base`, `Benefits`, `Employee Services`, and `About`.
+  - mapped provided nested entries into renderer schema keys: `l1`, `l2`, and `l3`.
+  - retained schema compatibility fields (`overviewLabel`, `overviewHref`, `href`, `description`, `id`).
+- Validation:
+  - YAML parse check: `ruby -ryaml -e 'YAML.load_file(...)'` passed.
+  - structural sanity: `menu.panels` count is `6`; `header.nav` count is `6`.
+  - deep-content spot checks passed for representative entries, including:
+    - `Global Digest FAQ`
+    - `Career Management Program Series`
+    - `Regulations.gov (Federal Rule-making Portal)`
+    - `Policy on FDIC Foreign Technical Assistance Program`
+    - `CWT Sato Travel’s Get There`
+    - `FDIC Employee Viewpoint Survey FAQ`
+
 ## Current Task (FDICnet L1 Overview Row Placement)
 - [x] Move first L1 item to bottom of first-column list.
 - [x] Render bottom overview row without chevron.
@@ -2387,3 +2818,60 @@
 - Updated `AGENTS.md` Key Docs to include:
   - `docs/delivery-workflow.md`
 - This establishes a standing default workflow so future requests do not need to restate these process expectations.
+
+## Current Task (FDICnet Label/Chevron Spacing)
+- [x] Increase minimum spacing between row labels and chevrons in mega-menu columns.
+
+## Review / Results (FDICnet Label/Chevron Spacing)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `.l1-caret` now has `margin-left: 12px`.
+  - `.l2-caret` now has `margin-left: 12px` (replacing `auto`).
+- Result: wrapped or long labels keep a clearer visual gap before the chevron.
+
+## Current Task (FDICnet Desktop Column Heading Semantics)
+- [x] Replace generic desktop column headings with dynamic content-based labels.
+
+## Review / Results (FDICnet Desktop Column Heading Semantics)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - desktop `#l1Heading`, `#l2Heading`, `#l3Heading` are now set dynamically in `updateView(...)`.
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - added content-aware heading labels in the view model:
+    - `"{Panel} sections"`
+    - `"{Selected L1} links"`
+    - `"{Active L2} resources"`
+- Result: screen reader column context is meaningful and reflects current content.
+
+## Current Task (FDICnet Active L2 Visual State)
+- [x] Add explicit visual styling for the active desktop L2 item (`data-active="true"`).
+
+## Review / Results (FDICnet Active L2 Visual State)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - `.l2-item[data-active="true"]` now has a subtle active background tint and accent left inset border.
+  - active L2 label text is underlined to match navigation affordance patterns.
+- Result: users can identify the current non-hover baseline L2 item at a glance, and see where L3 will revert after hover preview clears.
+
+## Current Task (FDICnet Top Nav ArrowDown Entry)
+- [x] Support `ArrowDown` on desktop top-nav buttons to open/focus into mega-menu.
+
+## Review / Results (FDICnet Top Nav ArrowDown Entry)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - `ArrowDown` on a top-nav menu button now triggers activation with `focusMenuOnActivate=true`.
+- Result: keyboard users can enter the mega-menu directly from top-nav with ArrowDown (without requiring Enter/Space first).
+
+## Current Task (FDICnet Focus Style Consistency Verification/Update)
+- [x] Verify desktop L2 focus visibility behavior in browser automation.
+- [x] Remove active-state/focus-style conflict for desktop L2 items.
+- [x] Normalize focus ring treatment across desktop mega-menu items and mobile drawer controls.
+
+## Review / Results (FDICnet Focus Style Consistency Verification/Update)
+- Root cause identified: `.l2-item[data-active="true"]` used `box-shadow`, which overrode `.l2-item:focus-visible` ring rendering.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - moved active indicator to a pseudo-element rail (`::before`) so it no longer overrides focus ring.
+  - introduced shared focus tokens (`--menu-focus-inset`, `--menu-focus-shadow`) and applied them consistently to desktop (`.l2-item`, `.l3-item`) and mobile drawer focus states.
+- Updated `sites/fdicnet-main-menu/events.js`:
+  - removed recursive refocus on focus-driven preview updates (`restoreFocus: false` on `fromFocus` paths).
+- Updated `sites/fdicnet-main-menu/script.js`:
+  - expanded transient focus-exit retries before closing mega-menu (3 frames) to reduce accidental close during keyboard rerenders.
+- Browser validation:
+  - mobile drawer focused controls show the expected shared focus ring.
+  - desktop issue fix verified by CSS rule precedence and computed-style path; keyboard handoff behavior remains under active tuning in automation.

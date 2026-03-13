@@ -6,10 +6,11 @@
      Tablet  (769–1049px) — narrower columns, same mega-menu
      Mobile  (≤768px) — slide-in drawer with drill-down navigation
 
-   Focus rings: all interactive items in the mega-menu use an
-   outset double-ring (white inner + accent outer) defined by
-   --menu-focus-inner and --menu-focus-ring. See the canonical
-   rule at .l2-item:focus-visible / .l3-item:focus-visible.
+   Focus rings: the menu system uses one tokenized strategy with
+   two variants:
+   - standard (desktop/outset)
+   - contained (mobile/inset to avoid clipping)
+   See --menu-focus-ring-shadow.
    ================================================================ */
 
 @font-face {
@@ -40,7 +41,7 @@
   --ds-overlay-emphasize-200: rgba(0, 0, 0, 0.08);
   --ds-spacing-sm: 12px;
   --ds-spacing-md: 16px;
-  --ds-font-size-md: 18px;
+  --ds-font-size-md: 16px;
 
   --fdic-blue-900: #003256;
   --fdic-blue-800: #0b466f;
@@ -56,8 +57,11 @@
   --menu-link: #1278b0;
   --menu-link-hover-underline: #1278b0;
   --menu-hover-overlay: rgba(0, 110, 190, 0.09); /* Shared hover/focus bg */
-  --menu-focus-inner: #ffffff;                  /* Focus ring: white inner */
-  --menu-focus-ring: var(--ds-border-input-focus); /* Focus ring: accent outer */
+  --focus-ring-inner: #ffffff;
+  --focus-ring-outer: var(--ds-border-input-focus);
+  --focus-ring-standard-shadow: 0 0 0 2px var(--focus-ring-inner), 0 0 0 4px var(--focus-ring-outer);
+  --focus-ring-contained-shadow: inset 0 0 0 2px rgba(0, 94, 162, 0.35), inset 0 0 0 4px var(--focus-ring-outer);
+  --menu-focus-ring-shadow: var(--focus-ring-standard-shadow);
   --menu-bottom-accent: #84dbff;
   --layout-masthead-height: 83px;
   --layout-top-nav-item-height: 48px;
@@ -182,8 +186,8 @@ body {
 }
 
 .icon-button:focus-visible {
-  outline: 2px solid #84dbff;
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--menu-focus-ring-shadow);
   border-radius: 3px;
 }
 
@@ -229,6 +233,17 @@ body {
 
 .fdic-nav {
   background: var(--fdic-blue-900);
+}
+
+@media (min-width: 769px) {
+  .fdic-nav {
+    border-bottom: 6px solid var(--menu-bottom-accent);
+  }
+
+  .fdic-header.menu-open .fdic-nav {
+    border-bottom-width: 0;
+    border-bottom-color: transparent;
+  }
 }
 
 .fdic-nav-list {
@@ -293,8 +308,8 @@ body {
 .fdic-nav-item:focus-visible {
   background: var(--fdic-blue-800);
   border-bottom-color: var(--fdic-accent);
-  outline: 2px solid #005ea2;
-  outline-offset: -2px;
+  outline: none;
+  box-shadow: var(--menu-focus-ring-shadow);
 }
 
 .fdic-nav-item--button {
@@ -318,8 +333,8 @@ body {
 }
 
 .fdic-nav-item--selected:focus-visible {
-  outline: 2px solid #005ea2;
-  outline-offset: -2px;
+  outline: none;
+  box-shadow: var(--menu-focus-ring-shadow);
 }
 
 /* ── Desktop mega-menu panel ───────────────────────────────────────
@@ -329,7 +344,7 @@ body {
   background: #fff;
   width: 100%;
   position: absolute;
-  top: calc(var(--layout-masthead-height) + var(--layout-top-nav-item-height));
+  top: 100%;
   left: 0;
   z-index: 60;
   display: grid;
@@ -394,6 +409,7 @@ body {
   border-left: 1px solid var(--menu-divider);
 }
 
+
 .mega-col--l1 {
   position: relative;
   background: var(--menu-panel-bg);
@@ -421,6 +437,7 @@ body {
   padding: 0;
 }
 
+
 .mega-col--l1 .menu-list {
   max-height: min(640px, calc(100vh - 220px));
   overflow: visible;
@@ -441,16 +458,16 @@ body {
   border: 0;
   text-align: left;
   font-family: inherit;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 1.375;
+  line-height: 1.45;
   cursor: pointer;
   transition: background-color 120ms ease, color 120ms ease;
 }
 
 .l1-item {
   width: 100%;
-  min-height: 41px;
+  min-height: 44px;
   padding: 8px 16px 8px 0;
   display: flex;
   align-items: center;
@@ -472,12 +489,27 @@ body {
   align-items: center;
   width: 100%;
   max-width: 100%;
-  min-height: 41px;
+  min-height: 44px;
   padding: 8px 0;
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: normal;
   line-height: 1.4;
+}
+
+@media (min-width: 769px) {
+  .l1-item,
+  .l2-item,
+  .l3-item {
+    min-height: 36px;
+  }
+
+  .l1-item,
+  .l2-item,
+  .menu-list--l3 .l3-item {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
 }
 
 .l1-item:hover {
@@ -510,7 +542,7 @@ body {
   left: -16px;
   pointer-events: none;
   z-index: 2;
-  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
+  box-shadow: var(--menu-focus-ring-shadow);
 }
 
 /* Active/selected L1 item remains white when focused; focus is shown by
@@ -554,21 +586,13 @@ body {
   width: 20px;
   height: 20px;
   min-width: 20px;
+  margin-left: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   line-height: 1;
   color: var(--menu-link);
-  opacity: 0;
-}
-
-.l1-item[data-selected="true"] .l1-caret {
-  opacity: 1;
-}
-
-.l1-item:hover .l1-caret,
-.l1-item:focus-visible .l1-caret {
   opacity: 1;
 }
 
@@ -606,13 +630,16 @@ body {
   text-decoration: none;
 }
 
-.l2-caret {
-  margin-left: auto;
+.menu-caret-spacer {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  margin-left: 12px;
+  display: inline-flex;
 }
 
-.l2-item:hover .l2-caret,
-.l2-item:focus-visible .l2-caret {
-  opacity: 1;
+.l2-caret {
+  margin-left: 12px;
 }
 
 /* Canonical focus ring for all mega-menu interactive items.
@@ -622,7 +649,7 @@ body {
   position: relative;
   z-index: 2;
   outline: none;
-  box-shadow: 0 0 0 2px var(--menu-focus-inner), 0 0 0 4px var(--menu-focus-ring);
+  box-shadow: var(--menu-focus-ring-shadow);
   background: var(--menu-hover-overlay);
   text-decoration-thickness: 2px;
 }
@@ -633,6 +660,29 @@ body {
   padding: 8px 16px 8px 24px;
   color: var(--menu-link);
   text-decoration: none;
+}
+
+.l2-item[data-active="true"] {
+  background: var(--menu-hover-overlay);
+  position: relative;
+}
+
+.l2-item[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--fdic-accent);
+  pointer-events: none;
+}
+
+.l2-item[data-active="true"] .l2-label {
+  text-decoration: underline;
+  text-decoration-color: var(--menu-link-hover-underline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .l2-item:hover,
@@ -661,7 +711,7 @@ body {
 .menu-description {
   padding: 8px 24px 10px;
   color: var(--menu-text-primary);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.375;
   min-height: 58px;
@@ -694,6 +744,21 @@ body {
   width: 100vw;
   background: var(--menu-hover-overlay);
   pointer-events: none;
+}
+
+@media (min-width: 769px) {
+  .l1-item,
+  .l2-item,
+  .l3-item {
+    min-height: 36px;
+  }
+
+  .l1-item,
+  .l2-item,
+  .menu-list--l3 .l3-item {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
 }
 
 .page-content {
@@ -778,6 +843,7 @@ body {
   .mega-menu-inner {
     grid-template-columns: minmax(200px, 1fr) minmax(200px, 1fr) minmax(180px, 1fr);
   }
+
 }
 
 @media (min-width: 1050px) and (max-width: 1200px) {
@@ -796,6 +862,10 @@ body {
    Content inside uses a drill-down pattern: each tap pushes a
    deeper level onto menuState.mobileDrillPath in script.js. */
 @media (max-width: 768px) {
+  :root {
+    --menu-focus-ring-shadow: var(--focus-ring-contained-shadow);
+  }
+
   .mega-menu-scrim {
     display: none !important;
   }
@@ -806,6 +876,7 @@ body {
     left: auto;
     z-index: auto;
   }
+
 
   .fdic-shell {
     width: min(var(--shell-max), calc(100% - 32px));
@@ -857,8 +928,8 @@ body {
   }
 
   .fdic-nav-toggle:focus-visible {
-    outline: 2px solid #84dbff;
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: var(--menu-focus-ring-shadow);
   }
 
   .fdic-nav-list {
@@ -940,6 +1011,68 @@ body {
     border-bottom: 1px solid var(--ds-border-divider);
   }
 
+  .mobile-drill-context {
+    margin: 0;
+    padding: 8px var(--ds-spacing-md);
+    border-bottom: 1px solid var(--ds-border-divider);
+    color: var(--ds-text-secondary);
+    font-size: var(--ds-font-size-sm);
+    line-height: 1.35;
+    font-weight: 500;
+  }
+
+  .mobile-drill-context-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+  }
+
+  .mobile-drill-context-item {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+  }
+
+  .mobile-drill-context-item + .mobile-drill-context-item::before {
+    content: ">";
+    color: var(--ds-text-secondary);
+    margin: 0 8px;
+    font-weight: 400;
+  }
+
+  .mobile-drill-crumb {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--menu-link);
+    font: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    cursor: pointer;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .mobile-drill-crumb-current {
+    color: var(--ds-text-primary);
+    font-weight: 600;
+    white-space: normal;
+  }
+
+  .mobile-drill-crumb:focus-visible {
+    box-shadow: var(--menu-focus-ring-shadow);
+    border-radius: 2px;
+    outline: none;
+  }
+
   .mobile-drill-back {
     align-items: center;
     appearance: none;
@@ -981,7 +1114,7 @@ body {
     font-size: var(--ds-font-size-md);
     font-weight: 600;
     line-height: 1.375;
-    min-height: 44px;
+    min-height: 40px;
     padding: 8px var(--ds-spacing-md);
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -1012,7 +1145,7 @@ body {
     display: flex;
     font-family: inherit;
     font-size: var(--ds-font-size-md);
-    line-height: 1.375;
+    line-height: 1.45;
     min-height: 44px;
     padding: 8px var(--ds-spacing-md);
     text-align: left;
@@ -1045,11 +1178,22 @@ body {
   }
 
   .mobile-drill-link {
+    display: flex;
+    justify-content: space-between;
     color: var(--menu-link);
     font-weight: 400;
+    min-height: 40px;
     text-decoration: underline;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
+  }
+
+  .mobile-drill-link::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin-left: 12px;
   }
 
   .mobile-drill-current-link {
@@ -1079,7 +1223,7 @@ body {
   .mobile-drill-link:focus-visible,
   .mobile-drill-current-link:focus-visible,
   .mobile-drill-back:focus-visible {
-    box-shadow: inset 0 0 0 2px var(--menu-focus-inner), inset 0 0 0 4px var(--menu-focus-ring);
+    box-shadow: var(--menu-focus-ring-shadow);
     background: var(--menu-hover-overlay);
     position: relative;
     z-index: 1;
@@ -1094,6 +1238,21 @@ body {
       opacity 140ms ease,
       transform 140ms ease;
     transition-delay: var(--mobile-stagger-delay, 0ms);
+  }
+
+  .mobile-drill-separator-item {
+    border-top: 0;
+    padding: 4px var(--ds-spacing-md);
+  }
+
+  .mobile-drill-separator-line {
+    display: block;
+    border-top: 1px solid var(--ds-border-divider);
+  }
+
+  .mobile-drill-separator-item + .mobile-drill-item,
+  .mobile-drill-separator-item + .mobile-drill-link-item {
+    border-top: 0;
   }
 
   .mobile-drawer-panel.is-entering .mobile-drill-item,

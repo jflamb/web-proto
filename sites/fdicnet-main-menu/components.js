@@ -48,6 +48,7 @@ class FDICTopNav extends HTMLElement {
         button.className = "fdic-nav-item fdic-nav-item--button";
         button.dataset.navIndex = String(index);
         button.dataset.panelKey = item.panelKey || item.id || "";
+        button.setAttribute("aria-haspopup", "true");
         button.setAttribute("aria-controls", "megaMenu");
         button.setAttribute("aria-expanded", "false");
         button.textContent = item.label || "Menu";
@@ -99,7 +100,9 @@ class FDICTopNav extends HTMLElement {
     const button = target.closest(".fdic-nav-item--button");
     if (button instanceof HTMLButtonElement) {
       const focusMenu = button.dataset.focusMenuOnActivate === "true";
+      const forceOpen = button.dataset.forceOpenOnActivate === "true";
       delete button.dataset.focusMenuOnActivate;
+      delete button.dataset.forceOpenOnActivate;
       this.dispatchEvent(
         new CustomEvent("fdic-top-nav-activate", {
           bubbles: true,
@@ -107,6 +110,7 @@ class FDICTopNav extends HTMLElement {
             panelKey: button.dataset.panelKey || "",
             navIndex: Number(button.dataset.navIndex || 0),
             focusMenu,
+            forceOpen,
           },
         })
       );
@@ -136,6 +140,14 @@ class FDICTopNav extends HTMLElement {
           detail: { key: event.key, currentIndex, itemCount: items.length },
         })
       );
+      return;
+    }
+
+    if (event.key === "ArrowDown" && target.classList.contains("fdic-nav-item--button")) {
+      event.preventDefault();
+      target.dataset.focusMenuOnActivate = "true";
+      target.dataset.forceOpenOnActivate = "true";
+      target.click();
       return;
     }
 
@@ -178,17 +190,17 @@ class FDICMegaMenu extends HTMLElement {
         <section id="megaMenu" class="mega-menu" aria-label="Main menu">
           <div class="fdic-shell mega-menu-inner">
             <section class="mega-col mega-col--l1" aria-labelledby="l1Heading">
-              <h2 id="l1Heading" class="sr-only">Level 1</h2>
+              <h2 id="l1Heading" class="sr-only">Menu sections</h2>
               <ul id="l1List" class="menu-list" aria-labelledby="l1Heading"></ul>
             </section>
 
             <section class="mega-col mega-col--l2" aria-labelledby="l2Heading">
-              <h2 id="l2Heading" class="sr-only">Level 2</h2>
+              <h2 id="l2Heading" class="sr-only">Section links</h2>
               <ul id="l2List" class="menu-list" aria-labelledby="l2Heading"></ul>
             </section>
 
             <section class="mega-col mega-col--l3" aria-labelledby="l3Heading">
-              <h2 id="l3Heading" class="sr-only">Level 3</h2>
+              <h2 id="l3Heading" class="sr-only">Resources</h2>
               <div id="l3Description" class="menu-description"></div>
               <ul id="l3List" class="menu-list menu-list--l3" role="list"></ul>
             </section>
@@ -235,6 +247,18 @@ class FDICMegaMenu extends HTMLElement {
     return this.querySelector("#l3Description");
   }
 
+  get l1Heading() {
+    return this.querySelector("#l1Heading");
+  }
+
+  get l2Heading() {
+    return this.querySelector("#l2Heading");
+  }
+
+  get l3Heading() {
+    return this.querySelector("#l3Heading");
+  }
+
   updateView({
     panelLabel = "Site menu",
     isMobile = false,
@@ -248,6 +272,9 @@ class FDICMegaMenu extends HTMLElement {
     showingPreview = false,
     l3Items = [],
     l3Description = "",
+    l1HeadingLabel = "Menu sections",
+    l2HeadingLabel = "Section links",
+    l3HeadingLabel = "Resources",
   } = {}) {
     this.isMobileView = isMobile;
     const megaMenu = this.megaMenuElement;
@@ -256,6 +283,9 @@ class FDICMegaMenu extends HTMLElement {
     }
 
     if (!this.l1List || !this.l2List || !this.l3List || !this.l3Description) return;
+    if (this.l1Heading) this.l1Heading.textContent = l1HeadingLabel || "Menu sections";
+    if (this.l2Heading) this.l2Heading.textContent = l2HeadingLabel || "Section links";
+    if (this.l3Heading) this.l3Heading.textContent = l3HeadingLabel || "Resources";
 
     if (isMobile) {
       this.l1List.innerHTML = "";
@@ -279,7 +309,7 @@ class FDICMegaMenu extends HTMLElement {
       li.setAttribute("role", "none");
       const link = document.createElement("a");
       const label = document.createElement("span");
-      const caret = document.createElement("span");
+      const hasNextLevel = Array.isArray(item.l2) && item.l2.length > 0;
 
       link.className = "l1-item";
       link.href = item.overviewHref || "#";
@@ -291,10 +321,18 @@ class FDICMegaMenu extends HTMLElement {
       label.className = "l1-label";
       label.textContent = item.label || "Section";
 
-      caret.className = "l1-caret ph ph-caret-right";
-      caret.setAttribute("aria-hidden", "true");
-
-      link.append(label, caret);
+      link.append(label);
+      if (hasNextLevel) {
+        const caret = document.createElement("span");
+        caret.className = "l1-caret ph ph-caret-right";
+        caret.setAttribute("aria-hidden", "true");
+        link.append(caret);
+      } else {
+        const spacer = document.createElement("span");
+        spacer.className = "menu-caret-spacer";
+        spacer.setAttribute("aria-hidden", "true");
+        link.append(spacer);
+      }
       li.appendChild(link);
       this.l1List.appendChild(li);
     });
@@ -335,8 +373,8 @@ class FDICMegaMenu extends HTMLElement {
       li.setAttribute("role", "none");
       const link = document.createElement("a");
       const label = document.createElement("span");
-      const caret = document.createElement("span");
       const isActive = index === activeL2Index;
+      const hasNextLevel = Array.isArray(item.l3) && item.l3.length > 0;
 
       link.className = "l2-item";
       link.href = item.href || "#";
@@ -347,9 +385,18 @@ class FDICMegaMenu extends HTMLElement {
 
       label.className = "l2-label";
       label.textContent = item.label || "Link";
-      caret.className = "l1-caret l2-caret ph ph-caret-right";
-      caret.setAttribute("aria-hidden", "true");
-      link.append(label, caret);
+      link.append(label);
+      if (hasNextLevel) {
+        const caret = document.createElement("span");
+        caret.className = "l1-caret l2-caret ph ph-caret-right";
+        caret.setAttribute("aria-hidden", "true");
+        link.append(caret);
+      } else {
+        const spacer = document.createElement("span");
+        spacer.className = "menu-caret-spacer";
+        spacer.setAttribute("aria-hidden", "true");
+        link.append(spacer);
+      }
 
       li.appendChild(link);
       this.l2List.appendChild(li);
@@ -513,6 +560,12 @@ class FDICMegaMenu extends HTMLElement {
       const items = Array.from(container?.querySelectorAll(selector) || []);
       const currentIndex = items.indexOf(activeElement);
       if (currentIndex === -1 || items.length === 0) return;
+
+      if (key === "ArrowUp" && currentIndex === 0) {
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent("fdic-mega-focus-active-top-nav", { bubbles: true }));
+        return;
+      }
 
       event.preventDefault();
       let nextIndex = currentIndex;
