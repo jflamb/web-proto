@@ -906,6 +906,7 @@ function setupEvents() {
         navToggle,
         mobileSearchToggle,
         mobileSearchRow,
+        mobileNavBackdrop,
         mobileNavMediaQuery,
         phoneSearchMediaQuery,
         topNav,

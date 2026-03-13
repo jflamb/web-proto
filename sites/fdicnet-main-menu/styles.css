@@ -984,6 +984,10 @@ body {
     pointer-events: none;
   }
 
+  .mobile-nav-backdrop[hidden] {
+    display: none !important;
+  }
+
   .mobile-nav-backdrop.is-visible {
     opacity: 1;
     pointer-events: auto;

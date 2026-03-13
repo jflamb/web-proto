@@ -402,6 +402,36 @@ class FDICMegaMenu extends HTMLElement {
       this.l2List.appendChild(li);
     });
 
+    if (l2Overview) {
+      if (l2Items.length > 0) {
+        const dividerLi = document.createElement("li");
+        dividerLi.className = "l2-separator-item";
+        dividerLi.setAttribute("aria-hidden", "true");
+        dividerLi.setAttribute("role", "presentation");
+        const dividerLine = document.createElement("span");
+        dividerLine.className = "l2-separator-line";
+        dividerLi.appendChild(dividerLine);
+        this.l2List.appendChild(dividerLi);
+      }
+
+      const overviewLi = document.createElement("li");
+      overviewLi.setAttribute("role", "none");
+      const overviewLink = document.createElement("a");
+      const overviewLabel = document.createElement("span");
+
+      overviewLink.className = "l2-item l2-item--overview";
+      overviewLink.href = l2Overview.href || "#";
+      overviewLink.dataset.column = "l2";
+      overviewLink.dataset.active = previewingOverview ? "true" : "false";
+      overviewLink.tabIndex = previewingOverview || l2Items.length === 0 ? 0 : -1;
+
+      overviewLabel.className = "l2-label";
+      overviewLabel.textContent = l2Overview.label || "Overview";
+      overviewLink.append(overviewLabel);
+      overviewLi.appendChild(overviewLink);
+      this.l2List.appendChild(overviewLi);
+    }
+
     this.l3Description.textContent = l3Description || "";
     this.l3Description.hidden = !l3Description;
 
