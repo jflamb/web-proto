@@ -1,5 +1,20 @@
 # TODO
 
+## Current Task (FDICnet Desktop Close Button Overlap Fix)
+- [x] Prevent desktop mega-menu close button from overlapping L3 link hit targets.
+- [x] Preserve close button visibility and accessibility.
+- [x] Validate no overlap in browser with representative panel state.
+
+## Review / Results (FDICnet Desktop Close Button Overlap Fix)
+- Updated `sites/fdicnet-main-menu/components.js`:
+  - toggles `l3-no-description` on `.mega-col--l3` when the L3 description is hidden.
+  - removes `l3-no-description` in mobile view cleanup path.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added `z-index` on `.mega-menu-close` and reserved top list space when description is hidden:
+    - `.mega-col--l3.l3-no-description .menu-list--l3 { padding-top: 40px; }`
+- Validation:
+  - desktop browser check on `Benefits > Retirement > Saving for Retirement` confirmed no intersection between close button and first L3 link hitbox (`overlapArea: 0`).
+
 ## Current Task (FDICnet Desktop Mega-Menu Close Affordance)
 - [x] Add an explicit close button in the desktop mega-menu panel.
 - [x] Wire close-button activation to existing menu close behavior with sensible focus return.

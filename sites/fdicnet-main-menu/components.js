@@ -297,6 +297,7 @@ class FDICMegaMenu extends HTMLElement {
       this.l3List.hidden = true;
       this.l3Description.textContent = "";
       this.l3Description.hidden = true;
+      this.l3Column?.classList.remove("l3-no-description");
       return;
     }
 
@@ -407,6 +408,7 @@ class FDICMegaMenu extends HTMLElement {
 
     this.l3Description.textContent = l3Description || "";
     this.l3Description.hidden = !l3Description;
+    this.l3Column?.classList.toggle("l3-no-description", !l3Description);
 
     this.l3List.innerHTML = "";
     this.l3List.hidden = !showingPreview || previewingOverview;
