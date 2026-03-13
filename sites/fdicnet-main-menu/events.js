@@ -175,6 +175,16 @@
     }
 
     if (megaMenuHost) {
+      megaMenuHost.addEventListener("click", (event) => {
+        if (isMobileViewport()) return;
+        const target = event.target instanceof HTMLElement ? event.target : null;
+        if (!target) return;
+        const closeButton = target.closest(".mega-menu-close");
+        if (!(closeButton instanceof HTMLButtonElement)) return;
+        closeMenu();
+        focusActiveTopNavButton();
+      });
+
       megaMenuHost.addEventListener("fdic-mega-l1-preview", (event) => {
         if (isMobileViewport()) return;
         const { index, fromFocus } = event.detail || {};

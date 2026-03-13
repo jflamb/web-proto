@@ -407,6 +407,38 @@ body {
 
 .mega-col--l3 {
   border-left: 1px solid var(--menu-divider);
+  position: relative;
+}
+
+.mega-menu-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: var(--menu-link);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.mega-menu-close .ph {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.mega-menu-close:hover {
+  background: var(--menu-hover-overlay);
+}
+
+.mega-menu-close:focus-visible {
+  outline: none;
+  box-shadow: var(--menu-focus-ring-shadow);
+  background: var(--menu-hover-overlay);
 }
 
 .mega-col--l1 {
@@ -692,7 +724,7 @@ body {
 }
 
 .menu-description {
-  padding: 8px 24px 10px;
+  padding: 8px 64px 10px 24px;
   color: var(--menu-text-primary);
   font-size: 18px;
   font-weight: 400;
@@ -843,6 +875,10 @@ body {
     top: auto;
     left: auto;
     z-index: auto;
+  }
+
+  .mega-menu-close {
+    display: none;
   }
 
   .fdic-shell {
