@@ -117,6 +117,37 @@ function getPanelConfigByKey(panelKey) {
   return selectPanelConfigByKey(menuState.siteContent, panelKey);
 }
 
+function getValidMobileDrillPath(path) {
+  if (!Array.isArray(path)) return null;
+  if (path.length === 0) return [];
+
+  const [panelKey, l1Index, l2Index] = path;
+  if (typeof panelKey !== "string" || panelKey.length === 0) return null;
+
+  const panelConfig = getPanelConfigByKey(panelKey);
+  if (!panelConfig) return null;
+
+  if (typeof l1Index !== "number") {
+    return [panelKey];
+  }
+
+  const l1Items = panelConfig.l1 || [];
+  if (l1Index < 0 || l1Index >= l1Items.length) {
+    return [panelKey];
+  }
+
+  if (typeof l2Index !== "number") {
+    return [panelKey, l1Index];
+  }
+
+  const l2Items = l1Items[l1Index]?.l2 || [];
+  if (l2Index < 0 || l2Index >= l2Items.length) {
+    return [panelKey, l1Index];
+  }
+
+  return [panelKey, l1Index, l2Index];
+}
+
 function getMobilePanelKeys() {
   return selectMobilePanelKeys(menuState.siteContent);
 }
@@ -388,10 +419,22 @@ function syncMobileNavState() {
 function setMobileNavOpen(isOpen) {
   const nextOpen = Boolean(isOpen);
   if (nextOpen && !menuState.mobileNavOpen) {
-    if (!Array.isArray(menuState.mobileDrillPath) || menuState.mobileDrillPath.length === 0) {
+    const currentPath = getValidMobileDrillPath(menuState.mobileDrillPath);
+    const savedPath = getValidMobileDrillPath(menuState.lastMobileDrillPath);
+
+    if (Array.isArray(currentPath) && currentPath.length > 0) {
+      menuState.mobileDrillPath = currentPath;
+    } else if (Array.isArray(savedPath)) {
+      menuState.mobileDrillPath = savedPath;
+    } else {
       menuState.mobileDrillPath = menuState.activePanelKey ? [menuState.activePanelKey] : [];
     }
   }
+
+  if (!nextOpen) {
+    menuState.lastMobileDrillPath = Array.isArray(menuState.mobileDrillPath) ? [...menuState.mobileDrillPath] : [];
+  }
+
   menuState.mobileNavOpen = nextOpen;
   syncMobileNavState();
 }
@@ -462,6 +505,7 @@ function resetPanelSelection() {
   menuState.previewingOverview = false;
   menuState.l1FocusIndex = defaultL1Index;
   menuState.mobileDrillPath = [];
+  menuState.lastMobileDrillPath = null;
 }
 
 function renderTopNav() {
