@@ -188,11 +188,6 @@ class FDICMegaMenu extends HTMLElement {
     if (!this.querySelector("#megaMenu")) {
       this.innerHTML = `
         <section id="megaMenu" class="mega-menu" aria-label="Main menu">
-          <div class="fdic-shell mega-menu-toolbar">
-            <button type="button" class="mega-menu-close" aria-label="Close menu">
-              <span class="ph ph-x" aria-hidden="true"></span>
-            </button>
-          </div>
           <div class="fdic-shell mega-menu-inner">
             <section class="mega-col mega-col--l1" aria-labelledby="l1Heading">
               <h2 id="l1Heading" class="sr-only">Menu sections</h2>
