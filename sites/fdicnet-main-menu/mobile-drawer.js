@@ -1,4 +1,9 @@
 (function initFDICMobileDrawerModule() {
+  const runtime = window.FDICMenuRuntime;
+  if (!runtime) {
+    throw new Error("FDICMenuRuntime missing. Ensure runtime.js is loaded before mobile-drawer.js.");
+  }
+
   function createFDICMobileDrawerController(deps) {
     const {
       menuState,
@@ -27,6 +32,30 @@
       } catch {
         return null;
       }
+    }
+
+    function getCurrentMobileDrillPathKey() {
+      return encodeMobilePath(menuState.mobileDrillPath);
+    }
+
+    function saveCurrentMobileDrillScrollPosition() {
+      const navList = getNavList();
+      if (!navList) return;
+      const pathKey = menuState.lastRenderedMobileDrillPathKey || getCurrentMobileDrillPathKey();
+      menuState.mobileDrillScrollPositions[pathKey] = navList.scrollTop;
+    }
+
+    function restoreCurrentMobileDrillScrollPosition() {
+      const navList = getNavList();
+      if (!navList) return;
+      const pathKey = getCurrentMobileDrillPathKey();
+      const nextScrollTop = Number(menuState.mobileDrillScrollPositions[pathKey] || 0);
+      window.requestAnimationFrame(() => {
+        const activeNavList = getNavList();
+        if (activeNavList) {
+          activeNavList.scrollTop = nextScrollTop;
+        }
+      });
     }
 
     function ensureMobileDrawerPanel() {
@@ -420,7 +449,9 @@
       const panelItem = ensureMobileDrawerPanel();
       const panelContainer = panelItem.querySelector(".mobile-drawer-panel");
       if (!panelContainer) return;
+      saveCurrentMobileDrillScrollPosition();
       panelContainer.innerHTML = "";
+      menuState.lastRenderedMobileDrillPathKey = getCurrentMobileDrillPathKey();
 
       const panelKeys = getMobilePanelKeys();
       if (panelKeys.length === 0) return;
@@ -432,6 +463,7 @@
         announceMobileDrillContext(null, null, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
+        restoreCurrentMobileDrillScrollPosition();
         return;
       }
 
@@ -443,6 +475,7 @@
         announceMobileDrillContext(null, null, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
+        restoreCurrentMobileDrillScrollPosition();
         return;
       }
 
@@ -453,6 +486,7 @@
         announceMobileDrillContext(panelKey, panelConfig, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
+        restoreCurrentMobileDrillScrollPosition();
         return;
       }
 
@@ -465,6 +499,7 @@
         announceMobileDrillContext(panelKey, panelConfig, l1Index, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
+        restoreCurrentMobileDrillScrollPosition();
         return;
       }
 
@@ -476,6 +511,7 @@
       announceMobileDrillContext(panelKey, panelConfig, l1Index, l2Index, panelKeys);
       ensureMobileMenuFocus();
       animateMobileDrillReveal(panelContainer);
+      restoreCurrentMobileDrillScrollPosition();
     }
 
     function handleDelegatedMobileDrillClick(target) {
@@ -509,5 +545,7 @@
     };
   }
 
-  window.createFDICMobileDrawerController = createFDICMobileDrawerController;
+  runtime.registerModule("mobileDrawer", {
+    createFDICMobileDrawerController,
+  });
 })();

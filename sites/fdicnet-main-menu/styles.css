@@ -186,6 +186,7 @@ body {
   padding: 0;
   list-style: none;
   overflow: auto;
+  overscroll-behavior: contain;
   max-height: min(52vh, 520px);
 }
 
