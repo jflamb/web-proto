@@ -52,9 +52,9 @@
   --fdic-accent: #38b6ff;
   --shell-max: 1440px;
   /* Mega-menu tokens — used by L1, L2, and L3 */
-  --menu-panel-bg: #edf3f7;
+  --menu-panel-bg: #ffffff;
   --menu-panel-l2-bg: #f7fafc;
-  --menu-panel-l3-bg: #ffffff;
+  --menu-panel-l3-bg: #edf3f7;
   --menu-divider: var(--ds-border-divider);
   --menu-text-primary: var(--ds-text-primary);
   --menu-link: #1278b0;
@@ -461,7 +461,7 @@ body.mobile-search-open {
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 18px;
   color: #fff;
   text-decoration: none;
   font-size: 18px;
@@ -475,7 +475,7 @@ body.mobile-search-open {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -4px;
+  bottom: -6px;
   height: 4px;
   background: var(--fdic-accent);
   opacity: 0;
@@ -494,8 +494,8 @@ body.mobile-search-open {
   background: var(--fdic-blue-800);
 }
 
-.fdic-nav-item:hover::after,
-.fdic-nav-item--button[aria-expanded="true"]::after {
+.fdic-nav-item:not(.fdic-nav-item--selected):hover::after,
+.fdic-nav-item--button[aria-expanded="true"]:not(.fdic-nav-item--selected)::after {
   opacity: 1;
 }
 
@@ -524,11 +524,21 @@ body.mobile-search-open {
 .fdic-nav-item--selected:hover,
 .fdic-nav-item--selected:focus-visible,
 .fdic-nav-item--selected[aria-expanded="true"] {
-  background: #fff;
+  background: #ffffff;
   color: #003256;
   font-weight: 600;
-  box-shadow: inset 0 -1px 0 rgba(0, 50, 86, 0.14);
+  box-shadow: none;
   z-index: 61;
+}
+
+.fdic-nav-item--selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--fdic-accent);
 }
 
 .fdic-nav-item--selected::after,
