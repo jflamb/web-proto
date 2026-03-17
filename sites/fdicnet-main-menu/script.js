@@ -535,6 +535,25 @@ function closeMobileNav() {
   setMobileNavOpen(false);
 }
 
+function updateSpotlightPosition() {
+  const megaMenuInner = megaMenuHost?.querySelector(".mega-menu-inner");
+  if (!megaMenuInner) return;
+
+  const items = getTopNavItems();
+  const activeIndex = getActiveTopNavIndex(items);
+  const activeButton = activeIndex >= 0 ? items[activeIndex] : null;
+
+  if (!activeButton) {
+    megaMenuInner.style.removeProperty("--spotlight-x");
+    return;
+  }
+
+  const buttonRect = activeButton.getBoundingClientRect();
+  const innerRect = megaMenuInner.getBoundingClientRect();
+  const centerX = buttonRect.left + buttonRect.width / 2 - innerRect.left;
+  megaMenuInner.style.setProperty("--spotlight-x", `${centerX}px`);
+}
+
 function syncTopNavState() {
   topNav?.updateState({
     activePanelKey: menuState.activePanelKey,
@@ -640,6 +659,7 @@ function activateTopNavPanel(panelKey, navIndex, { focusMenu = false, forceOpen 
   syncTopNavState();
   applyTopNavRoving();
   renderMenuPanel();
+  updateSpotlightPosition();
   openMenu({ focusMenu });
   closeMobileNav();
 }
@@ -656,6 +676,7 @@ function previewTopNavPanel(panelKey, navIndex) {
   }
   syncTopNavState();
   applyTopNavRoving();
+  updateSpotlightPosition();
   if (!menuState.menuOpen) {
     openMenu({ focusMenu: false });
   }
@@ -707,6 +728,7 @@ function openMenu({ focusMenu = false } = {}) {
   window.requestAnimationFrame(() => {
     if (menuState.menuOpen) {
       header.classList.add("menu-open");
+      updateSpotlightPosition();
       if (focusMenu) {
         if (!focusSelectedL1()) {
           const fallbackTarget = megaMenu.querySelector(".l1-item, .l2-item, .l3-item");
