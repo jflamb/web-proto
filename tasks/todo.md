@@ -1,5 +1,36 @@
 # TODO
 
+## Current Task (FDICnet Column 2 Overview Gap Tightening)
+- [x] Tighten the spacing below the column-2 overview link in the grouped intro layout.
+- [x] Keep the grouped overview/introduction block readable without affecting other L2 row spacing.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDICnet Column 2 Overview Gap Tightening)
+- Updated [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - reduced the grouped intro block’s top padding from `8px` to `4px` so the overview link and follow-on intro copy read as a tighter pair.
+- Validation:
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser DOM verification at `http://127.0.0.1:5500/sites/fdicnet-main-menu/index.html` confirmed:
+    - the grouped `Column 2 intro` layout still renders the overview row before the intro copy.
+    - the inline intro block now computes to `padding-top: 4px`.
+
+## Current Task (FDICnet Column 2 Overview Before Intro Copy)
+- [x] Move the column-2 overview link above the intro description text in the desktop grouped-intro layout.
+- [x] Preserve the existing grouped-intro styling and fallback behavior when no overview link is present.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDICnet Column 2 Overview Before Intro Copy)
+- Updated [components.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/components.js):
+  - kept the persistent `#l2Description` element in place for fallback rendering, but in `Column 2 intro` mode now renders a dedicated inline intro-description block directly beneath the overview row inside the grouped L2 overview item.
+- Updated [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - added a specific spacing variant for the inline intro-description block so the overview-first grouped treatment remains compact and aligned.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser DOM verification at `http://127.0.0.1:5500/sites/fdicnet-main-menu/index.html` confirmed:
+    - in `Column 2 intro`, the first L2 list item now contains the overview link followed by the intro copy (`overviewThenDescription = true`).
+    - the standalone column-level `#l2Description` block stays hidden when the inline grouped-intro version is present (`directColumnDescriptionChild = false`).
+
 ## Current Task (FDICnet Inline Notes L2 Secondary Text)
 - [x] Extend `Inline notes` so column-2 rows render their descriptions as secondary text.
 - [x] Keep the existing desktop menu layout and caret alignment stable for both described and undescribed L2 rows.

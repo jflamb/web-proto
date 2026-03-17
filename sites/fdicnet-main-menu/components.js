@@ -441,8 +441,8 @@ class FDICMegaMenu extends HTMLElement {
 
     this.l2List.innerHTML = "";
     this.l2Description.textContent = l2Description || "";
-    this.l2Description.hidden = !l2Description;
     const hasColumnIntro = descriptionMode === "column" && Boolean(l2Description);
+    this.l2Description.hidden = !l2Description;
     if (this.l2Column) {
       if (hasColumnIntro) {
         this.l2Column.dataset.columnIntro = "true";
@@ -459,6 +459,7 @@ class FDICMegaMenu extends HTMLElement {
       const overviewLink = document.createElement("a");
       const overviewLabel = document.createElement("span");
       const overviewDescription = document.createElement("span");
+      const columnIntroDescription = document.createElement("div");
 
       overviewLink.className = "l2-item l2-item--overview";
       if (hasColumnIntro) {
@@ -479,6 +480,12 @@ class FDICMegaMenu extends HTMLElement {
         overviewLink.append(overviewDescription);
       }
       overviewLi.appendChild(overviewLink);
+      if (hasColumnIntro && l2Description) {
+        columnIntroDescription.className = "menu-description menu-description--l2 menu-description--l2-inline-intro";
+        columnIntroDescription.textContent = l2Description;
+        overviewLi.appendChild(columnIntroDescription);
+        this.l2Description.hidden = true;
+      }
       this.l2List.appendChild(overviewLi);
 
       if (l2Items.length > 0) {
