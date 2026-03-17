@@ -25,6 +25,8 @@ const phoneSearchMediaQuery = window.matchMedia(runtime.getPhoneSearchQuery());
 const reduceMotionMediaQuery = window.matchMedia(runtime.getReducedMotionQuery());
 const MOBILE_STAGGER_MAX_ITEMS = 6;
 const MOBILE_STAGGER_STEP_MS = 15;
+const MENU_DESCRIPTION_MODE_STORAGE_KEY = "fdicnetMenuDescriptionMode";
+const VALID_MENU_DESCRIPTION_MODES = new Set(["none", "column", "inline"]);
 
 let topNav = null;
 let megaMenuHost = null;
@@ -34,6 +36,7 @@ let navToggle = null;
 let megaMenu = null;
 let l1List = null;
 let l2List = null;
+let l2Description = null;
 let l3List = null;
 let l3Description = null;
 let l3Column = null;
@@ -46,6 +49,8 @@ let desktopSearchSubmit = null;
 let desktopSearchPanel = null;
 let desktopSearchResults = null;
 let desktopSearchStatus = null;
+let menuDescriptionModeGroup = null;
+let menuDescriptionModeInputs = [];
 let mobileSearchToggle = null;
 let mobileSearchRow = null;
 let mobileSearchInput = null;
@@ -72,6 +77,7 @@ function refreshDomRefs() {
   megaMenu = megaMenuHost?.megaMenuElement || document.getElementById("megaMenu");
   l1List = megaMenuHost?.l1List || document.getElementById("l1List");
   l2List = megaMenuHost?.l2List || document.getElementById("l2List");
+  l2Description = megaMenuHost?.l2Description || document.getElementById("l2Description");
   l3List = megaMenuHost?.l3List || document.getElementById("l3List");
   l3Description = megaMenuHost?.l3Description || document.getElementById("l3Description");
   l3Column = megaMenuHost?.l3Column || document.querySelector(".mega-col--l3");
@@ -84,6 +90,8 @@ function refreshDomRefs() {
   desktopSearchPanel = document.getElementById("desktopSearchPanel");
   desktopSearchResults = document.getElementById("desktopSearchResults");
   desktopSearchStatus = document.getElementById("desktopSearchStatus");
+  menuDescriptionModeGroup = document.getElementById("menuDescriptionModeGroup");
+  menuDescriptionModeInputs = Array.from(document.querySelectorAll('input[name="menuDescriptionMode"]'));
   mobileSearchToggle = document.getElementById("mobileSearchToggle");
   mobileSearchRow = document.getElementById("mobileSearchRow");
   mobileSearchInput = document.getElementById("mobileSearchInput");
@@ -112,6 +120,7 @@ function getDom() {
     megaMenu,
     l1List,
     l2List,
+    l2Description,
     l3List,
     l3Description,
     l3Column,
@@ -124,6 +133,8 @@ function getDom() {
     desktopSearchPanel,
     desktopSearchResults,
     desktopSearchStatus,
+    menuDescriptionModeGroup,
+    menuDescriptionModeInputs,
     mobileSearchToggle,
     mobileSearchRow,
     mobileSearchInput,
@@ -145,6 +156,65 @@ function getPanelConfig() {
 
 function getPanelConfigByKey(panelKey) {
   return selectPanelConfigByKey(menuState.siteContent, panelKey);
+}
+
+function normalizeMenuDescriptionMode(mode) {
+  return VALID_MENU_DESCRIPTION_MODES.has(mode) ? mode : "none";
+}
+
+function readStoredMenuDescriptionMode() {
+  try {
+    return normalizeMenuDescriptionMode(window.localStorage.getItem(MENU_DESCRIPTION_MODE_STORAGE_KEY));
+  } catch (error) {
+    return "none";
+  }
+}
+
+function persistMenuDescriptionMode(mode) {
+  try {
+    window.localStorage.setItem(MENU_DESCRIPTION_MODE_STORAGE_KEY, mode);
+  } catch (error) {
+    // Ignore storage failures in the static prototype.
+  }
+}
+
+function syncMenuDescriptionModeControls() {
+  if (!menuDescriptionModeInputs.length) return;
+  const activeMode = normalizeMenuDescriptionMode(menuState.descriptionMode);
+  menuDescriptionModeInputs.forEach((input) => {
+    input.checked = input.value === activeMode;
+  });
+}
+
+function setMenuDescriptionMode(mode, { persist = true } = {}) {
+  const normalizedMode = normalizeMenuDescriptionMode(mode);
+  if (menuState.descriptionMode === normalizedMode) {
+    syncMenuDescriptionModeControls();
+    return;
+  }
+
+  menuState.descriptionMode = normalizedMode;
+  syncMenuDescriptionModeControls();
+  if (persist) {
+    persistMenuDescriptionMode(normalizedMode);
+  }
+  renderMenuPanel();
+}
+
+function getL1FallbackDescription(item, { panelLabel = "this section", isOverview = false } = {}) {
+  const label = item?.label || "this section";
+  if (isOverview) {
+    return `Start with the full ${panelLabel} overview, then jump to the area you need.`;
+  }
+  return `Explore ${label} services, guidance, and related resources.`;
+}
+
+function getL1MenuDescription(item, { panelLabel = "this section", isOverview = false } = {}) {
+  const explicitDescription = item?.description || selectL2Overview(item)?.description || "";
+  if (explicitDescription) {
+    return explicitDescription;
+  }
+  return getL1FallbackDescription(item, { panelLabel, isOverview });
 }
 
 function getValidMobileDrillPath(path) {
@@ -235,6 +305,7 @@ function renderPageContent() {
     paragraph.textContent = line;
     pageIntro.appendChild(paragraph);
   });
+  syncMenuDescriptionModeControls();
 }
 
 function getSearchController() {
@@ -931,8 +1002,17 @@ function getMegaMenuViewModel() {
   const panelLabel = (menuState.siteContent?.header?.nav || []).find(
     (item) => item.kind === "menu" && (item.panelKey || item.id) === menuState.activePanelKey
   )?.label || panel?.overviewLabel || "Menu";
-  const selectedL1 = getSelectedL1();
-  const l2Overview = getL2Overview(selectedL1);
+  const rawL1Items = getPanelL1();
+  const l1Items = rawL1Items.map((item, index) => ({
+    ...item,
+    menuDescription: getL1MenuDescription(item, {
+      panelLabel,
+      isOverview: index === 0 && rawL1Items.length > 1,
+    }),
+  }));
+  const rawSelectedL1 = rawL1Items[menuState.selectedL1Index] || null;
+  const selectedL1 = l1Items[menuState.selectedL1Index] || null;
+  const l2Overview = getL2Overview(rawSelectedL1);
   const showingPreview = menuState.previewL2Index !== null;
   const selectedL2 = selectedL1?.l2?.[menuState.selectedL2Index] || null;
   const previewL2 = getVisibleL2();
@@ -942,20 +1022,30 @@ function getMegaMenuViewModel() {
   const l2HeadingLabel = `${selectedL1?.label || "Section"} links`;
   const l3HeadingLabel = `${activeL2ForHeading?.label || "Section"} resources`;
   const hasActiveL3Items = activeL3Items.length > 0;
-  const defaultL1Description = selectedL1?.description
+  const currentDefaultL1Description = rawSelectedL1?.description
     || l2Overview?.description
     || "";
-  const descriptionText = menuState.previewingOverview
+  const modeDefaultL1Description = selectedL1?.menuDescription || currentDefaultL1Description;
+  const l2Description = menuState.descriptionMode === "column"
+    ? modeDefaultL1Description
+    : "";
+  const defaultL3Description = menuState.previewingOverview
     ? l2Overview?.description || ""
     : showingPreview
       ? (hasActiveL3Items ? "" : previewL2?.description || "")
-      : defaultL1Description;
+      : currentDefaultL1Description;
+  const l3Description = menuState.descriptionMode === "column"
+    && showingPreview
+    && !menuState.previewingOverview
+    && hasActiveL3Items
+    ? (previewL2?.description || "")
+    : defaultL3Description;
 
   return {
     panelKey: menuState.activePanelKey || "",
     panelLabel: panel?.ariaLabel || "Site menu",
     isMobile: isMobileViewport(),
-    l1Items: getPanelL1(),
+    l1Items,
     selectedL1Index: menuState.selectedL1Index,
     l1FocusIndex: menuState.l1FocusIndex,
     l2Items: selectedL1?.l2 || [],
@@ -963,8 +1053,10 @@ function getMegaMenuViewModel() {
     l2Overview,
     previewingOverview: menuState.previewingOverview,
     showingPreview,
+    descriptionMode: menuState.descriptionMode,
     l3Items: activeL3Items,
-    l3Description: descriptionText,
+    l2Description,
+    l3Description,
     l1HeadingLabel,
     l2HeadingLabel,
     l3HeadingLabel,
@@ -985,6 +1077,8 @@ function renderMenuPanel() {
       l1Items: [],
       l2Items: [],
       l3Items: [],
+      descriptionMode: menuState.descriptionMode,
+      l2Description: "",
       l3Description: "",
     });
     return;
@@ -1042,6 +1136,12 @@ function setupEvents() {
     getTopNavItems,
     setSelectedL1,
   });
+
+  menuDescriptionModeGroup?.addEventListener("change", (event) => {
+    const target = event.target instanceof HTMLInputElement ? event.target : null;
+    if (!target || target.name !== "menuDescriptionMode") return;
+    setMenuDescriptionMode(target.value);
+  });
 }
 
 const { createFDICMenuInitializer: initializerFactory } = runtime.requireModule("init");
@@ -1066,4 +1166,5 @@ const menuInitializer = initializerFactory({
   openMenu,
 });
 
+menuState.descriptionMode = readStoredMenuDescriptionMode();
 menuInitializer.init();

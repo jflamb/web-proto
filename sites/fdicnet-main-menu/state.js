@@ -8,6 +8,7 @@
     siteContent: null,
     activePanelKey: null,
     menuOpen: false,
+    descriptionMode: "none",
     selectedL1Index: 0,
     selectedL2Index: 0,
     previewL2Index: null,
