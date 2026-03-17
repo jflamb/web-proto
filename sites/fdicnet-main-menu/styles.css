@@ -1094,6 +1094,11 @@ body.mobile-search-open {
   max-width: 65ch;
 }
 
+.menu-description--l2-inline-intro {
+  padding-top: 4px;
+  padding-bottom: 10px;
+}
+
 .menu-list--with-column-intro .l2-item--column-intro-overview {
   margin-top: 0;
   padding-top: 2px;
