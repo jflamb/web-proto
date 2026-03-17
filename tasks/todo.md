@@ -1,5 +1,120 @@
 # TODO
 
+## Current Task (FDICnet Inline Notes L2 Secondary Text)
+- [x] Extend `Inline notes` so column-2 rows render their descriptions as secondary text.
+- [x] Keep the existing desktop menu layout and caret alignment stable for both described and undescribed L2 rows.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDICnet Inline Notes L2 Secondary Text)
+- Updated [components.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/components.js):
+  - extended the existing `descriptionMode === "inline"` render path so L2 overview rows and standard L2 rows append `.l2-description` secondary text when description content exists.
+- Updated [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - changed L2 rows to the same two-column grid treatment used by L1 so labels, secondary text, and carets stay aligned.
+  - added `.l2-description` styling to match the existing inline-note secondary text treatment.
+  - kept overview rows on a single content column so they do not reserve empty caret space.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - headless Chrome DOM verification against `http://127.0.0.1:5500/sites/fdicnet-main-menu/index.html` confirmed:
+    - with `Inline notes` active, `Knowledge Base > Legal References & Resources` renders L2 secondary text for described rows (`l2DescriptionCount = 2` in the verified state).
+    - the verified sample rows `Directives` and `FDIC Forms` both rendered `.l2-description`, while the overview row remained label-only because it has no description content.
+
+## Current Task (FDICnet Mega-Menu Bottom Overflow And Page Fill)
+- [x] Diagnose the desktop bottom overflow and document-background gap shown in the latest mega-menu screenshot.
+- [x] Adjust the menu/page layout CSS with the smallest root-cause fix that preserves current desktop behavior.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDICnet Mega-Menu Bottom Overflow And Page Fill)
+- Updated [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - changed the desktop open-state mega-menu container from the grid-row animation state to normal block flow so the panel height follows the full column content instead of staying pinned to the old `237px` minimum.
+  - removed the desktop L1 list `max-height` cap so the first column is no longer artificially constrained while the open panel is sizing itself.
+  - changed the root `html, body` background to white so the underlying page fill continues through the full document when the menu extends below the initial viewport.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - headless Chrome DOM verification against `http://127.0.0.1:5500/sites/fdicnet-main-menu/index.html` confirmed:
+    - the open mega-menu frame now extends to the full menu height (`megaMenuRect.bottom = 653`) instead of stopping at the prior short frame (`371` in the pre-fix measurement).
+    - the last L1 row now stays inside the panel (`l1OverflowPastPanel = -8`) instead of spilling below it (`274` before the fix).
+    - `html`, `body`, and `.page-content` all resolve to `rgb(255, 255, 255)`, eliminating the gray document background showing below the viewport-sized page section.
+
+## Current Task (FDICnet Column 3 Active-L2 Intro)
+- [x] Add active L2 description support at the top of column 3 using the existing description block pattern.
+- [x] Keep the behavior aligned with the current description-mode model so default behavior does not change unexpectedly.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDICnet Column 3 Active-L2 Intro)
+- Updated [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js):
+  - preserved the existing column-3 description behavior for `Standard` and `Inline notes`.
+  - in `Column 2 intro` mode only, active L2 items with L3 children now pass their own description into the existing column-3 description block instead of blanking it out.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser verification at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html` confirmed:
+    - with `Column 2 intro` enabled, focusing `Directives` under `Knowledge Base > Forms & Directives` shows `Review guidance, requirements, and reference materials for Directives in Forms & Directives.` at the top of column 3 while leaving the L3 resource list visible below it.
+    - `Standard` and `Inline notes` mode behavior remains unchanged because the new description handoff is gated to `descriptionMode === "column"`.
+
+## Current Task (FDICnet Inline Notes L1 Overflow)
+- [x] Diagnose the desktop column-1 overflow introduced by `Inline notes`.
+- [x] Adjust the L1 column sizing so inline descriptions do not spill past the panel on tall desktop viewports.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDICnet Inline Notes L1 Overflow)
+- Updated [sites/fdicnet-main-menu/styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - increased the desktop L1 list cap from `min(640px, calc(100vh - 220px))` to `min(760px, calc(100vh - 160px))` so inline-note rows can fit within the open mega-menu on taller desktop viewports before any clipping occurs.
+- Validation:
+  - browser verification at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html` confirmed the `About` panel with `Inline notes` enabled stays within the mega-menu frame instead of letting the selected bottom-row treatment spill below the panel.
+  - numeric DOM check confirmed the L1 list now resolves to a taller computed cap (`650px` in the verification viewport), matching the intended sizing increase.
+
+## Current Task (FDICnet Column 2 Intro Copy Refinement)
+- [x] Replace the generic L1 fallback description pattern with more natural prototype copy.
+- [x] Refine the `Column 2 intro` rendering so the intro text and overview link read as one grouped block with clearer separation from the remaining L2 items.
+- [x] Run targeted syntax and browser verification, then record results.
+
+## Review / Results (FDICnet Column 2 Intro Copy Refinement)
+- Updated [sites/fdicnet-main-menu/script.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/script.js):
+  - replaced the generic `Browse links, updates, and resources in ...` fallback with more natural prototype copy for both overview and non-overview L1 descriptions.
+- Updated [sites/fdicnet-main-menu/components.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/components.js):
+  - added a column-intro state hook on the L2 column/list so `Column 2 intro` can style the description, overview link, and following links as a single grouped treatment.
+  - widened L2 keyboard focus scoping from the list alone to the full L2 column so the grouped intro treatment remains navigable if the overview row presentation shifts within the column.
+- Updated [sites/fdicnet-main-menu/styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - tightened the description block, capped its measure, and added a specific intro-overview treatment plus separator spacing before the remaining L2 links.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser verification at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html` confirmed:
+    - `Column 2 intro` now renders the fallback text as `Explore News services, guidance, and related resources.` rather than the old `Browse links...` pattern.
+    - the overview link sits visually with the intro copy, and a subtle divider plus added whitespace separates it from the remaining column-2 items.
+    - the L2 column reports the expected grouped-intro state (`data-column-intro="true"` with `.menu-list--with-column-intro` active).
+
+## Current Task (FDICnet Mega-Menu Description Modes)
+- [x] Add prototype controls for selecting the mega-menu description presentation mode.
+- [x] Update desktop mega-menu state/rendering to support the three requested modes without changing the existing default behavior.
+- [x] Style the selector and any new descriptive text so it fits the current prototype visual language.
+- [x] Run syntax and browser verification for desktop menu behavior and record results.
+
+## Review / Results (FDICnet Mega-Menu Description Modes)
+- Updated `sites/fdicnet-main-menu/index.html` and `sites/fdicnet-main-menu/components/fdicnet-main-menu/fdicnet-main-menu.twig`:
+  - added a prototype-only segmented radio control below the page intro so testers can switch between `Standard`, `Column 2 intro`, and `Inline notes`.
+- Updated `sites/fdicnet-main-menu/state.js`, `sites/fdicnet-main-menu/script.js`, and `sites/fdicnet-main-menu/init.js`:
+  - added `descriptionMode` to menu state and persisted the selected option in `localStorage` under `fdicnetMenuDescriptionMode`.
+  - kept `Standard` mode faithful to the current behavior with no added descriptive text.
+  - added a column-2 description mode that shows the active first-column item description at the top of column 2.
+  - added neutral L1 fallback descriptions for the two new modes only when explicit L1 description content is absent.
+- Updated `sites/fdicnet-main-menu/components.js` and `sites/fdicnet-main-menu/styles.css`:
+  - rendered optional L1 secondary text inline beneath first-column labels.
+  - added the new column-2 description block and segmented-control styling aligned to the prototype’s current palette and panel treatment.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node --check sites/fdicnet-main-menu/state.js`
+  - `node --check sites/fdicnet-main-menu/init.js`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser verification at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html` confirmed:
+    - `Standard` mode keeps `#l2Description` hidden, renders no inline L1 descriptions, and leaves the existing column-3 description behavior unchanged.
+    - `Column 2 intro` mode shows the active L1 description above column 2 and hides inline L1 descriptions.
+    - `Inline notes` mode shows secondary descriptions under first-column items, hides the new column-2 description block, and persists the selected mode across reloads.
+
 ## Current Task (FDICnet Architecture Cleanup Follow-up)
 - [x] Add a guardrail so standalone `index.html` and the Twig component shell stay in sync.
 - [x] Extract launcher search behavior out of `script.js` into a dedicated module with a cleaner integration boundary.
