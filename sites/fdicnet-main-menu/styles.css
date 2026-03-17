@@ -626,6 +626,19 @@ body.mobile-search-open {
   z-index: 0;
 }
 
+.fdic-header.menu-open .mega-menu-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 45% 70% at var(--spotlight-x, 50%) 0%,
+    rgba(255, 255, 255, 0.85) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .fdic-header.menu-open .mega-menu-inner {
   min-height: var(--layout-mega-open-min-height);
 }
@@ -634,7 +647,6 @@ body.mobile-search-open {
   min-width: 0;
   padding: 8px 0;
   position: relative;
-  z-index: 1;
   --column-rail-top: 0px;
   --column-rail-height: 0px;
   --column-rail-opacity: 0;
@@ -709,12 +721,17 @@ body.mobile-search-open {
 
 .mega-col--l1 > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+.mega-col--l2 > * {
+  position: relative;
+  z-index: 2;
 }
 
 .mega-col--l3 > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .menu-list {
