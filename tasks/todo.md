@@ -1,5 +1,43 @@
 # TODO
 
+## Current Task (FDICnet Search Shortcut Affordance)
+- [x] Add a low-noise visual affordance for the `/` shortcut in the shared search markup.
+- [x] Style the desktop hint badge and inline mobile helper copy to fit the existing masthead/search patterns without adding interaction noise.
+- [x] Run targeted syntax, parity, and browser verification, then record results.
+
+## Review / Results (FDICnet Search Shortcut Affordance)
+- Updated [sites/fdicnet-main-menu/index.html](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/index.html) and [fdicnet-main-menu.twig](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/components/fdicnet-main-menu/fdicnet-main-menu.twig):
+  - added a quiet desktop `.search-shortcut-hint` badge with `/` inside the shared search label.
+  - added a short inline mobile helper line, `Press / to jump to search.`, inside the expanded masthead search row.
+- Updated [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - styled the desktop `/` badge as a small muted keycap that occupies the right-side action slot when the search field is idle.
+  - swapped the desktop right-side affordance by focus state: idle shows `/` and hides the submit arrow; focused hides `/` and shows the submit arrow.
+  - kept the mobile row free of the desktop badge and instead surfaced the helper line only at phone width, with a matching inline keycap treatment.
+- Validation:
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser verification at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html` confirmed:
+    - on desktop, the `/` badge is visible in the idle search field, and focusing the field swaps it out for the submit arrow without clipping the placeholder text.
+    - at phone width (`390x844`), opening the inline search row shows the helper copy `Press / to jump to search.` beneath the field while keeping the desktop badge hidden.
+
+## Current Task (FDICnet Slash-To-Search Shortcut)
+- [x] Add a focused plan for the `/` keyboard shortcut using the existing shared search controller path.
+- [x] Implement guarded `/` shortcut behavior so it focuses desktop search or opens phone search only outside editable contexts.
+- [x] Run targeted syntax and interaction verification, then record results.
+
+## Review / Results (FDICnet Slash-To-Search Shortcut)
+- Updated [sites/fdicnet-main-menu/search.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/search.js):
+  - added `isEditableSearchShortcutTarget()` so the global search shortcut does not hijack typing inside inputs, textareas, selects, combobox/textbox/searchbox roles, or contenteditable regions.
+  - extended the existing document-level shortcut handler to treat plain `/` as a search-focus shortcut only when no modifier keys are pressed, the event is not composing, and the target is not editable.
+  - preserved the existing shared search behavior: desktop `/` focuses/selects `desktopSearchInput`, and phone-width `/` opens the inline masthead search and focuses `mobileSearchInput`.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/search.js`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - Playwright verification at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html` confirmed:
+    - on desktop, pressing `/` from the page body focuses `#desktopSearchInput` without inserting `/`.
+    - on desktop, pressing `/` while `#desktopSearchInput` is already focused types `/` normally instead of re-triggering the shortcut.
+    - at phone width (`390x844`), pressing `/` opens the inline masthead search, sets `aria-expanded="true"` on the mobile toggle, and focuses `#mobileSearchInput`.
+    - at phone width, pressing `/` while `#mobileSearchInput` is focused types `/` normally instead of re-triggering the shortcut.
+
 ## Current Task (FDICnet Column 2 Overview Gap Tightening)
 - [x] Tighten the spacing below the column-2 overview link in the grouped intro layout.
 - [x] Keep the grouped overview/introduction block readable without affecting other L2 row spacing.
