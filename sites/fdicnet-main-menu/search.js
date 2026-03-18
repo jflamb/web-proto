@@ -569,6 +569,16 @@
       if (mobileSearchInput) mobileSearchInput.placeholder = placeholder;
     }
 
+    function isEditableSearchShortcutTarget(target) {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      return Boolean(
+        target.closest(
+          'input, textarea, select, [contenteditable="true"], [role="textbox"], [role="combobox"], [role="searchbox"]'
+        )
+      );
+    }
+
     function openMobileSearch({ focus = false } = {}) {
       const { desktopSearchInput, mobileSearchInput, mobileSearchToggle } = getDom();
       searchReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : mobileSearchToggle;
@@ -744,7 +754,14 @@
       document.addEventListener("keydown", (event) => {
         const ctrlSlash = event.ctrlKey && !event.metaKey && event.code === "Slash";
         const cmdG = event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "g";
-        if (!ctrlSlash && !cmdG) return;
+        const plainSlash = !event.ctrlKey
+          && !event.metaKey
+          && !event.altKey
+          && !event.shiftKey
+          && !event.isComposing
+          && event.code === "Slash"
+          && !isEditableSearchShortcutTarget(event.target);
+        if (!ctrlSlash && !cmdG && !plainSlash) return;
         event.preventDefault();
         if (isPhoneViewport()) {
           openMobileSearch({ focus: true });
