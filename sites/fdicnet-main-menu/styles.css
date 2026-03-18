@@ -95,6 +95,10 @@ body {
   margin: 0 auto;
 }
 
+fdic-site-search {
+  display: block;
+}
+
 @media (min-width: 769px) and (max-width: 1049px) {
   .fdic-shell {
     width: min(var(--shell-max), calc(100% - 64px));
