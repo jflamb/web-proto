@@ -4,6 +4,285 @@
     throw new Error("FDICMenuRuntime missing. Ensure runtime.js is loaded before search.js.");
   }
 
+  function normalizeLauncherText(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/&/g, " and ")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
+  function extractLauncherAliasData(label) {
+    const parentheticalAliases = new Set();
+    const derivedAcronyms = new Set();
+    const rawLabel = String(label || "");
+    const parentheticalMatches = [...rawLabel.matchAll(/\(([^)]+)\)/g)];
+
+    parentheticalMatches.forEach(([, match]) => {
+      const normalizedMatch = normalizeLauncherText(match);
+      if (!normalizedMatch) return;
+      parentheticalAliases.add(normalizedMatch);
+      normalizedMatch.split(" ").forEach((token) => {
+        if (token.length >= 2) {
+          parentheticalAliases.add(token);
+        }
+      });
+    });
+
+    const acronymSource = normalizeLauncherText(rawLabel.replace(/\([^)]*\)/g, " "));
+    const acronymWords = acronymSource
+      .split(" ")
+      .filter((word) => word && !["a", "an", "and", "for", "of", "the", "to"].includes(word));
+    if (acronymWords.length >= 2) {
+      derivedAcronyms.add(acronymWords.map((word) => word[0]).join(""));
+    }
+
+    return {
+      parentheticalAliases: [...parentheticalAliases],
+      derivedAcronyms: [...derivedAcronyms],
+    };
+  }
+
+  function createLauncherEntry({
+    id,
+    label,
+    kind,
+    href = "#",
+    panelKey,
+    panelLabel,
+    l1Index = null,
+    l1Label = "",
+    l2Index = null,
+    l2Label = "",
+    l3Index = null,
+    description = "",
+  }) {
+    const crumbs = [panelLabel, l1Label, l2Label].filter(Boolean);
+    const normalizedLabel = normalizeLauncherText(label);
+    const normalizedCrumbs = normalizeLauncherText(crumbs.join(" "));
+    const normalizedDescription = normalizeLauncherText(description);
+    const labelTokens = normalizedLabel ? normalizedLabel.split(" ") : [];
+    const { parentheticalAliases, derivedAcronyms } = extractLauncherAliasData(label);
+
+    return {
+      id,
+      label: label || "Untitled",
+      kind,
+      href: href || "#",
+      panelKey,
+      panelLabel,
+      l1Index,
+      l1Label,
+      l2Index,
+      l2Label,
+      l3Index,
+      description: description || "",
+      crumbs,
+      normalizedLabel,
+      labelTokens,
+      parentheticalAliases,
+      derivedAcronyms,
+      searchText: [normalizedLabel, normalizedCrumbs, normalizedDescription].filter(Boolean).join(" "),
+    };
+  }
+
+  function buildLauncherIndex(siteContent, { getL2Overview = () => null } = {}) {
+    const navItems = siteContent?.header?.nav || [];
+    const panels = siteContent?.menu?.panels || {};
+    const entries = [];
+
+    navItems
+      .filter((item) => item.kind === "menu")
+      .forEach((navItem) => {
+        const panelKey = navItem.panelKey || navItem.id;
+        const panel = panels[panelKey];
+        if (!panel) return;
+        const panelLabel = navItem.label || panel.overviewLabel || "Menu";
+
+        entries.push(createLauncherEntry({
+          id: `panel:${panelKey}`,
+          label: panelLabel,
+          kind: "Panel",
+          href: panel.overviewHref || "#",
+          panelKey,
+          panelLabel,
+          description: panel.ariaLabel || "",
+        }));
+
+        (panel.l1 || []).forEach((l1Item, l1Index) => {
+          entries.push(createLauncherEntry({
+            id: `l1:${panelKey}:${l1Index}`,
+            label: l1Item.label,
+            kind: l1Index === 0 ? "Panel overview" : "Section",
+            href: l1Item.overviewHref || l1Item.href || "#",
+            panelKey,
+            panelLabel,
+            l1Index,
+            l1Label: l1Item.label,
+            description: l1Item.description || "",
+          }));
+
+          const l2Overview = getL2Overview(l1Item);
+          if (l2Overview) {
+            entries.push(createLauncherEntry({
+              id: `l2overview:${panelKey}:${l1Index}`,
+              label: l2Overview.label,
+              kind: "Section overview",
+              href: l2Overview.href || "#",
+              panelKey,
+              panelLabel,
+              l1Index,
+              l1Label: l1Item.label,
+              description: l2Overview.description || "",
+            }));
+          }
+
+          (l1Item.l2 || []).forEach((l2Item, l2Index) => {
+            entries.push(createLauncherEntry({
+              id: `l2:${panelKey}:${l1Index}:${l2Index}`,
+              label: l2Item.label,
+              kind: "Link",
+              href: l2Item.href || "#",
+              panelKey,
+              panelLabel,
+              l1Index,
+              l1Label: l1Item.label,
+              l2Index,
+              l2Label: l2Item.label,
+              description: l2Item.description || "",
+            }));
+
+            (l2Item.l3 || []).forEach((l3Item, l3Index) => {
+              entries.push(createLauncherEntry({
+                id: `l3:${panelKey}:${l1Index}:${l2Index}:${l3Index}`,
+                label: l3Item.label,
+                kind: "Resource",
+                href: l3Item.href || "#",
+                panelKey,
+                panelLabel,
+                l1Index,
+                l1Label: l1Item.label,
+                l2Index,
+                l2Label: l2Item.label,
+                l3Index,
+                description: l3Item.description || "",
+              }));
+            });
+          });
+        });
+      });
+
+    return entries;
+  }
+
+  function getLauncherMatchRank(entry, query) {
+    if (!query) return Number.POSITIVE_INFINITY;
+    const label = entry.normalizedLabel || normalizeLauncherText(entry.label);
+    if (label === query) return 0;
+    if (entry.parentheticalAliases?.includes(query)) return 1;
+    if (label.startsWith(query)) return 2;
+    if (entry.derivedAcronyms?.includes(query)) return 3;
+    if (entry.labelTokens?.includes(query)) return 4;
+    if (label.includes(query)) return 5;
+    return Number.POSITIVE_INFINITY;
+  }
+
+  function getLauncherMatches(query, searchIndex, { limit = 8 } = {}) {
+    const normalizedQuery = normalizeLauncherText(query);
+    if (!normalizedQuery) return [];
+
+    return searchIndex
+      .map((entry) => ({ entry, rank: getLauncherMatchRank(entry, normalizedQuery) }))
+      .filter((item) => Number.isFinite(item.rank))
+      .sort((left, right) => {
+        if (left.rank !== right.rank) return left.rank - right.rank;
+        return left.entry.label.localeCompare(right.entry.label);
+      })
+      .slice(0, limit)
+      .map((item) => item.entry);
+  }
+
+  function isTopLevelSearchEntry(entry) {
+    return entry?.l1Index === null && entry?.l2Index === null && entry?.l3Index === null;
+  }
+
+  function createMenuSuggestionItem(entry) {
+    return {
+      id: entry.id,
+      title: entry.label,
+      meta: isTopLevelSearchEntry(entry) ? "" : entry.crumbs.join(" / "),
+      entry,
+      action: {
+        kind: "menu-entry",
+        entry,
+      },
+    };
+  }
+
+  function normalizeSuggestionItem(item, index) {
+    if (!item) return null;
+    const title = String(item.title || item.label || "").trim();
+    if (!title) return null;
+    return {
+      id: item.id || `search-suggestion-${index}`,
+      title,
+      meta: String(item.meta || ""),
+      action: item.action || null,
+      entry: item.entry || null,
+    };
+  }
+
+  function createMenuSuggestionsProvider({ getL2Overview, limit = 8 } = {}) {
+    let lastSiteContent = null;
+    let lastIndex = [];
+
+    return function provideMenuSuggestions({ query, siteContent }) {
+      if (siteContent !== lastSiteContent) {
+        lastSiteContent = siteContent;
+        lastIndex = buildLauncherIndex(siteContent, { getL2Overview });
+      }
+      return getLauncherMatches(query, lastIndex, { limit }).map(createMenuSuggestionItem);
+    };
+  }
+
+  function defaultSuggestionActionHandler({ suggestion, activateMenuEntry }) {
+    if (suggestion?.action?.kind !== "menu-entry" || !suggestion.action.entry) {
+      return false;
+    }
+    activateMenuEntry(suggestion.action.entry);
+    return true;
+  }
+
+  function createDefaultQuerySubmissionHandler({ resultsViewHandler = null } = {}) {
+    return function handleQuerySubmission({
+      query,
+      surface,
+      suggestions,
+      activeIndex,
+      activateSuggestion,
+    }) {
+      if (typeof resultsViewHandler === "function") {
+        const handled = resultsViewHandler({
+          query,
+          surface,
+          suggestions,
+          activeIndex,
+          selectedSuggestion: activeIndex >= 0 ? suggestions[activeIndex] || null : suggestions[0] || null,
+        });
+        if (handled) {
+          return true;
+        }
+      }
+
+      if (!suggestions.length) {
+        return false;
+      }
+
+      activateSuggestion(activeIndex >= 0 ? activeIndex : 0);
+      return true;
+    };
+  }
+
   function createFDICMenuSearchController(deps) {
     const {
       menuState,
@@ -24,185 +303,21 @@
       getL2Overview,
     } = deps;
 
-    let searchIndex = [];
     let searchSuggestions = [];
     let searchActiveIndex = -1;
     let searchDebounceTimer = null;
     let searchReturnFocus = null;
     let activeSearchSurface = "desktop";
     let suppressDesktopSearchFocusSuggestions = false;
-    let SEARCH_DEBOUNCE_MS = 180;
-
-    function normalizeLauncherText(value) {
-      return String(value || "")
-        .toLowerCase()
-        .replace(/&/g, " and ")
-        .replace(/[^a-z0-9]+/g, " ")
-        .trim();
-    }
-
-    function extractLauncherAliasData(label) {
-      const parentheticalAliases = new Set();
-      const derivedAcronyms = new Set();
-      const rawLabel = String(label || "");
-      const parentheticalMatches = [...rawLabel.matchAll(/\(([^)]+)\)/g)];
-
-      parentheticalMatches.forEach(([, match]) => {
-        const normalizedMatch = normalizeLauncherText(match);
-        if (!normalizedMatch) return;
-        parentheticalAliases.add(normalizedMatch);
-        normalizedMatch.split(" ").forEach((token) => {
-          if (token.length >= 2) {
-            parentheticalAliases.add(token);
-          }
-        });
-      });
-
-      const acronymSource = normalizeLauncherText(rawLabel.replace(/\([^)]*\)/g, " "));
-      const acronymWords = acronymSource
-        .split(" ")
-        .filter((word) => word && !["a", "an", "and", "for", "of", "the", "to"].includes(word));
-      if (acronymWords.length >= 2) {
-        derivedAcronyms.add(acronymWords.map((word) => word[0]).join(""));
-      }
-
-      return {
-        parentheticalAliases: [...parentheticalAliases],
-        derivedAcronyms: [...derivedAcronyms],
-      };
-    }
-
-    function createLauncherEntry({
-      id,
-      label,
-      kind,
-      href = "#",
-      panelKey,
-      panelLabel,
-      l1Index = null,
-      l1Label = "",
-      l2Index = null,
-      l2Label = "",
-      l3Index = null,
-      description = "",
-    }) {
-      const crumbs = [panelLabel, l1Label, l2Label].filter(Boolean);
-      const normalizedLabel = normalizeLauncherText(label);
-      const normalizedCrumbs = normalizeLauncherText(crumbs.join(" "));
-      const normalizedDescription = normalizeLauncherText(description);
-      const labelTokens = normalizedLabel ? normalizedLabel.split(" ") : [];
-      const { parentheticalAliases, derivedAcronyms } = extractLauncherAliasData(label);
-
-      return {
-        id,
-        label: label || "Untitled",
-        kind,
-        href: href || "#",
-        panelKey,
-        panelLabel,
-        l1Index,
-        l1Label,
-        l2Index,
-        l2Label,
-        l3Index,
-        description: description || "",
-        crumbs,
-        normalizedLabel,
-        labelTokens,
-        parentheticalAliases,
-        derivedAcronyms,
-        searchText: [normalizedLabel, normalizedCrumbs, normalizedDescription].filter(Boolean).join(" "),
-      };
-    }
-
-    function buildLauncherIndex(siteContent) {
-      const navItems = siteContent?.header?.nav || [];
-      const panels = siteContent?.menu?.panels || {};
-      const entries = [];
-
-      navItems
-        .filter((item) => item.kind === "menu")
-        .forEach((navItem) => {
-          const panelKey = navItem.panelKey || navItem.id;
-          const panel = panels[panelKey];
-          if (!panel) return;
-          const panelLabel = navItem.label || panel.overviewLabel || "Menu";
-
-          entries.push(createLauncherEntry({
-            id: `panel:${panelKey}`,
-            label: panelLabel,
-            kind: "Panel",
-            href: panel.overviewHref || "#",
-            panelKey,
-            panelLabel,
-            description: panel.ariaLabel || "",
-          }));
-
-          (panel.l1 || []).forEach((l1Item, l1Index) => {
-            entries.push(createLauncherEntry({
-              id: `l1:${panelKey}:${l1Index}`,
-              label: l1Item.label,
-              kind: l1Index === 0 ? "Panel overview" : "Section",
-              href: l1Item.overviewHref || l1Item.href || "#",
-              panelKey,
-              panelLabel,
-              l1Index,
-              l1Label: l1Item.label,
-              description: l1Item.description || "",
-            }));
-
-            const l2Overview = getL2Overview(l1Item);
-            if (l2Overview) {
-              entries.push(createLauncherEntry({
-                id: `l2overview:${panelKey}:${l1Index}`,
-                label: l2Overview.label,
-                kind: "Section overview",
-                href: l2Overview.href || "#",
-                panelKey,
-                panelLabel,
-                l1Index,
-                l1Label: l1Item.label,
-                description: l2Overview.description || "",
-              }));
-            }
-
-            (l1Item.l2 || []).forEach((l2Item, l2Index) => {
-              entries.push(createLauncherEntry({
-                id: `l2:${panelKey}:${l1Index}:${l2Index}`,
-                label: l2Item.label,
-                kind: "Link",
-                href: l2Item.href || "#",
-                panelKey,
-                panelLabel,
-                l1Index,
-                l1Label: l1Item.label,
-                l2Index,
-                l2Label: l2Item.label,
-                description: l2Item.description || "",
-              }));
-
-              (l2Item.l3 || []).forEach((l3Item, l3Index) => {
-                entries.push(createLauncherEntry({
-                  id: `l3:${panelKey}:${l1Index}:${l2Index}:${l3Index}`,
-                  label: l3Item.label,
-                  kind: "Resource",
-                  href: l3Item.href || "#",
-                  panelKey,
-                  panelLabel,
-                  l1Index,
-                  l1Label: l1Item.label,
-                  l2Index,
-                  l2Label: l2Item.label,
-                  l3Index,
-                  description: l3Item.description || "",
-                }));
-              });
-            });
-          });
-        });
-
-      return entries;
-    }
+    const SEARCH_DEBOUNCE_MS = 180;
+    // These hooks are the intended extension seam:
+    // - suggestionsProvider can replace menu-derived suggestions entirely
+    // - querySubmissionHandler / resultsViewHandler can hand off submit to a results view
+    const suggestionsProvider = deps.suggestionsProvider || createMenuSuggestionsProvider({ getL2Overview });
+    const suggestionActionHandler = deps.suggestionActionHandler || defaultSuggestionActionHandler;
+    const querySubmissionHandler = deps.querySubmissionHandler || createDefaultQuerySubmissionHandler({
+      resultsViewHandler: deps.resultsViewHandler,
+    });
 
     function getSearchResultsElement() {
       const { desktopSearchResults, mobileSearchResults } = getDom();
@@ -295,41 +410,17 @@
       syncSearchComboboxState();
     }
 
-    function getLauncherMatchRank(entry, query) {
-      if (!query) return Number.POSITIVE_INFINITY;
-      const label = entry.normalizedLabel || normalizeLauncherText(entry.label);
-      if (label === query) return 0;
-      if (entry.parentheticalAliases?.includes(query)) return 1;
-      if (label.startsWith(query)) return 2;
-      if (entry.derivedAcronyms?.includes(query)) return 3;
-      if (entry.labelTokens?.includes(query)) return 4;
-      if (label.includes(query)) return 5;
-      return Number.POSITIVE_INFINITY;
-    }
-
-    function getLauncherMatches(query) {
-      const normalizedQuery = normalizeLauncherText(query);
-      if (!normalizedQuery) return [];
-
-      return searchIndex
-        .map((entry) => ({ entry, rank: getLauncherMatchRank(entry, normalizedQuery) }))
-        .filter((item) => Number.isFinite(item.rank))
-        .sort((left, right) => {
-          if (left.rank !== right.rank) return left.rank - right.rank;
-          return left.entry.label.localeCompare(right.entry.label);
-        })
-        .slice(0, 8)
-        .map((item) => item.entry);
-    }
-
-    function buildSearchActions(query) {
+    function buildSuggestionsForQuery(query, surface) {
       const trimmedQuery = query.trim();
       if (!trimmedQuery) return [];
-      return getLauncherMatches(trimmedQuery).map((entry) => ({ type: "menu", entry }));
-    }
-
-    function isTopLevelSearchEntry(entry) {
-      return entry?.l1Index === null && entry?.l2Index === null && entry?.l3Index === null;
+      const nextSuggestions = suggestionsProvider({
+        query: trimmedQuery,
+        surface,
+        siteContent: menuState.siteContent,
+      });
+      return (Array.isArray(nextSuggestions) ? nextSuggestions : [])
+        .map((item, index) => normalizeSuggestionItem(item, index))
+        .filter(Boolean);
     }
 
     function renderSearchSuggestions() {
@@ -338,7 +429,7 @@
       const query = getSearchQuery();
       if (!(results instanceof HTMLElement) || !(status instanceof HTMLElement)) return;
 
-      searchSuggestions = buildSearchActions(query);
+      searchSuggestions = buildSuggestionsForQuery(query, activeSearchSurface);
       searchActiveIndex = -1;
       results.innerHTML = "";
 
@@ -361,13 +452,13 @@
 
         const title = document.createElement("span");
         title.className = "site-search-option-title";
-        title.textContent = item.entry.label;
+        title.textContent = item.title;
         li.appendChild(title);
 
-        if (!isTopLevelSearchEntry(item.entry) && item.entry.crumbs.length > 0) {
+        if (item.meta) {
           const meta = document.createElement("span");
           meta.className = "site-search-option-meta";
-          meta.textContent = item.entry.crumbs.join(" / ");
+          meta.textContent = item.meta;
           li.appendChild(meta);
         }
 
@@ -546,7 +637,11 @@
     function activateSearchSuggestion(index) {
       if (!Number.isFinite(index) || index < 0 || index >= searchSuggestions.length) return;
       const suggestion = searchSuggestions[index];
-      activateSearchEntry(suggestion.entry);
+      suggestionActionHandler({
+        suggestion,
+        surface: activeSearchSurface,
+        activateMenuEntry: activateSearchEntry,
+      });
     }
 
     function submitSearchQuery(surface) {
@@ -555,11 +650,16 @@
       const query = getSearchQuery();
       if (!query.trim()) return;
 
-      searchSuggestions = buildSearchActions(query);
+      searchSuggestions = buildSuggestionsForQuery(query, surface);
       searchActiveIndex = searchActiveIndex >= 0 && searchActiveIndex < searchSuggestions.length ? searchActiveIndex : -1;
       renderSearchSuggestions();
-      if (searchSuggestions.length === 0) return;
-      activateSearchSuggestion(searchActiveIndex >= 0 ? searchActiveIndex : 0);
+      querySubmissionHandler({
+        query: query.trim(),
+        surface,
+        suggestions: searchSuggestions,
+        activeIndex: searchActiveIndex,
+        activateSuggestion: activateSearchSuggestion,
+      });
     }
 
     function applyHeaderContent() {
@@ -622,8 +722,6 @@
         mobileSearchSubmit,
       } = getDom();
       const desktopField = desktopSearchInput?.closest(".site-search-field");
-
-      searchIndex = buildLauncherIndex(menuState.siteContent);
 
       function handleInput(surface) {
         activeSearchSurface = surface;
@@ -791,5 +889,9 @@
 
   runtime.registerModule("search", {
     createFDICMenuSearchController,
+    buildLauncherIndex,
+    createMenuSuggestionsProvider,
+    createDefaultQuerySubmissionHandler,
+    defaultSuggestionActionHandler,
   });
 })();

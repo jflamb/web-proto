@@ -1,3 +1,104 @@
+const componentsRuntime = window.FDICMenuRuntime || null;
+
+function normalizeSearchSurface(surface) {
+  return surface === "mobile" ? "mobile" : "desktop";
+}
+
+function getSearchSurfaceConfig(surface) {
+  const normalizedSurface = normalizeSearchSurface(surface);
+  if (normalizedSurface === "mobile") {
+    return {
+      inputId: "mobileSearchInput",
+      clearId: "mobileSearchClear",
+      submitId: "mobileSearchSubmit",
+      resultsId: "mobileSearchResults",
+      statusId: "mobileSearchStatus",
+      fieldClassName: "site-search-field site-search-field--mobile",
+      inputRowClassName: "mobile-search-input-row",
+      labelClassName: "search-input search-input--mobile",
+      helperMarkup: '<p class="mobile-search-shortcut-hint">Press <span class="search-shortcut-key" aria-hidden="true">/</span> to jump to search.</p>',
+      panelMarkup: "",
+      submitLabel: "Open first matching result",
+    };
+  }
+
+  return {
+    inputId: "desktopSearchInput",
+    clearId: "desktopSearchClear",
+    submitId: "desktopSearchSubmit",
+    resultsId: "desktopSearchResults",
+    statusId: "desktopSearchStatus",
+    fieldClassName: "site-search-field",
+    inputRowClassName: "",
+    labelClassName: "search-input",
+    helperMarkup: "",
+    panelMarkup: `
+      <section id="desktopSearchPanel" class="site-search-panel" hidden aria-label="Search suggestions">
+        <ul id="desktopSearchResults" class="site-search-results" role="listbox" aria-label="Matching menu content"></ul>
+        <p id="desktopSearchStatus" class="site-search-status" role="status" aria-live="polite"></p>
+      </section>
+    `,
+    submitLabel: "Open first matching result",
+  };
+}
+
+function buildFDICSiteSearchMarkup({ surface = "desktop" } = {}) {
+  const config = getSearchSurfaceConfig(surface);
+  const fieldInnerMarkup = `
+    <label class="${config.labelClassName}">
+      <span class="sr-only">Search</span>
+      <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+      <input
+        id="${config.inputId}"
+        type="search"
+        role="combobox"
+        aria-expanded="false"
+        aria-controls="${config.resultsId}"
+        aria-autocomplete="list"
+        aria-haspopup="listbox"
+        placeholder="Search FDICnet"
+        autocomplete="off"
+      />
+      ${config.inputId === "desktopSearchInput" ? '<span class="search-shortcut-hint" aria-hidden="true">/</span>' : ""}
+    </label>
+    <button id="${config.clearId}" class="search-clear" type="button" aria-label="Clear search" hidden>
+      <i class="ph ph-x" aria-hidden="true"></i>
+    </button>
+    <button id="${config.submitId}" class="search-submit" type="button" aria-label="${config.submitLabel}">
+      <i class="ph ph-arrow-right" aria-hidden="true"></i>
+    </button>
+  `.trim();
+
+  if (surface === "mobile") {
+    return `
+      <div class="${config.fieldClassName}">
+        <div class="${config.inputRowClassName}">
+          ${fieldInnerMarkup}
+        </div>
+      </div>
+      ${config.helperMarkup}
+      <ul id="${config.resultsId}" class="site-search-results" role="listbox" aria-label="Matching menu content"></ul>
+      <p id="${config.statusId}" class="site-search-status" role="status" aria-live="polite"></p>
+    `.trim();
+  }
+
+  return `
+    <div class="${config.fieldClassName}">
+      ${fieldInnerMarkup}
+      ${config.panelMarkup}
+    </div>
+  `.trim();
+}
+
+class FDICSiteSearch extends HTMLElement {
+  connectedCallback() {
+    const surface = normalizeSearchSurface(this.getAttribute("surface"));
+    if (!this.querySelector(".site-search-field")) {
+      this.innerHTML = buildFDICSiteSearchMarkup({ surface });
+    }
+  }
+}
+
 class FDICTopNav extends HTMLElement {
   constructor() {
     super();
@@ -786,4 +887,15 @@ if (!customElements.get("fdic-top-nav")) {
 
 if (!customElements.get("fdic-mega-menu")) {
   customElements.define("fdic-mega-menu", FDICMegaMenu);
+}
+
+if (!customElements.get("fdic-site-search")) {
+  customElements.define("fdic-site-search", FDICSiteSearch);
+}
+
+if (componentsRuntime) {
+  componentsRuntime.registerModule("components", {
+    normalizeSearchSurface,
+    buildFDICSiteSearchMarkup,
+  });
 }

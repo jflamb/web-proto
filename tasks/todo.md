@@ -1,5 +1,35 @@
 # TODO
 
+## Current Task (FDICnet Search Web Component Refactor)
+- [x] Replace the duplicated desktop/mobile search markup with a reusable search web component while preserving the existing DOM contract and wrapper parity.
+- [x] Refactor the shared search controller to expose clean extension points for suggestion population and search-results-view hand-off without changing current default behavior.
+- [x] Add automated verification for the new component markup and search extension hooks, then run targeted runtime/browser checks and record results.
+
+## Review / Results (FDICnet Search Web Component Refactor)
+- Updated [components.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/components.js):
+  - added a reusable `fdic-site-search` custom element that renders either the desktop or mobile search markup from one shared builder while preserving the required IDs used by the runtime.
+  - registered the shared markup builder through the runtime so it can be verified independently in Node.
+- Updated [index.html](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/index.html) and [fdicnet-main-menu.twig](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/components/fdicnet-main-menu/fdicnet-main-menu.twig):
+  - replaced the duplicated inline search markup with `fdic-site-search` hosts for the desktop masthead field and the mobile inline search row.
+- Updated [search.js](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/search.js):
+  - moved suggestion generation behind `suggestionsProvider`, with the existing launcher behavior preserved by the default menu suggestion provider.
+  - added `querySubmissionHandler` / `resultsViewHandler` seams so submit can hand off cleanly to a future search-results view without rewriting the controller.
+  - kept default behavior aligned with the current prototype by activating the selected or first matching menu destination when no results-view handler intercepts submission.
+- Added [verify-search-component.mjs](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/verify-search-component.mjs):
+  - verifies `fdic-site-search` registration and generated desktop/mobile markup in plain Node.
+  - verifies the default menu suggestion provider and the submit-hand-off hook behavior, including delegated results-view handling.
+- Updated [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdicnet-main-menu/styles.css):
+  - added explicit host display for `fdic-site-search` so the new custom element participates cleanly in the existing layout.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node --check sites/fdicnet-main-menu/search.js`
+  - `node sites/fdicnet-main-menu/verify-search-component.mjs`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser verification at `http://127.0.0.1:4173/sites/fdicnet-main-menu/index.html` confirmed:
+    - the standalone page initializes successfully with the custom search element rendering the required desktop/mobile IDs.
+    - dispatching `/` on desktop focuses `#desktopSearchInput` and swaps the idle `/` hint for the submit arrow.
+    - dispatching `/` at phone width opens the inline search row, focuses `#mobileSearchInput`, and preserves the mobile helper copy and submit control.
+
 ## Current Task (FDICnet Search Shortcut Affordance)
 - [x] Add a low-noise visual affordance for the `/` shortcut in the shared search markup.
 - [x] Style the desktop hint badge and inline mobile helper copy to fit the existing masthead/search patterns without adding interaction noise.
