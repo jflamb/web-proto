@@ -106,6 +106,35 @@ body {
   width: 256px;
 }
 
+.search-shortcut-hint {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(9, 53, 84, 0.16);
+  border-radius: 6px;
+  background: #f5f7f9;
+  color: #4b5b69;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+}
+
+.site-search-field:not(:focus-within) .search-submit {
+  display: none;
+}
+
+.site-search-field:focus-within .search-shortcut-hint {
+  display: none;
+}
+
 .search-submit {
   position: absolute;
   top: 50%;
@@ -226,11 +255,28 @@ body {
   color: #0c2336;
 }
 
+.search-shortcut-key,
 .site-search-option-meta,
 .site-search-status,
 .mobile-search-shortcut-hint {
   color: #4b5b69;
   font-size: 0.9375rem;
+}
+
+.search-shortcut-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  margin: 0 0.2rem;
+  padding: 0 0.4rem;
+  border: 1px solid rgba(188, 202, 214, 0.72);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .site-search-option-meta {
@@ -260,7 +306,9 @@ body.mobile-search-open {
 }
 
 .mobile-search-shortcut-hint {
-  margin: -4px 0 0;
+  display: none;
+  margin: 8px 0 0;
+  line-height: 1.35;
 }
 
 .sr-only {
@@ -384,7 +432,7 @@ body.mobile-search-open {
   border: 0;
   background: transparent;
   padding: 0;
-  padding-right: 68px;
+  padding-right: 44px;
   font-size: 18px;
   font-weight: 400;
   line-height: 1.375;
@@ -1384,6 +1432,14 @@ body.mobile-search-open {
     padding-right: 96px;
   }
 
+  .site-search-field--mobile .search-shortcut-hint {
+    display: none;
+  }
+
+  .site-search-field--mobile .search-submit {
+    display: inline-flex;
+  }
+
   .site-search-field--mobile .search-submit,
   .site-search-field--mobile .search-clear {
     position: absolute;
@@ -1416,12 +1472,22 @@ body.mobile-search-open {
     color: rgba(255, 255, 255, 0.88);
   }
 
+  .mobile-search-shortcut-hint {
+    display: block;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .mobile-search-shortcut-hint .search-shortcut-key {
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+  }
+
   .mobile-search-sheet .site-search-results:empty,
   .mobile-search-sheet .site-search-status:empty {
     display: none;
   }
 
-  .mobile-search-shortcut-hint,
   .mobile-search-sheet-header,
   .mobile-search-close {
     display: none;
