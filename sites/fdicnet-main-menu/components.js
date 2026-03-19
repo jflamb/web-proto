@@ -408,6 +408,7 @@ class FDICMegaMenu extends HTMLElement {
     l1Items = [],
     selectedL1Index = 0,
     l1FocusIndex = 0,
+    l1Description = "",
     l2Items = [],
     activeL2Index = 0,
     l2Overview = null,
@@ -438,6 +439,8 @@ class FDICMegaMenu extends HTMLElement {
       this.l2Description.hidden = true;
       this.l2Column?.removeAttribute("data-column-intro");
       this.l2List?.classList.remove("menu-list--with-column-intro");
+      this.l1Column?.removeAttribute("data-column-intro");
+      this.l1List?.classList.remove("menu-list--with-column-intro");
       this.l3List.innerHTML = "";
       this.l3List.hidden = true;
       this.l3Description.textContent = "";
@@ -449,6 +452,15 @@ class FDICMegaMenu extends HTMLElement {
     const boundedL1FocusIndex = Math.max(0, Math.min(l1FocusIndex, l1Items.length));
 
     this.l1List.innerHTML = "";
+    const hasL1ColumnIntro = Boolean(l1Description);
+    if (this.l1Column) {
+      if (hasL1ColumnIntro) {
+        this.l1Column.dataset.columnIntro = "true";
+      } else {
+        delete this.l1Column.dataset.columnIntro;
+      }
+    }
+    this.l1List.classList.toggle("menu-list--with-column-intro", hasL1ColumnIntro);
     const hasOverviewRow = l1Items.length > 1;
     const overviewItem = hasOverviewRow ? l1Items[0] : null;
     const primaryItems = hasOverviewRow ? l1Items.slice(1) : l1Items;
@@ -471,6 +483,12 @@ class FDICMegaMenu extends HTMLElement {
       overviewLabel.textContent = overviewItem?.label || "Overview";
       overviewLink.append(overviewLabel);
       overviewLi.appendChild(overviewLink);
+      if (hasL1ColumnIntro && l1Description) {
+        const columnIntroDescription = document.createElement("div");
+        columnIntroDescription.className = "menu-description menu-description--l1 menu-description--l1-inline-intro";
+        columnIntroDescription.textContent = l1Description;
+        overviewLi.appendChild(columnIntroDescription);
+      }
       this.l1List.appendChild(overviewLi);
 
       if (primaryItems.length > 0) {
