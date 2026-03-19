@@ -1143,6 +1143,16 @@ body.mobile-search-open {
   min-height: 36px;
 }
 
+.menu-empty-hint {
+  padding: 8px 24px;
+  color: var(--ds-text-secondary);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.45;
+  opacity: 0.7;
+  margin: 0;
+}
+
 .menu-description--l2 {
   padding-top: 18px;
   padding-bottom: 6px;
@@ -1175,6 +1185,7 @@ body.mobile-search-open {
 .menu-description--l1-inline-intro {
   padding-top: 4px;
   padding-bottom: 10px;
+  padding-left: 0;
 }
 
 .mega-col--l1[data-column-intro="true"] .menu-description--l1 {
@@ -1183,7 +1194,7 @@ body.mobile-search-open {
 
 .menu-list--with-column-intro .l1-item--overview {
   margin-top: 0;
-  padding-top: 2px;
+  padding-top: 8px;
   padding-bottom: 8px;
 }
 
