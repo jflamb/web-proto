@@ -526,7 +526,6 @@
       if (typeof l1Index !== "number") {
         const region = createMobileDrillRegion(panelContainer, `${getPanelLabel(panelKey, panelConfig)} sections`);
         renderMobileDrillL1(region, panelKey, panelConfig);
-        renderMobileDrillContext(region, getMobileContextNodes(panelKey, panelConfig, null, null));
         announceMobileDrillContext(panelKey, panelConfig, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
@@ -539,7 +538,6 @@
         const headingText = `${l1Item?.label || getPanelLabel(panelKey, panelConfig)} links`;
         const region = createMobileDrillRegion(panelContainer, headingText);
         renderMobileDrillL2(region, panelKey, panelConfig, l1Index);
-        renderMobileDrillContext(region, getMobileContextNodes(panelKey, panelConfig, l1Index, null));
         announceMobileDrillContext(panelKey, panelConfig, l1Index, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
@@ -551,7 +549,6 @@
       const l2Item = (l1Item?.l2 || [])[l2Index];
       const region = createMobileDrillRegion(panelContainer, `${l2Item?.label || "Section"} links`);
       renderMobileDrillL3(region, panelKey, panelConfig, l1Index, l2Index);
-      renderMobileDrillContext(region, getMobileContextNodes(panelKey, panelConfig, l1Index, l2Index));
       announceMobileDrillContext(panelKey, panelConfig, l1Index, l2Index, panelKeys);
       ensureMobileMenuFocus();
       animateMobileDrillReveal(panelContainer);
