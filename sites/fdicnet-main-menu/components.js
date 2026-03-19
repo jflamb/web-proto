@@ -405,16 +405,17 @@ class FDICMegaMenu extends HTMLElement {
     panelKey = "",
     panelLabel = "Site menu",
     isMobile = false,
+    showEmptyState = false,
     l1Items = [],
     selectedL1Index = 0,
     l1FocusIndex = 0,
+    l1Description = "",
     l2Items = [],
     activeL2Index = 0,
     l2Overview = null,
     previewingOverview = false,
     showingPreview = false,
     l3Items = [],
-    descriptionMode = "none",
     l2Description = "",
     l3Description = "",
     l1HeadingLabel = "Menu sections",
@@ -439,6 +440,8 @@ class FDICMegaMenu extends HTMLElement {
       this.l2Description.hidden = true;
       this.l2Column?.removeAttribute("data-column-intro");
       this.l2List?.classList.remove("menu-list--with-column-intro");
+      this.l1Column?.removeAttribute("data-column-intro");
+      this.l1List?.classList.remove("menu-list--with-column-intro");
       this.l3List.innerHTML = "";
       this.l3List.hidden = true;
       this.l3Description.textContent = "";
@@ -450,6 +453,15 @@ class FDICMegaMenu extends HTMLElement {
     const boundedL1FocusIndex = Math.max(0, Math.min(l1FocusIndex, l1Items.length));
 
     this.l1List.innerHTML = "";
+    const hasL1ColumnIntro = Boolean(l1Description);
+    if (this.l1Column) {
+      if (hasL1ColumnIntro) {
+        this.l1Column.dataset.columnIntro = "true";
+      } else {
+        delete this.l1Column.dataset.columnIntro;
+      }
+    }
+    this.l1List.classList.toggle("menu-list--with-column-intro", hasL1ColumnIntro);
     const hasOverviewRow = l1Items.length > 1;
     const overviewItem = hasOverviewRow ? l1Items[0] : null;
     const primaryItems = hasOverviewRow ? l1Items.slice(1) : l1Items;
@@ -459,7 +471,6 @@ class FDICMegaMenu extends HTMLElement {
       overviewLi.setAttribute("role", "none");
       const overviewLink = document.createElement("a");
       const overviewLabel = document.createElement("span");
-      const overviewDescription = document.createElement("span");
 
       overviewLink.className = "l1-item l1-item--overview";
       overviewLink.href = overviewItem?.overviewHref || overviewItem?.href || "#";
@@ -472,12 +483,13 @@ class FDICMegaMenu extends HTMLElement {
       overviewLabel.className = "l1-label";
       overviewLabel.textContent = overviewItem?.label || "Overview";
       overviewLink.append(overviewLabel);
-      if (descriptionMode === "inline" && (overviewItem?.menuDescription || overviewItem?.description)) {
-        overviewDescription.className = "l1-description";
-        overviewDescription.textContent = overviewItem.menuDescription || overviewItem.description;
-        overviewLink.append(overviewDescription);
-      }
       overviewLi.appendChild(overviewLink);
+      if (hasL1ColumnIntro && l1Description) {
+        const columnIntroDescription = document.createElement("div");
+        columnIntroDescription.className = "menu-description menu-description--l1 menu-description--l1-inline-intro";
+        columnIntroDescription.textContent = l1Description;
+        overviewLi.appendChild(columnIntroDescription);
+      }
       this.l1List.appendChild(overviewLi);
 
       if (primaryItems.length > 0) {
@@ -499,7 +511,6 @@ class FDICMegaMenu extends HTMLElement {
       const hasNextLevel = Array.isArray(item.l2) && item.l2.length > 0;
       const control = document.createElement(hasNextLevel ? "button" : "a");
       const label = document.createElement("span");
-      const description = document.createElement("span");
 
       control.className = "l1-item";
       control.dataset.launcherId = `l1:${panelKey}:${index}`;
@@ -520,11 +531,6 @@ class FDICMegaMenu extends HTMLElement {
       label.textContent = item.label || "Section";
 
       control.append(label);
-      if (descriptionMode === "inline" && (item.menuDescription || item.description)) {
-        description.className = "l1-description";
-        description.textContent = item.menuDescription || item.description;
-        control.append(description);
-      }
       if (hasNextLevel) {
         const caret = document.createElement("span");
         caret.className = "l1-caret ph ph-caret-right";
@@ -541,8 +547,31 @@ class FDICMegaMenu extends HTMLElement {
     });
 
     this.l2List.innerHTML = "";
+
+    if (showEmptyState) {
+      this.l2Description.textContent = "";
+      this.l2Description.hidden = true;
+      delete this.l2Column?.dataset.columnIntro;
+      this.l2List.classList.remove("menu-list--with-column-intro");
+
+      const hintLi = document.createElement("li");
+      hintLi.setAttribute("role", "presentation");
+      const hint = document.createElement("p");
+      hint.className = "menu-empty-hint";
+      hint.textContent = "Select a category to see its links";
+      hintLi.appendChild(hint);
+      this.l2List.appendChild(hintLi);
+
+      this.l3List.innerHTML = "";
+      this.l3List.hidden = true;
+      this.l3Description.textContent = "";
+      this.l3Description.hidden = true;
+      this.updateColumnRails();
+      return;
+    }
+
     this.l2Description.textContent = l2Description || "";
-    const hasColumnIntro = descriptionMode === "column" && Boolean(l2Description);
+    const hasColumnIntro = Boolean(l2Description);
     this.l2Description.hidden = !l2Description;
     if (this.l2Column) {
       if (hasColumnIntro) {
@@ -559,7 +588,6 @@ class FDICMegaMenu extends HTMLElement {
       overviewLi.setAttribute("role", "none");
       const overviewLink = document.createElement("a");
       const overviewLabel = document.createElement("span");
-      const overviewDescription = document.createElement("span");
       const columnIntroDescription = document.createElement("div");
 
       overviewLink.className = "l2-item l2-item--overview";
@@ -575,11 +603,6 @@ class FDICMegaMenu extends HTMLElement {
       overviewLabel.className = "l2-label";
       overviewLabel.textContent = l2Overview.label || "Overview";
       overviewLink.append(overviewLabel);
-      if (descriptionMode === "inline" && (l2Overview.menuDescription || l2Overview.description)) {
-        overviewDescription.className = "l2-description";
-        overviewDescription.textContent = l2Overview.menuDescription || l2Overview.description;
-        overviewLink.append(overviewDescription);
-      }
       overviewLi.appendChild(overviewLink);
       if (hasColumnIntro && l2Description) {
         columnIntroDescription.className = "menu-description menu-description--l2 menu-description--l2-inline-intro";
@@ -606,7 +629,6 @@ class FDICMegaMenu extends HTMLElement {
       li.setAttribute("role", "none");
       const link = document.createElement("a");
       const label = document.createElement("span");
-      const description = document.createElement("span");
       const isActive = shouldHighlightL2 && index === activeL2Index;
       const hasNextLevel = Array.isArray(item.l3) && item.l3.length > 0;
 
@@ -621,11 +643,6 @@ class FDICMegaMenu extends HTMLElement {
       label.className = "l2-label";
       label.textContent = item.label || "Link";
       link.append(label);
-      if (descriptionMode === "inline" && (item.menuDescription || item.description)) {
-        description.className = "l2-description";
-        description.textContent = item.menuDescription || item.description;
-        link.append(description);
-      }
       if (hasNextLevel) {
         const caret = document.createElement("span");
         caret.className = "l1-caret l2-caret ph ph-caret-right";

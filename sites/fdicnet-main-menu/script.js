@@ -25,8 +25,6 @@ const phoneSearchMediaQuery = window.matchMedia(runtime.getPhoneSearchQuery());
 const reduceMotionMediaQuery = window.matchMedia(runtime.getReducedMotionQuery());
 const MOBILE_STAGGER_MAX_ITEMS = 6;
 const MOBILE_STAGGER_STEP_MS = 15;
-const MENU_DESCRIPTION_MODE_STORAGE_KEY = "fdicnetMenuDescriptionMode";
-const VALID_MENU_DESCRIPTION_MODES = new Set(["none", "column", "inline"]);
 
 let topNav = null;
 let megaMenuHost = null;
@@ -49,8 +47,6 @@ let desktopSearchSubmit = null;
 let desktopSearchPanel = null;
 let desktopSearchResults = null;
 let desktopSearchStatus = null;
-let menuDescriptionModeGroup = null;
-let menuDescriptionModeInputs = [];
 let mobileSearchToggle = null;
 let mobileSearchRow = null;
 let mobileSearchInput = null;
@@ -90,8 +86,6 @@ function refreshDomRefs() {
   desktopSearchPanel = document.getElementById("desktopSearchPanel");
   desktopSearchResults = document.getElementById("desktopSearchResults");
   desktopSearchStatus = document.getElementById("desktopSearchStatus");
-  menuDescriptionModeGroup = document.getElementById("menuDescriptionModeGroup");
-  menuDescriptionModeInputs = Array.from(document.querySelectorAll('input[name="menuDescriptionMode"]'));
   mobileSearchToggle = document.getElementById("mobileSearchToggle");
   mobileSearchRow = document.getElementById("mobileSearchRow");
   mobileSearchInput = document.getElementById("mobileSearchInput");
@@ -133,8 +127,6 @@ function getDom() {
     desktopSearchPanel,
     desktopSearchResults,
     desktopSearchStatus,
-    menuDescriptionModeGroup,
-    menuDescriptionModeInputs,
     mobileSearchToggle,
     mobileSearchRow,
     mobileSearchInput,
@@ -156,49 +148,6 @@ function getPanelConfig() {
 
 function getPanelConfigByKey(panelKey) {
   return selectPanelConfigByKey(menuState.siteContent, panelKey);
-}
-
-function normalizeMenuDescriptionMode(mode) {
-  return VALID_MENU_DESCRIPTION_MODES.has(mode) ? mode : "none";
-}
-
-function readStoredMenuDescriptionMode() {
-  try {
-    return normalizeMenuDescriptionMode(window.localStorage.getItem(MENU_DESCRIPTION_MODE_STORAGE_KEY));
-  } catch (error) {
-    return "none";
-  }
-}
-
-function persistMenuDescriptionMode(mode) {
-  try {
-    window.localStorage.setItem(MENU_DESCRIPTION_MODE_STORAGE_KEY, mode);
-  } catch (error) {
-    // Ignore storage failures in the static prototype.
-  }
-}
-
-function syncMenuDescriptionModeControls() {
-  if (!menuDescriptionModeInputs.length) return;
-  const activeMode = normalizeMenuDescriptionMode(menuState.descriptionMode);
-  menuDescriptionModeInputs.forEach((input) => {
-    input.checked = input.value === activeMode;
-  });
-}
-
-function setMenuDescriptionMode(mode, { persist = true } = {}) {
-  const normalizedMode = normalizeMenuDescriptionMode(mode);
-  if (menuState.descriptionMode === normalizedMode) {
-    syncMenuDescriptionModeControls();
-    return;
-  }
-
-  menuState.descriptionMode = normalizedMode;
-  syncMenuDescriptionModeControls();
-  if (persist) {
-    persistMenuDescriptionMode(normalizedMode);
-  }
-  renderMenuPanel();
 }
 
 function getL1FallbackDescription(item, { panelLabel = "this section", isOverview = false } = {}) {
@@ -258,7 +207,7 @@ function getPanelL1() {
 
 function getDefaultL1Index(panel = getPanelConfig()) {
   const l1Items = panel?.l1 || [];
-  return l1Items.length > 1 ? 1 : 0;
+  return l1Items.length > 1 ? null : 0;
 }
 
 function announceMenuContext(message) {
@@ -305,7 +254,6 @@ function renderPageContent() {
     paragraph.textContent = line;
     pageIntro.appendChild(paragraph);
   });
-  syncMenuDescriptionModeControls();
 }
 
 function getSearchController() {
@@ -358,26 +306,64 @@ function isPhoneViewport() {
   return phoneSearchMediaQuery.matches;
 }
 
+function syncMobileBackdropState() {
+  if (!mobileNavBackdrop) return;
+  const isOpen = isMobileViewport() && (menuState.mobileNavOpen || menuState.mobileSearchOpen);
+  mobileNavBackdrop.hidden = !isOpen;
+  mobileNavBackdrop.classList.toggle("is-visible", isOpen);
+}
+
 function syncMobileSearchState({ focus = false } = {}) {
   if (!mobileSearchToggle || !mobileSearchRow) return;
   const phone = isPhoneViewport();
   mobileSearchToggle.hidden = !phone;
   if (!phone) {
     menuState.mobileSearchOpen = false;
+    if (menuState.mobileSearchCloseHideTimer) {
+      window.clearTimeout(menuState.mobileSearchCloseHideTimer);
+      menuState.mobileSearchCloseHideTimer = null;
+    }
+    mobileSearchRow.classList.remove("is-open");
     mobileSearchToggle.setAttribute("aria-expanded", "false");
     mobileSearchToggle.setAttribute("aria-label", "Open search");
     mobileSearchRow.hidden = true;
     document.body.classList.remove("mobile-search-open");
+    syncMobileBackdropState();
+    syncMobileBackgroundInertState();
     return;
   }
   mobileSearchToggle.setAttribute("aria-expanded", menuState.mobileSearchOpen ? "true" : "false");
   mobileSearchToggle.setAttribute("aria-label", menuState.mobileSearchOpen ? "Close search" : "Open search");
-  mobileSearchRow.hidden = !menuState.mobileSearchOpen;
   document.body.classList.toggle("mobile-search-open", menuState.mobileSearchOpen);
-  if (focus && menuState.mobileSearchOpen && mobileSearchInput) {
-    mobileSearchInput.focus();
-    mobileSearchInput.select();
+  if (menuState.mobileSearchCloseHideTimer) {
+    window.clearTimeout(menuState.mobileSearchCloseHideTimer);
+    menuState.mobileSearchCloseHideTimer = null;
   }
+  if (menuState.mobileSearchOpen) {
+    mobileSearchRow.hidden = false;
+    // Force reflow so the browser registers the initial (off-screen) state
+    // before we add is-open — this preserves the slide-in CSS transition.
+    void mobileSearchRow.offsetHeight;
+    mobileSearchRow.classList.add("is-open");
+    if (focus && menuState.mobileSearchOpen && mobileSearchInput) {
+      mobileSearchInput.focus();
+      mobileSearchInput.select();
+    }
+  } else {
+    mobileSearchRow.classList.remove("is-open");
+    if (reduceMotionMediaQuery.matches) {
+      mobileSearchRow.hidden = true;
+    } else {
+      menuState.mobileSearchCloseHideTimer = window.setTimeout(() => {
+        menuState.mobileSearchCloseHideTimer = null;
+        if (!menuState.mobileSearchOpen) {
+          mobileSearchRow.hidden = true;
+        }
+      }, 240);
+    }
+  }
+  syncMobileBackdropState();
+  syncMobileBackgroundInertState();
 }
 
 function setMobileSearchOpen(isOpen, { focus = false } = {}) {
@@ -395,11 +381,12 @@ function setInertState(element, isInert) {
 }
 
 function syncMobileBackgroundInertState() {
-  const shouldInert = isMobileViewport() && menuState.mobileNavOpen;
-  setInertState(mainContent, shouldInert);
-  setInertState(mastheadControls, shouldInert);
-  setInertState(mastheadWordmark, shouldInert);
-  setInertState(mobileSearchRow, shouldInert);
+  const shouldInertMain = isMobileViewport() && (menuState.mobileNavOpen || menuState.mobileSearchOpen);
+  setInertState(mainContent, shouldInertMain);
+  setInertState(mastheadControls, isMobileViewport() && menuState.mobileNavOpen);
+  setInertState(mastheadWordmark, shouldInertMain);
+  setInertState(navList, isMobileViewport() && menuState.mobileSearchOpen);
+  setInertState(mobileSearchRow, isMobileViewport() && menuState.mobileNavOpen);
 }
 
 function syncMobileToggleButton() {
@@ -491,8 +478,7 @@ function syncMobileNavState() {
       menuState.mobileNavCloseHideTimer = null;
     }
     if (mobileNavBackdrop) {
-      mobileNavBackdrop.hidden = true;
-      mobileNavBackdrop.classList.remove("is-visible");
+      syncMobileBackdropState();
     }
     navToggle.setAttribute("aria-expanded", "false");
     syncMobileToggleButton();
@@ -505,10 +491,7 @@ function syncMobileNavState() {
   navToggle.setAttribute("aria-expanded", menuState.mobileNavOpen ? "true" : "false");
   syncMobileToggleButton();
   header.classList.toggle("mobile-menu-open", menuState.mobileNavOpen);
-  if (mobileNavBackdrop) {
-    mobileNavBackdrop.hidden = !menuState.mobileNavOpen;
-    mobileNavBackdrop.classList.toggle("is-visible", menuState.mobileNavOpen);
-  }
+  syncMobileBackdropState();
   syncMobileBackgroundInertState();
 
   if (menuState.mobileNavOpen) {
@@ -682,7 +665,7 @@ function resetPanelSelection() {
   menuState.selectedL2Index = 0;
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
-  menuState.l1FocusIndex = defaultL1Index;
+  menuState.l1FocusIndex = defaultL1Index ?? 0;
   menuState.mobileDrillPath = [];
   menuState.lastMobileDrillPath = null;
 }
@@ -1026,16 +1009,13 @@ function getMegaMenuViewModel() {
     || l2Overview?.description
     || "";
   const modeDefaultL1Description = selectedL1?.menuDescription || currentDefaultL1Description;
-  const l2Description = menuState.descriptionMode === "column"
-    ? modeDefaultL1Description
-    : "";
+  const l2Description = modeDefaultL1Description;
   const defaultL3Description = menuState.previewingOverview
     ? l2Overview?.description || ""
     : showingPreview
       ? (hasActiveL3Items ? "" : previewL2?.description || "")
       : currentDefaultL1Description;
-  const l3Description = menuState.descriptionMode === "column"
-    && showingPreview
+  const l3Description = showingPreview
     && !menuState.previewingOverview
     && hasActiveL3Items
     ? (previewL2?.description || "")
@@ -1045,15 +1025,16 @@ function getMegaMenuViewModel() {
     panelKey: menuState.activePanelKey || "",
     panelLabel: panel?.ariaLabel || "Site menu",
     isMobile: isMobileViewport(),
+    showEmptyState: menuState.selectedL1Index === null,
     l1Items,
     selectedL1Index: menuState.selectedL1Index,
     l1FocusIndex: menuState.l1FocusIndex,
+    l1Description: panel?.description || "",
     l2Items: selectedL1?.l2 || [],
     activeL2Index: getVisibleL2Index(),
     l2Overview,
     previewingOverview: menuState.previewingOverview,
     showingPreview,
-    descriptionMode: menuState.descriptionMode,
     l3Items: activeL3Items,
     l2Description,
     l3Description,
@@ -1077,7 +1058,6 @@ function renderMenuPanel() {
       l1Items: [],
       l2Items: [],
       l3Items: [],
-      descriptionMode: menuState.descriptionMode,
       l2Description: "",
       l3Description: "",
     });
@@ -1136,12 +1116,6 @@ function setupEvents() {
     getTopNavItems,
     setSelectedL1,
   });
-
-  menuDescriptionModeGroup?.addEventListener("change", (event) => {
-    const target = event.target instanceof HTMLInputElement ? event.target : null;
-    if (!target || target.name !== "menuDescriptionMode") return;
-    setMenuDescriptionMode(target.value);
-  });
 }
 
 const { createFDICMenuInitializer: initializerFactory } = runtime.requireModule("init");
@@ -1166,5 +1140,4 @@ const menuInitializer = initializerFactory({
   openMenu,
 });
 
-menuState.descriptionMode = readStoredMenuDescriptionMode();
 menuInitializer.init();
