@@ -414,7 +414,6 @@ class FDICMegaMenu extends HTMLElement {
     previewingOverview = false,
     showingPreview = false,
     l3Items = [],
-    descriptionMode = "none",
     l2Description = "",
     l3Description = "",
     l1HeadingLabel = "Menu sections",
@@ -459,7 +458,6 @@ class FDICMegaMenu extends HTMLElement {
       overviewLi.setAttribute("role", "none");
       const overviewLink = document.createElement("a");
       const overviewLabel = document.createElement("span");
-      const overviewDescription = document.createElement("span");
 
       overviewLink.className = "l1-item l1-item--overview";
       overviewLink.href = overviewItem?.overviewHref || overviewItem?.href || "#";
@@ -472,11 +470,6 @@ class FDICMegaMenu extends HTMLElement {
       overviewLabel.className = "l1-label";
       overviewLabel.textContent = overviewItem?.label || "Overview";
       overviewLink.append(overviewLabel);
-      if (descriptionMode === "inline" && (overviewItem?.menuDescription || overviewItem?.description)) {
-        overviewDescription.className = "l1-description";
-        overviewDescription.textContent = overviewItem.menuDescription || overviewItem.description;
-        overviewLink.append(overviewDescription);
-      }
       overviewLi.appendChild(overviewLink);
       this.l1List.appendChild(overviewLi);
 
@@ -499,7 +492,6 @@ class FDICMegaMenu extends HTMLElement {
       const hasNextLevel = Array.isArray(item.l2) && item.l2.length > 0;
       const control = document.createElement(hasNextLevel ? "button" : "a");
       const label = document.createElement("span");
-      const description = document.createElement("span");
 
       control.className = "l1-item";
       control.dataset.launcherId = `l1:${panelKey}:${index}`;
@@ -520,11 +512,6 @@ class FDICMegaMenu extends HTMLElement {
       label.textContent = item.label || "Section";
 
       control.append(label);
-      if (descriptionMode === "inline" && (item.menuDescription || item.description)) {
-        description.className = "l1-description";
-        description.textContent = item.menuDescription || item.description;
-        control.append(description);
-      }
       if (hasNextLevel) {
         const caret = document.createElement("span");
         caret.className = "l1-caret ph ph-caret-right";
@@ -542,7 +529,7 @@ class FDICMegaMenu extends HTMLElement {
 
     this.l2List.innerHTML = "";
     this.l2Description.textContent = l2Description || "";
-    const hasColumnIntro = descriptionMode === "column" && Boolean(l2Description);
+    const hasColumnIntro = Boolean(l2Description);
     this.l2Description.hidden = !l2Description;
     if (this.l2Column) {
       if (hasColumnIntro) {
@@ -559,7 +546,6 @@ class FDICMegaMenu extends HTMLElement {
       overviewLi.setAttribute("role", "none");
       const overviewLink = document.createElement("a");
       const overviewLabel = document.createElement("span");
-      const overviewDescription = document.createElement("span");
       const columnIntroDescription = document.createElement("div");
 
       overviewLink.className = "l2-item l2-item--overview";
@@ -575,11 +561,6 @@ class FDICMegaMenu extends HTMLElement {
       overviewLabel.className = "l2-label";
       overviewLabel.textContent = l2Overview.label || "Overview";
       overviewLink.append(overviewLabel);
-      if (descriptionMode === "inline" && (l2Overview.menuDescription || l2Overview.description)) {
-        overviewDescription.className = "l2-description";
-        overviewDescription.textContent = l2Overview.menuDescription || l2Overview.description;
-        overviewLink.append(overviewDescription);
-      }
       overviewLi.appendChild(overviewLink);
       if (hasColumnIntro && l2Description) {
         columnIntroDescription.className = "menu-description menu-description--l2 menu-description--l2-inline-intro";
@@ -606,7 +587,6 @@ class FDICMegaMenu extends HTMLElement {
       li.setAttribute("role", "none");
       const link = document.createElement("a");
       const label = document.createElement("span");
-      const description = document.createElement("span");
       const isActive = shouldHighlightL2 && index === activeL2Index;
       const hasNextLevel = Array.isArray(item.l3) && item.l3.length > 0;
 
@@ -621,11 +601,6 @@ class FDICMegaMenu extends HTMLElement {
       label.className = "l2-label";
       label.textContent = item.label || "Link";
       link.append(label);
-      if (descriptionMode === "inline" && (item.menuDescription || item.description)) {
-        description.className = "l2-description";
-        description.textContent = item.menuDescription || item.description;
-        link.append(description);
-      }
       if (hasNextLevel) {
         const caret = document.createElement("span");
         caret.className = "l1-caret l2-caret ph ph-caret-right";
