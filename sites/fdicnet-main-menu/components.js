@@ -405,6 +405,7 @@ class FDICMegaMenu extends HTMLElement {
     panelKey = "",
     panelLabel = "Site menu",
     isMobile = false,
+    showEmptyState = false,
     l1Items = [],
     selectedL1Index = 0,
     l1FocusIndex = 0,
@@ -546,6 +547,29 @@ class FDICMegaMenu extends HTMLElement {
     });
 
     this.l2List.innerHTML = "";
+
+    if (showEmptyState) {
+      this.l2Description.textContent = "";
+      this.l2Description.hidden = true;
+      delete this.l2Column?.dataset.columnIntro;
+      this.l2List.classList.remove("menu-list--with-column-intro");
+
+      const hintLi = document.createElement("li");
+      hintLi.setAttribute("role", "presentation");
+      const hint = document.createElement("p");
+      hint.className = "menu-empty-hint";
+      hint.textContent = "Select a category to see its links";
+      hintLi.appendChild(hint);
+      this.l2List.appendChild(hintLi);
+
+      this.l3List.innerHTML = "";
+      this.l3List.hidden = true;
+      this.l3Description.textContent = "";
+      this.l3Description.hidden = true;
+      this.updateColumnRails();
+      return;
+    }
+
     this.l2Description.textContent = l2Description || "";
     const hasColumnIntro = Boolean(l2Description);
     this.l2Description.hidden = !l2Description;
