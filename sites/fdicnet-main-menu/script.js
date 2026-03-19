@@ -207,7 +207,7 @@ function getPanelL1() {
 
 function getDefaultL1Index(panel = getPanelConfig()) {
   const l1Items = panel?.l1 || [];
-  return l1Items.length > 1 ? 1 : 0;
+  return l1Items.length > 1 ? null : 0;
 }
 
 function announceMenuContext(message) {
@@ -1025,6 +1025,7 @@ function getMegaMenuViewModel() {
     panelKey: menuState.activePanelKey || "",
     panelLabel: panel?.ariaLabel || "Site menu",
     isMobile: isMobileViewport(),
+    showEmptyState: menuState.selectedL1Index === null,
     l1Items,
     selectedL1Index: menuState.selectedL1Index,
     l1FocusIndex: menuState.l1FocusIndex,
