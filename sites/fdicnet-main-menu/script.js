@@ -665,7 +665,7 @@ function resetPanelSelection() {
   menuState.selectedL2Index = 0;
   menuState.previewL2Index = null;
   menuState.previewingOverview = false;
-  menuState.l1FocusIndex = defaultL1Index;
+  menuState.l1FocusIndex = defaultL1Index ?? 0;
   menuState.mobileDrillPath = [];
   menuState.lastMobileDrillPath = null;
 }
