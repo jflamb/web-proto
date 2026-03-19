@@ -39,6 +39,7 @@ menu:
       ariaLabel: "News & Events menu"
       overviewLabel: "News & Events Overview"
       overviewHref: "#news-and-events-overview"
+      description: "Stay current with FDIC announcements, upcoming events, and multimedia content."
       l1:
         -
           id: "news-and-events-overview"
@@ -141,6 +142,7 @@ menu:
       ariaLabel: "Career Development & Training menu"
       overviewLabel: "Career Development & Training Overview"
       overviewHref: "#career-development-and-training-overview"
+      description: "Find training programs, job opportunities, and professional development resources to grow your career at the FDIC."
       l1:
         -
           id: "career-development-and-training-overview"
@@ -672,6 +674,7 @@ menu:
       ariaLabel: "Knowledge Base menu"
       overviewLabel: "Knowledge Base Overview"
       overviewHref: "#knowledge-base-overview"
+      description: "Access policies, procedures, reference materials, and institutional knowledge across all FDIC divisions."
       l1:
         -
           id: "knowledge-base-overview"
@@ -2643,6 +2646,7 @@ menu:
       ariaLabel: "Benefits menu"
       overviewLabel: "Benefits Overview"
       overviewHref: "#benefits-overview"
+      description: "Review your compensation, health coverage, retirement options, and other employee benefit programs."
       l1:
         -
           id: "benefits-overview"
@@ -3154,6 +3158,7 @@ menu:
       ariaLabel: "Employee Services menu"
       overviewLabel: "Employee Services Overview"
       overviewHref: "#employee-services-overview"
+      description: "Get help with IT, workplace, travel, library, and day-to-day operational support."
       l1:
         -
           id: "employee-services-overview"
@@ -4771,6 +4776,7 @@ menu:
       ariaLabel: "About menu"
       overviewLabel: "About Overview"
       overviewHref: "#about-overview"
+      description: "Learn about the FDIC's mission, organizational structure, regional offices, and workplace initiatives."
       l1:
         -
           id: "about-overview"
