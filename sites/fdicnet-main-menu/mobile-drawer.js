@@ -229,6 +229,50 @@
       list.appendChild(li);
     }
 
+    function appendMobileDrillDescriptionItem(list, description) {
+      const text = typeof description === "string" ? description.trim() : "";
+      if (!text) return;
+
+      const li = document.createElement("li");
+      li.className = "mobile-drill-description-item";
+
+      const block = document.createElement("div");
+      block.className = "mobile-drill-description";
+      block.textContent = text;
+
+      li.appendChild(block);
+      list.appendChild(li);
+    }
+
+    function getL1FallbackDescription(item, panelLabel = "this section", isOverview = false) {
+      const label = item?.label || "this section";
+      if (isOverview) {
+        return `Start with the full ${panelLabel} overview, then jump to the area you need.`;
+      }
+      return `Explore ${label} services, guidance, and related resources.`;
+    }
+
+    function getL1MenuDescription(item, panelLabel = "this section", isOverview = false) {
+      const explicitDescription = item?.description || getL2Overview(item)?.description || "";
+      if (explicitDescription) {
+        return explicitDescription;
+      }
+      return getL1FallbackDescription(item, panelLabel, isOverview);
+    }
+
+    function getL2Overview(item) {
+      if (!item) return null;
+      return item.l2Overview || (
+        item.overviewLabel || item.overviewHref
+          ? {
+              label: item.overviewLabel || `${item.label || "Overview"} Overview`,
+              href: item.overviewHref || "#",
+              description: "",
+            }
+          : null
+      );
+    }
+
     function renderMobileDrillRoot(panelContainer, panelKeys, siteContent) {
       const list = createMobileDrillList();
       panelKeys.forEach((panelKey) => {
@@ -254,6 +298,17 @@
       const hasOverviewRow = l1Items.length > 1;
       const primaryItems = hasOverviewRow ? l1Items.slice(1) : l1Items;
 
+      if (hasOverviewRow) {
+        const panelLabel = getPanelLabel(panelKey, panelConfig);
+        appendMobileDrillLinkItem(
+          list,
+          panelLabel,
+          panelConfig.overviewHref || "#",
+          `panel:${panelKey}`
+        );
+        appendMobileDrillDescriptionItem(list, panelConfig.description || "");
+      }
+
       primaryItems.forEach((l1Item, orderIndex) => {
         const l1Index = hasOverviewRow ? orderIndex + 1 : orderIndex;
         const hasChildren = Array.isArray(l1Item.l2) && l1Item.l2.length > 0;
@@ -264,22 +319,6 @@
         });
       });
 
-      if (hasOverviewRow) {
-        const divider = document.createElement("li");
-        divider.className = "mobile-drill-separator-item";
-        divider.setAttribute("aria-hidden", "true");
-        const dividerLine = document.createElement("span");
-        dividerLine.className = "mobile-drill-separator-line";
-        divider.appendChild(dividerLine);
-        list.appendChild(divider);
-
-        const overviewItem = l1Items[0];
-        appendMobileDrillItem(list, overviewItem.label || "Overview", [panelKey, 0], {
-          hasChildren: Array.isArray(overviewItem.l2) && overviewItem.l2.length > 0,
-          href: overviewItem.href || overviewItem.overviewHref || "#",
-          targetId: `l1:${panelKey}:0`,
-        });
-      }
       panelContainer.appendChild(list);
     }
 
@@ -294,6 +333,16 @@
       );
 
       const list = createMobileDrillList();
+      appendMobileDrillLinkItem(
+        list,
+        l1Item.label || "Section",
+        l1Item.href || l1Item.overviewHref || "#",
+        `l2overview:${panelKey}:${l1Index}`
+      );
+      appendMobileDrillDescriptionItem(
+        list,
+        getL1MenuDescription(l1Item, getPanelLabel(panelKey, panelConfig))
+      );
       (l1Item.l2 || []).forEach((l2Item, l2Index) => {
         const hasChildren = Array.isArray(l2Item.l3) && l2Item.l3.length > 0;
         appendMobileDrillItem(list, l2Item.label || "Link", [panelKey, l1Index, l2Index], {
@@ -302,12 +351,6 @@
           targetId: `l2:${panelKey}:${l1Index}:${l2Index}`,
         });
       });
-      appendMobileDrillLinkItem(
-        list,
-        l1Item.label || "Section",
-        l1Item.href || l1Item.overviewHref || "#",
-        `l2overview:${panelKey}:${l1Index}`
-      );
       panelContainer.appendChild(list);
     }
 
@@ -326,6 +369,14 @@
       list.className = "mobile-drill-link-list";
       list.setAttribute("role", "list");
 
+      appendMobileDrillLinkItem(
+        list,
+        l2Item.label || "Link",
+        l2Item.href || "#",
+        `l2:${panelKey}:${l1Index}:${l2Index}`
+      );
+      appendMobileDrillDescriptionItem(list, l2Item.description || "");
+
       (l2Item.l3 || []).forEach((l3Item, l3Index) => {
         const li = document.createElement("li");
         li.className = "mobile-drill-link-item";
@@ -339,13 +390,6 @@
         li.appendChild(link);
         list.appendChild(li);
       });
-
-      appendMobileDrillLinkItem(
-        list,
-        l2Item.label || "Link",
-        l2Item.href || "#",
-        `l2:${panelKey}:${l1Index}:${l2Index}`
-      );
       panelContainer.appendChild(list);
     }
 
@@ -482,7 +526,6 @@
       if (typeof l1Index !== "number") {
         const region = createMobileDrillRegion(panelContainer, `${getPanelLabel(panelKey, panelConfig)} sections`);
         renderMobileDrillL1(region, panelKey, panelConfig);
-        renderMobileDrillContext(region, getMobileContextNodes(panelKey, panelConfig, null, null));
         announceMobileDrillContext(panelKey, panelConfig, null, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
@@ -495,7 +538,6 @@
         const headingText = `${l1Item?.label || getPanelLabel(panelKey, panelConfig)} links`;
         const region = createMobileDrillRegion(panelContainer, headingText);
         renderMobileDrillL2(region, panelKey, panelConfig, l1Index);
-        renderMobileDrillContext(region, getMobileContextNodes(panelKey, panelConfig, l1Index, null));
         announceMobileDrillContext(panelKey, panelConfig, l1Index, null, panelKeys);
         ensureMobileMenuFocus();
         animateMobileDrillReveal(panelContainer);
@@ -507,7 +549,6 @@
       const l2Item = (l1Item?.l2 || [])[l2Index];
       const region = createMobileDrillRegion(panelContainer, `${l2Item?.label || "Section"} links`);
       renderMobileDrillL3(region, panelKey, panelConfig, l1Index, l2Index);
-      renderMobileDrillContext(region, getMobileContextNodes(panelKey, panelConfig, l1Index, l2Index));
       announceMobileDrillContext(panelKey, panelConfig, l1Index, l2Index, panelKeys);
       ensureMobileMenuFocus();
       animateMobileDrillReveal(panelContainer);

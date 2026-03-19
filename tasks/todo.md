@@ -3928,3 +3928,41 @@
 - Review notes:
   - verified the README content against `index.html`, `content.yaml`, `state.js`, `components.js`, `mobile-drawer.js`, `events.js`, `script.js`, `init.js`, and the Drupal wrapper files under `components/fdicnet-main-menu`.
   - explicitly documented that the current SDC Twig wrapper still lags the latest static mobile-search markup, so contributors understand the present integration risk before deploying to Drupal.
+
+## Current Task (FDICnet Column 2 Intro Consolidation)
+- [x] Remove the mega-menu description mode picker from the shared static and Drupal shells.
+- [x] Collapse `fdicnet-main-menu` desktop menu rendering onto the fixed Column 2 intro structure.
+- [x] Remove obsolete multi-mode state, persistence, and picker-only styling.
+- [x] Run sync/syntax checks plus a browser smoke test and record the result.
+
+## Review / Results (FDICnet Column 2 Intro Consolidation)
+- Updated `sites/fdicnet-main-menu/index.html` and `sites/fdicnet-main-menu/components/fdicnet-main-menu/fdicnet-main-menu.twig`:
+  - removed the prototype-only description mode picker so both shells now expose only the page title and intro content below the header.
+- Updated `sites/fdicnet-main-menu/script.js`, `sites/fdicnet-main-menu/state.js`, and `sites/fdicnet-main-menu/components.js`:
+  - removed the stored `descriptionMode` state and the now-obsolete radio-control event handling.
+  - simplified the desktop mega-menu view model so the selected L1 description always feeds the column-2 intro treatment.
+  - deleted the inline-description branches so the component renders only the fixed Column 2 intro structure.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - removed the unused picker panel and segmented-control styles.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node --check sites/fdicnet-main-menu/components.js`
+  - `node --check sites/fdicnet-main-menu/state.js`
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser verification at `http://127.0.0.1:4177/sites/fdicnet-main-menu/index.html` at `1440x900` confirmed:
+    - the option picker is no longer present.
+    - opening `News & Events` shows `News Overview` first in column 2, followed immediately by the intro copy `Explore News services, guidance, and related resources.`
+    - the fixed column-intro hooks remain active (`#l2List.menu-list--with-column-intro`, `.mega-col--l2[data-column-intro="true"]`, and hidden fallback `#l2Description`).
+
+## Current Task (FDICnet Active Tab Blend Regression)
+- [x] Inspect the active-tab radial blend regression in the desktop mega-menu.
+- [x] Restore the white-to-column background transition without regressing active-tab or panel layering.
+- [x] Verify the blend in-browser and record results.
+
+## Review / Results (FDICnet Active Tab Blend Regression)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - tightened `.mega-menu-inner::after` from a full-panel overlay to a `180px`-tall top-band spotlight so the effect reads as a local bridge under the active tab instead of a white wash across all three columns.
+  - changed the radial gradient stops to transition from near-white into the column-2 surface tone (`rgba(247, 250, 252, ...)`) before fading out, which restores the intended blend between the white active tab and the adjoining menu column background.
+- Validation:
+  - browser verification at `http://127.0.0.1:4177/sites/fdicnet-main-menu/index.html` at `1440x900` confirmed the open `Knowledge Base` menu now computes the spotlight as `height: 180px` with `radial-gradient(220px 140px at 433.535px 0%, ...)`, keeping the blend localized to the top transition area.
+  - browser screenshot review confirmed the active-tab blend no longer reads as a broad white overlay across the entire mega-menu panel.
