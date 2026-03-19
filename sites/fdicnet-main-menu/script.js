@@ -306,26 +306,64 @@ function isPhoneViewport() {
   return phoneSearchMediaQuery.matches;
 }
 
+function syncMobileBackdropState() {
+  if (!mobileNavBackdrop) return;
+  const isOpen = isMobileViewport() && (menuState.mobileNavOpen || menuState.mobileSearchOpen);
+  mobileNavBackdrop.hidden = !isOpen;
+  mobileNavBackdrop.classList.toggle("is-visible", isOpen);
+}
+
 function syncMobileSearchState({ focus = false } = {}) {
   if (!mobileSearchToggle || !mobileSearchRow) return;
   const phone = isPhoneViewport();
   mobileSearchToggle.hidden = !phone;
   if (!phone) {
     menuState.mobileSearchOpen = false;
+    if (menuState.mobileSearchCloseHideTimer) {
+      window.clearTimeout(menuState.mobileSearchCloseHideTimer);
+      menuState.mobileSearchCloseHideTimer = null;
+    }
+    mobileSearchRow.classList.remove("is-open");
     mobileSearchToggle.setAttribute("aria-expanded", "false");
     mobileSearchToggle.setAttribute("aria-label", "Open search");
     mobileSearchRow.hidden = true;
     document.body.classList.remove("mobile-search-open");
+    syncMobileBackdropState();
+    syncMobileBackgroundInertState();
     return;
   }
   mobileSearchToggle.setAttribute("aria-expanded", menuState.mobileSearchOpen ? "true" : "false");
   mobileSearchToggle.setAttribute("aria-label", menuState.mobileSearchOpen ? "Close search" : "Open search");
-  mobileSearchRow.hidden = !menuState.mobileSearchOpen;
   document.body.classList.toggle("mobile-search-open", menuState.mobileSearchOpen);
-  if (focus && menuState.mobileSearchOpen && mobileSearchInput) {
-    mobileSearchInput.focus();
-    mobileSearchInput.select();
+  if (menuState.mobileSearchCloseHideTimer) {
+    window.clearTimeout(menuState.mobileSearchCloseHideTimer);
+    menuState.mobileSearchCloseHideTimer = null;
   }
+  if (menuState.mobileSearchOpen) {
+    mobileSearchRow.hidden = false;
+    // Force reflow so the browser registers the initial (off-screen) state
+    // before we add is-open — this preserves the slide-in CSS transition.
+    void mobileSearchRow.offsetHeight;
+    mobileSearchRow.classList.add("is-open");
+    if (focus && menuState.mobileSearchOpen && mobileSearchInput) {
+      mobileSearchInput.focus();
+      mobileSearchInput.select();
+    }
+  } else {
+    mobileSearchRow.classList.remove("is-open");
+    if (reduceMotionMediaQuery.matches) {
+      mobileSearchRow.hidden = true;
+    } else {
+      menuState.mobileSearchCloseHideTimer = window.setTimeout(() => {
+        menuState.mobileSearchCloseHideTimer = null;
+        if (!menuState.mobileSearchOpen) {
+          mobileSearchRow.hidden = true;
+        }
+      }, 240);
+    }
+  }
+  syncMobileBackdropState();
+  syncMobileBackgroundInertState();
 }
 
 function setMobileSearchOpen(isOpen, { focus = false } = {}) {
@@ -343,11 +381,12 @@ function setInertState(element, isInert) {
 }
 
 function syncMobileBackgroundInertState() {
-  const shouldInert = isMobileViewport() && menuState.mobileNavOpen;
-  setInertState(mainContent, shouldInert);
-  setInertState(mastheadControls, shouldInert);
-  setInertState(mastheadWordmark, shouldInert);
-  setInertState(mobileSearchRow, shouldInert);
+  const shouldInertMain = isMobileViewport() && (menuState.mobileNavOpen || menuState.mobileSearchOpen);
+  setInertState(mainContent, shouldInertMain);
+  setInertState(mastheadControls, isMobileViewport() && menuState.mobileNavOpen);
+  setInertState(mastheadWordmark, shouldInertMain);
+  setInertState(navList, isMobileViewport() && menuState.mobileSearchOpen);
+  setInertState(mobileSearchRow, isMobileViewport() && menuState.mobileNavOpen);
 }
 
 function syncMobileToggleButton() {
@@ -439,8 +478,7 @@ function syncMobileNavState() {
       menuState.mobileNavCloseHideTimer = null;
     }
     if (mobileNavBackdrop) {
-      mobileNavBackdrop.hidden = true;
-      mobileNavBackdrop.classList.remove("is-visible");
+      syncMobileBackdropState();
     }
     navToggle.setAttribute("aria-expanded", "false");
     syncMobileToggleButton();
@@ -453,10 +491,7 @@ function syncMobileNavState() {
   navToggle.setAttribute("aria-expanded", menuState.mobileNavOpen ? "true" : "false");
   syncMobileToggleButton();
   header.classList.toggle("mobile-menu-open", menuState.mobileNavOpen);
-  if (mobileNavBackdrop) {
-    mobileNavBackdrop.hidden = !menuState.mobileNavOpen;
-    mobileNavBackdrop.classList.toggle("is-visible", menuState.mobileNavOpen);
-  }
+  syncMobileBackdropState();
   syncMobileBackgroundInertState();
 
   if (menuState.mobileNavOpen) {
@@ -993,6 +1028,7 @@ function getMegaMenuViewModel() {
     l1Items,
     selectedL1Index: menuState.selectedL1Index,
     l1FocusIndex: menuState.l1FocusIndex,
+    l1Description: panel?.description || "",
     l2Items: selectedL1?.l2 || [],
     activeL2Index: getVisibleL2Index(),
     l2Overview,
