@@ -1,5 +1,43 @@
 # TODO
 
+## Current Task (Indeterminate Progress Animation)
+- [x] Diagnose why the indeterminate progress bar is not animating.
+- [x] Fix the root cause in the typography site assets.
+- [x] Verify the animation in-browser and record the result.
+
+## Review / Results (Indeterminate Progress Animation)
+- Root cause:
+  - the original indeterminate treatment used hard-edged repeated diagonal segments directly on the rounded native progress control.
+  - even after restoring animation, those tiled segments were clipped by the bar radius, which made the leading/trailing edges look jagged and visually misaligned.
+- Fix:
+  - added explicit `appearance: none` / `-webkit-appearance: none` to the progress control.
+  - moved the indeterminate animation onto `.prose progress:not([value])` and made the vendor progress pseudo-elements transparent for that state.
+  - replaced the repeated stripe tile with a single angled shimmer gradient that sweeps across the bar, which preserves motion without the clipped segment seams.
+- Verification:
+  - browser verification against `http://127.0.0.1:8765/sites/fdic-typography/index.html` confirmed `#progress-upload` now has a running `prose-progress-indeterminate` animation.
+  - repeated computed-style checks showed the indeterminate progress background position changing over time in Chromium with the new shimmer treatment active.
+
+## Current Task (Branch Cleanup)
+- [x] Audit local and remote branches against `main`.
+- [x] Delete branches whose content is already in `main`.
+- [x] Verify remaining branches and record the cleanup results.
+
+## Review / Results (Branch Cleanup)
+- Deleted remote branches already fully contained in `main`:
+  - `feat/fdic-typography-content-refresh`
+  - `feat/fdic-typography-import`
+  - `feat/fdicnet-main-menu-column2-intro-mobile-followups`
+  - `hover-styling`
+  - `mobile-menu-styling`
+- Verified remaining remote branches still have content not reachable from `origin/main`:
+  - `docs/default-delivery-workflow`
+  - `feat/fdicnet-menu-consistency-a11y`
+  - `feat/fdicnet-menu-launcher`
+  - `feat/fdicnet-menu-web-components`
+  - `fix/fdicnet-menu-review-findings`
+- Additional note:
+  - `feat/fdicnet-menu-consistency-a11y` and `fix/fdicnet-menu-review-findings` are patch-equivalent to each other, but neither is fully represented in `main`, so both were retained.
+
 ## Current Task (.claude Cleanup)
 - [x] Add repo ignore rules for `.claude/` directories.
 - [x] Remove tracked `.claude` content from the current branch without disturbing unrelated changes.
