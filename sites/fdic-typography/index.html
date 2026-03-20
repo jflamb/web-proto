@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<a href="#typography" class="skip-link sr-only">Skip to content</a>
+<a href="#main" class="skip-link sr-only">Skip to content</a>
 <article class="prose" id="main">
 
 <h1 id="top">Penny Prose Style Guide</h1>
@@ -29,6 +29,7 @@
     <li><a href="#media">Media</a></li>
     <li><a href="#components">Components</a></li>
     <li><a href="#footnotes">Footnotes</a></li>
+    <li><a href="#accessibility">Accessibility</a></li>
   </ul>
 </nav>
 
@@ -54,7 +55,7 @@
 <p>Disclaimers, version notes, and legal caveats are everywhere in regulatory content. The <code>&lt;small&gt;</code> element renders text at a reduced size in a secondary color — readable but clearly subordinate to surrounding content.</p>
 <p><small>The prose component is provided as-is under the FDIC Design System and may change in future releases. Refer to the design system changelog for the latest updates.</small></p>
 
-<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<p class="prose-back-to-top"><a href="#top">Back to top <span class="prose-icon-inline" aria-hidden="true">&uarr;</span></a></p>
 <hr />
 
 <!-- ================================================================== -->
@@ -65,15 +66,19 @@
 
 <h3>Links</h3>
 <p>Links are underlined in the <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> brand blue (<code>#1278b0</code>) with a subtle, partially transparent 1px underline at rest. On hover, three properties animate together: the underline thickens to 2px, drops from a 2px to 4px offset, and saturates from 40% to full opacity &mdash; creating a clearly perceptible response without being flashy. Visited links shift to a muted purple (<code>#855AA5</code>) that darkens slightly on hover. Here&rsquo;s <a href="https://www.fdic.gov">a link to the FDIC website</a> and here&rsquo;s <a href="https://www.fdic.gov/about">one you may have visited before</a>. External links display a small arrow icon after the text &mdash; for example, <a href="https://en.wikipedia.org/wiki/Federal_Deposit_Insurance_Corporation">the FDIC article on Wikipedia</a>.</p>
+<p><strong>Accessibility:</strong> All links receive a visible <code>:focus-visible</code> outline (2px solid blue, 2px offset) for keyboard users. External-link icons are applied via CSS <code>background-image</code> and are purely decorative &mdash; screen readers announce the link text alone. Ensure link text is descriptive; avoid generic labels like &ldquo;click here&rdquo; or &ldquo;read more,&rdquo; which are meaningless out of context (WCAG 2.4.4).</p>
 
 <h3>Bold and emphasis</h3>
-<p>Use <code>&lt;strong&gt;</code> for <strong>strong importance</strong> and <code>&lt;em&gt;</code> for <em>stress emphasis</em>. Bold text uses weight 600 (semibold) rather than 700 to match the heading weight and avoid looking heavy in body copy. You can combine them for <strong><em>strong emphasis</em></strong> when warranted.</p>
+<p>Use <code>&lt;strong&gt;</code> to mark text with <strong>strong importance</strong> &mdash; content the reader must not skip, such as warnings, key terms in instructions, or critical figures: <strong>deposits exceeding $250,000 are not insured</strong>. Do not use <code>&lt;strong&gt;</code> for visual styling alone; if text should be bold but carries no extra importance (like a label in a list), use CSS <code>font-weight: 600</code> instead.</p>
+<p>Use <code>&lt;em&gt;</code> for <em>stress emphasis</em> &mdash; words that would be vocally stressed when read aloud, changing the meaning of a sentence. Compare &ldquo;the bank <em>was</em> adequately capitalized&rdquo; (it was, despite doubts) with &ldquo;the bank was adequately <em>capitalized</em>&rdquo; (capitalized specifically, not necessarily liquid). Do not use <code>&lt;em&gt;</code> for titles of works (use <code>&lt;cite&gt;</code>), technical terms (use <code>&lt;dfn&gt;</code> on first use), or foreign phrases (use <code>&lt;i lang="..."&gt;</code>).</p>
+<p>Bold text renders at weight 600 (semibold) rather than 700, matching the heading weight and avoiding a heavy appearance in body copy. You can combine them for <strong><em>strong emphasis</em></strong> when both importance and vocal stress apply &mdash; but this should be rare.</p>
 
 <h3>Inline code</h3>
 <p>Inline <code>&lt;code&gt;</code> elements render in the system monospace stack at a slightly reduced size, with a subtle background and border: <code>font-size: 0.8em</code>. Use it for tag names like <code>&lt;article&gt;</code>, property names like <code>margin-top</code>, or values like <code>1.5rem</code>.</p>
 
 <h3>Abbreviations</h3>
 <p>The <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> was established in 1933 to maintain public confidence in the nation&rsquo;s financial system.<sup><a href="#fn1" id="ref1" role="doc-noteref">[1]</a></sup> Abbreviations with a <code>title</code> attribute get a dotted underline and a help cursor &mdash; hover over &ldquo;<abbr title="Federal Deposit Insurance Corporation">FDIC</abbr>&rdquo; to see the tooltip. Use <code>&lt;abbr title="&hellip;"&gt;</code> for the first occurrence of any acronym on a page.</p>
+<p><strong>Accessibility:</strong> The <code>title</code> attribute on <code>&lt;abbr&gt;</code> is not announced by most screen readers by default. Always spell out the full term in visible text on first use &mdash; for example, &ldquo;Federal Deposit Insurance Corporation (<abbr title="Federal Deposit Insurance Corporation">FDIC</abbr>)&rdquo; &mdash; so the expansion is available to all users regardless of assistive technology.</p>
 
 <h3>Keyboard input</h3>
 <p>The <code>&lt;kbd&gt;</code> element represents keyboard input. It renders as a raised pill that mimics a physical key: <kbd>Ctrl</kbd> + <kbd>S</kbd> to save, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> to toggle full-screen mode. The subtle bottom border creates a three-dimensional appearance.</p>
@@ -83,6 +88,7 @@
 
 <h3>Insertions and deletions</h3>
 <p>The <code>&lt;del&gt;</code> and <code>&lt;ins&gt;</code> elements mark removed and added text, useful for tracking amendments in regulatory documents. For example, the standard insurance limit was raised from <del><span class="sr-only">deleted: </span>$100,000</del> to <ins><span class="sr-only">inserted: </span>$250,000</ins> per depositor in 2008.</p>
+<p><strong>Accessibility:</strong> Screen readers do not consistently announce <code>&lt;del&gt;</code> and <code>&lt;ins&gt;</code> semantics. Include a visually hidden <code>&lt;span class="sr-only"&gt;</code> inside each element (e.g., <code>deleted:</code> or <code>inserted:</code>) so assistive technology conveys the change. This is a Section&nbsp;508 best practice for revision-tracked content.</p>
 
 <h3>Dates and times</h3>
 <p>The <code>&lt;time&gt;</code> element associates human-readable dates with a machine-readable <code>datetime</code> attribute. When a <code>title</code> attribute is present, it displays the ISO date on hover: the FDIC was established on <time datetime="1933-06-16" title="1933-06-16">June 16, 1933</time>. Quarterly Call Reports are due within <time datetime="P30D" title="30 days">30 days</time> of each quarter end — for example, the Q4 2025 report was due by <time datetime="2026-01-30" title="2026-01-30">January 30, 2026</time>.</p>
@@ -118,7 +124,7 @@
 <h3>Word break opportunities</h3>
 <p>The <code>&lt;wbr&gt;</code> element suggests optional line-break points within long strings that would otherwise overflow. This is useful for certificate numbers (CERT<wbr>#<wbr>00012345<wbr>-<wbr>2026<wbr>-<wbr>Q1<wbr>-<wbr>RC), long URLs, or regulatory reference codes that lack natural break points. The browser will only break at a <code>&lt;wbr&gt;</code> if the line would otherwise overflow.</p>
 
-<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<p class="prose-back-to-top"><a href="#top">Back to top <span class="prose-icon-inline" aria-hidden="true">&uarr;</span></a></p>
 <hr />
 
 <!-- ================================================================== -->
@@ -162,15 +168,6 @@
   text-wrap: pretty;
 }</code></pre>
 
-<h3>Addresses</h3>
-<p>The <code>&lt;address&gt;</code> element marks up contact information for the nearest <code>&lt;article&gt;</code> or <code>&lt;body&gt;</code> ancestor. Browser defaults render it in italic, which the prose component overrides to match body text. Use it for office locations, mailing addresses, or institutional contacts:</p>
-<address>
-  Federal Deposit Insurance Corporation<br />
-  550 17th Street NW<br />
-  Washington, D.C. 20429<br />
-  <a href="tel:+18773753342">(877) 375-3342</a>
-</address>
-
 <h3>Wrapping code blocks</h3>
 <p>By default, code blocks scroll horizontally when content overflows. For configuration files, log output, or prose-heavy code, add <code>class="prose-pre-wrap"</code> to enable word wrapping instead:</p>
 <pre class="prose-pre-wrap"><code>ERROR 2026-01-15T09:23:41Z [fdic-ingest] Failed to process Call Report CR-2026-Q1 for institution CERT#12345: validation error in Schedule RC-R, line item 43 — reported Tier 1 capital ratio (3.8%) falls below the minimum threshold (4.0%). Report has been flagged for supervisory review. Contact the institution's primary federal regulator for corrective action within 30 calendar days.</code></pre>
@@ -186,10 +183,19 @@
   FDIC Reserve Ratio:    1.28%
 </pre>
 
+<h3>Addresses</h3>
+<p>The <code>&lt;address&gt;</code> element marks up contact information for the nearest <code>&lt;article&gt;</code> or <code>&lt;body&gt;</code> ancestor. Browser defaults render it in italic, which the prose component overrides to match body text. Use it for office locations, mailing addresses, or institutional contacts:</p>
+<address>
+  Federal Deposit Insurance Corporation<br />
+  550 17th Street NW<br />
+  Washington, D.C. 20429<br />
+  <a href="tel:+18773753342">(877) 375-3342</a>
+</address>
+
 <h3>Horizontal rules</h3>
 <p>Horizontal rules provide strong visual breaks between major sections. They use generous vertical margins (<code>3rem</code> above and below) so they don't crowd adjacent content. There's one between each top-level section on this page.</p>
 
-<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<p class="prose-back-to-top"><a href="#top">Back to top <span class="prose-icon-inline" aria-hidden="true">&uarr;</span></a></p>
 <hr />
 
 <!-- ================================================================== -->
@@ -260,8 +266,8 @@
 </li>
 </ol>
 
-<h3>Lettered and roman numeral lists</h3>
-<p>Legal and regulatory text frequently uses lettered (<code>type="a"</code>) and roman numeral (<code>type="i"</code>) sub-lists for nested clauses. Padding adjusts automatically to accommodate wider markers:</p>
+<h3>Lettered and Roman numeral lists</h3>
+<p>Legal and regulatory text frequently uses lettered (<code>type="a"</code>) and Roman numeral (<code>type="i"</code>) sub-lists for nested clauses. Padding adjusts automatically to accommodate wider markers:</p>
 <ol>
 <li>
   <strong>Section 3(a) &mdash; Definitions.</strong> For the purposes of this regulation:
@@ -320,7 +326,7 @@
   <dd>In legal proceedings, the questioning of a witness under oath, as in direct examination or cross-examination.</dd>
 </dl>
 
-<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<p class="prose-back-to-top"><a href="#top">Back to top <span class="prose-icon-inline" aria-hidden="true">&uarr;</span></a></p>
 <hr />
 
 <!-- ================================================================== -->
@@ -329,6 +335,7 @@
 
 <h2 id="tables">Tables</h2>
 <p>Tables use the brand blue for header backgrounds with white text. Body rows alternate with subtle striping, and a hover highlight aids row tracking. The <code>&lt;caption&gt;</code> element provides an accessible title, and <code>&lt;tfoot&gt;</code> contains summary rows.</p>
+<p><strong>Accessibility:</strong> Tables are wrapped in a <code>&lt;div class="prose-table-wrapper"&gt;</code> with <code>role="region"</code>, a descriptive <code>aria-label</code>, and <code>tabindex="0"</code>. This pattern preserves native table semantics for screen readers (row/column navigation) while allowing keyboard users to scroll wide tables. Never apply <code>display: block</code> to a <code>&lt;table&gt;</code> element &mdash; it destroys the accessibility tree. Use <code>scope="col"</code> on column headers and <code>scope="row"</code> on row headers so screen readers announce headers when navigating cells. The <code>&lt;caption&gt;</code> element provides a programmatic name for the table, announced when a screen reader enters the table context.</p>
 
 <h3>Column alignment</h3>
 <p>Choose alignment based on what the column contains. The goal is to make values easy to scan and compare vertically:</p>
@@ -441,7 +448,7 @@
 </table>
 </div>
 
-<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<p class="prose-back-to-top"><a href="#top">Back to top <span class="prose-icon-inline" aria-hidden="true">&uarr;</span></a></p>
 <hr />
 
 <!-- ================================================================== -->
@@ -456,6 +463,7 @@
 <img src="https://placehold.co/720x400?text=720+%C3%97+400" alt="Placeholder image demonstrating figure styling" />
 <figcaption>Captions appear below the image in a smaller size and secondary color, providing context without competing with body text for attention.</figcaption>
 </figure>
+<p><strong>Accessibility:</strong> Every <code>&lt;img&gt;</code> must have an <code>alt</code> attribute. Use descriptive alt text that conveys the image&rsquo;s purpose (not just &ldquo;image of&hellip;&rdquo;). For purely decorative images, use <code>alt=""</code> so screen readers skip them. Video and audio elements should include text fallback content inside the element, and use <code>&lt;figcaption&gt;</code> or a transcript link for users who cannot perceive the media. The <code>title</code> attribute on <code>&lt;iframe&gt;</code> embeds provides an accessible name for screen readers (WCAG 4.1.2).</p>
 
 <h3>Responsive images</h3>
 <p>The <code>&lt;picture&gt;</code> element with <code>&lt;source&gt;</code> children lets CMS tools serve different images at different viewport widths. The prose component styles the rendered <code>&lt;img&gt;</code> identically regardless of which source is selected:</p>
@@ -518,7 +526,7 @@
   &lt;figcaption&gt;Episode description and metadata.&lt;/figcaption&gt;
 &lt;/figure&gt;</code></pre>
 
-<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<p class="prose-back-to-top"><a href="#top">Back to top <span class="prose-icon-inline" aria-hidden="true">&uarr;</span></a></p>
 <hr />
 
 <!-- ================================================================== -->
@@ -561,9 +569,9 @@
   </div>
 </div>
 
-<p>Callout markup uses a simple flex layout with an icon span and a content div:</p>
-<pre><code class="language-html">&lt;div class="prose-callout prose-callout-info"&gt;
-  &lt;span class="prose-callout-icon"&gt;&lt;/span&gt;
+<p><strong>Accessibility:</strong> Callouts use <code>role="note"</code> to identify them as supplementary information. The danger variant uses <code>role="alert"</code> so screen readers announce it immediately (ARIA live region semantics). Each callout carries an <code>aria-label</code> matching its variant (e.g., &ldquo;Information,&rdquo; &ldquo;Warning&rdquo;) and the decorative icon span uses <code>aria-hidden="true"</code> to prevent the SVG data URI from being announced. Always include these ARIA attributes in callout markup:</p>
+<pre><code class="language-html">&lt;div class="prose-callout prose-callout-info" role="note" aria-label="Information"&gt;
+  &lt;span class="prose-callout-icon" aria-hidden="true"&gt;&lt;/span&gt;
   &lt;div class="prose-callout-content"&gt;
     &lt;p&gt;Your callout text here.&lt;/p&gt;
   &lt;/div&gt;
@@ -604,6 +612,7 @@
 
 <h3>Collapsible sections</h3>
 <p>The <code>&lt;details&gt;</code> and <code>&lt;summary&gt;</code> elements create accordion-style collapsible sections. The summary uses a Phosphor chevron icon on the right side that rotates on open, with hover, active, and focus-visible states:</p>
+<p><strong>Accessibility:</strong> The <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code> pattern is natively keyboard-accessible &mdash; users can toggle with <kbd>Enter</kbd> or <kbd>Space</kbd>. Screen readers announce the summary as a button with an expanded/collapsed state. No additional ARIA is needed. The <code>:focus-visible</code> style provides a visible focus ring matching the design system&rsquo;s standard outline pattern. In print, all details are force-expanded so content is not hidden.</p>
 <details>
   <summary>What is deposit insurance?</summary>
   <p>Deposit insurance is a guarantee provided by the <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> that protects depositors against the loss of their insured deposits if an FDIC-insured bank or savings association fails. Since the FDIC was established in 1933, no depositor has lost a single penny of insured funds.</p>
@@ -617,7 +626,7 @@
   <p>When a bank fails, the FDIC is typically appointed as receiver. It assumes responsibility for selling or collecting the assets of the failed bank and settling its debts, including claims for deposits in excess of the insured limit. Insured depositors typically have access to their funds within two business days of the closure.</p>
 </details>
 
-<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<p class="prose-back-to-top"><a href="#top">Back to top <span class="prose-icon-inline" aria-hidden="true">&uarr;</span></a></p>
 <hr />
 
 <!-- ================================================================== -->
@@ -627,14 +636,18 @@
 <h2 id="footnotes">Footnotes</h2>
 <p>Footnotes use the standard scholarly pattern with bidirectional linking: a superscript reference<sup><a href="#fn3" id="ref3" role="doc-noteref">[3]</a></sup> in the body links down to the footnote, and a back-link (<code>↩</code>) in the footnote returns to the reference. Clicking a footnote highlights it briefly with the <code>:target</code> pseudo-class. The footnote section uses a partial-width horizontal rule as a visual separator<sup><a href="#fn4" id="ref4" role="doc-noteref">[4]</a></sup>:</p>
 
+<p><strong>Accessibility:</strong> Footnotes use <abbr title="Digital Publishing Accessibility Roles for Accessible Rich Internet Applications">DPUB-ARIA</abbr> roles for assistive technology. Inline references use <code>role="doc-noteref"</code> so screen readers announce them as note references, not generic links. The footnote section uses <code>role="doc-endnotes"</code> with an <code>aria-label</code>, each <code>&lt;li&gt;</code> uses <code>role="doc-footnote"</code>, and back-links use <code>role="doc-backlink"</code> with a descriptive <code>title</code>. The <code>:target</code> flash animation (yellow highlight) respects <code>prefers-reduced-motion</code> by falling back to a static highlight. Always include these roles in footnote markup:</p>
 <pre><code class="language-html">&lt;!-- Inline reference --&gt;
-&lt;sup&gt;&lt;a href="#fn1" id="ref1"&gt;[1]&lt;/a&gt;&lt;/sup&gt;
+&lt;sup&gt;&lt;a href="#fn1" id="ref1" role="doc-noteref"&gt;[1]&lt;/a&gt;&lt;/sup&gt;
 
 &lt;!-- Footnote section --&gt;
-&lt;section class="prose-footnotes"&gt;
+&lt;section class="prose-footnotes" role="doc-endnotes" aria-label="Footnotes"&gt;
   &lt;hr /&gt;
   &lt;ol&gt;
-    &lt;li id="fn1"&gt;Footnote text. &lt;a href="#ref1"&gt;&amp;#8617;&lt;/a&gt;&lt;/li&gt;
+    &lt;li id="fn1" role="doc-footnote"&gt;
+      Footnote text.
+      &lt;a href="#ref1" role="doc-backlink" title="Back to reference"&gt;&amp;#x21a9;&lt;/a&gt;
+    &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/section&gt;</code></pre>
 
@@ -650,6 +663,62 @@
     <li id="fn4" role="doc-footnote">The footnote section uses <code>font-size: 0.875em</code> and a 33%-width <code>hr</code> aligned to the left. The <code>:target</code> highlight on clicked footnotes uses the same warm yellow as the <code>mark</code> element, with a 1.5-second fade-out transition. <a href="#ref4" role="doc-backlink" title="Back to reference">↩</a></li>
   </ol>
 </section>
+
+<p class="prose-back-to-top"><a href="#top">Back to top <span class="prose-icon-inline" aria-hidden="true">&uarr;</span></a></p>
+<hr />
+
+<!-- ================================================================== -->
+<!--  ACCESSIBILITY                                                     -->
+<!-- ================================================================== -->
+
+<h2 id="accessibility">Accessibility</h2>
+<p class="lead">The prose component is designed for WCAG 2.1 AA conformance and Section&nbsp;508 compliance. This section summarizes the accessibility patterns used throughout.</p>
+
+<h3>Keyboard access</h3>
+<p>Every interactive element in the prose component is reachable and operable via keyboard alone:</p>
+<ul>
+<li><strong>Skip link:</strong> The first element in <code>&lt;body&gt;</code> is <code>&lt;a href="#main" class="skip-link sr-only"&gt;Skip to content&lt;/a&gt;</code>. It becomes visible on focus, allowing keyboard users to bypass navigation and jump directly to the main content area.</li>
+<li><strong>Focus indicators:</strong> All focusable elements use <code>:focus-visible</code> with a <code>2px solid</code> blue outline at <code>2px offset</code>. This meets WCAG 2.4.7 (Focus Visible). The <code>:focus-visible</code> pseudo-class ensures outlines appear only for keyboard navigation, not mouse clicks.</li>
+<li><strong>Scrollable regions:</strong> Table wrappers and code blocks use <code>tabindex="0"</code> so keyboard users can scroll overflowing content with arrow keys. Each scrollable region has <code>role="region"</code> and an <code>aria-label</code> so screen readers announce entry into a scrollable area.</li>
+<li><strong>Details/summary:</strong> Natively keyboard-operable &mdash; <kbd>Enter</kbd> or <kbd>Space</kbd> toggles the expanded state.</li>
+</ul>
+
+<h3>Screen reader support</h3>
+<p>Semantic HTML and ARIA roles provide a clear experience for assistive technology users:</p>
+<dl>
+  <dt><code>role="note"</code> / <code>role="alert"</code></dt>
+  <dd>Callouts use <code>role="note"</code> for informational content. The danger callout uses <code>role="alert"</code> to ensure immediate announcement by screen readers (ARIA live region semantics).</dd>
+
+  <dt><code>role="doc-noteref"</code>, <code>role="doc-footnote"</code>, <code>role="doc-backlink"</code></dt>
+  <dd>DPUB-ARIA roles on footnote references, footnote items, and back-links help screen readers convey the bidirectional footnote relationship. The wrapping <code>&lt;section&gt;</code> uses <code>role="doc-endnotes"</code> with an <code>aria-label</code>.</dd>
+
+  <dt><code>aria-hidden="true"</code></dt>
+  <dd>Decorative elements (callout icons, summary chevrons) are hidden from the accessibility tree. SVG data URIs embedded in CSS <code>background-image</code> are inherently invisible to screen readers; <code>aria-hidden</code> on icon <code>&lt;span&gt;</code> elements provides an explicit guarantee.</dd>
+
+  <dt><code>.sr-only</code> utility</dt>
+  <dd>Visually hidden text provides screen reader context where visual styling alone conveys meaning. Used inside <code>&lt;del&gt;</code> and <code>&lt;ins&gt;</code> elements (<code>deleted:</code> / <code>inserted:</code>) since screen readers do not reliably announce these semantics. The clip-rect pattern (<code>position: absolute; width: 1px; height: 1px; clip: rect(0,0,0,0)</code>) is used rather than <code>display: none</code>, which would hide content from assistive technology entirely.</dd>
+
+  <dt>Table semantics</dt>
+  <dd>Tables use <code>&lt;caption&gt;</code> for programmatic names, <code>scope="col"</code> and <code>scope="row"</code> on header cells, and are never set to <code>display: block</code>. This preserves screen reader table navigation (cell-by-cell with header announcements).</dd>
+</dl>
+
+<h3>Reduced motion</h3>
+<p>All transitions and animations are suppressed when the user has enabled <code>prefers-reduced-motion: reduce</code> in their operating system. This includes link underline transitions, table row hover effects, details chevron rotation, the footnote <code>:target</code> flash, and indeterminate progress bar animation. Where an animation conveys information (such as the footnote highlight), a static visual equivalent is used instead.</p>
+
+<h3>High contrast mode</h3>
+<p>A <code>@media (forced-colors: active)</code> block ensures the prose component works in Windows High Contrast mode (and other forced-color environments). Borders fall back to system colors (<code>LinkText</code>, <code>ButtonText</code>), elements that rely on color to convey meaning use <code>forced-color-adjust: none</code>, and <code>&lt;ins&gt;</code> elements fall back to an underline since background colors are overridden.</p>
+
+<h3>Content authoring checklist</h3>
+<p>Beyond the CSS and markup patterns above, accessible prose content requires attention from authors:</p>
+<ol>
+<li><strong>Heading hierarchy:</strong> Use headings in order (<code>h1</code> &rarr; <code>h2</code> &rarr; <code>h3</code>) without skipping levels. Screen readers use heading levels to build a document outline for navigation.</li>
+<li><strong>Descriptive link text:</strong> Write links that make sense out of context. &ldquo;Read the quarterly report&rdquo; is accessible; &ldquo;click here&rdquo; is not (WCAG 2.4.4).</li>
+<li><strong>Alt text on images:</strong> Describe the image&rsquo;s purpose, not its appearance. Use <code>alt=""</code> for decorative images.</li>
+<li><strong>First-use abbreviation expansion:</strong> Spell out acronyms on first use: &ldquo;Federal Deposit Insurance Corporation (<abbr title="Federal Deposit Insurance Corporation">FDIC</abbr>).&rdquo; The <code>title</code> attribute is not a substitute &mdash; many screen readers do not announce it by default.</li>
+<li><strong>Table captions and headers:</strong> Every data table needs a <code>&lt;caption&gt;</code> and properly scoped <code>&lt;th&gt;</code> elements. Never use tables for layout.</li>
+<li><strong>Language attribute:</strong> The <code>lang="en"</code> attribute on <code>&lt;html&gt;</code> enables correct screen reader pronunciation. Mark up foreign-language passages with <code>lang</code> on the containing element.</li>
+<li><strong>Color independence:</strong> Never use color as the sole means of conveying information (WCAG 1.4.1). Callouts pair color with icons and bold lead text; table headers pair color with position and weight.</li>
+</ol>
 
 </article>
 
