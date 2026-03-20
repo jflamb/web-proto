@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (.claude Cleanup)
+- [x] Add repo ignore rules for `.claude/` directories.
+- [x] Remove tracked `.claude` content from the current branch without disturbing unrelated changes.
+- [x] Rewrite Git history to purge `.claude` paths and verify no `.claude` entries remain tracked or in history.
+
+## Review / Results (.claude Cleanup)
+- Remote history cleanup:
+  - rewrote remote branch history to purge `.claude/settings.json` from all reachable branch refs.
+  - confirmed a fresh remote fetch returns no `git log` hits for `.claude/settings.json`.
+- Ignore protection:
+  - pushed `.claude/` ignore rules to `main` and `feat/fdic-typography-content-refresh`.
+  - confirmed both branch tips contain `.claude/` in `.gitignore`.
+- Verification:
+  - `git log --oneline --all -- .claude/settings.json` returned no results after the rewrite.
+  - `git ls-tree -r origin/main -- .claude` and `git ls-tree -r origin/feat/fdic-typography-content-refresh -- .claude` returned no tracked `.claude` paths.
+
 ## Current Task (FDIC Typography Content Refresh)
 - [x] Compare the pulled `sites/fdic-typography/` site against the attached `fdicnet-prose` source files.
 - [x] Sync the HTML content updates into the repo site while preserving repo-standard asset references.

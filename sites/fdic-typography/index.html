@@ -43,6 +43,7 @@
 
 <h3>Headings</h3>
 <p>Headings use Source Sans 3 at weight 600. Space above a heading is <code>1.5em</code> (relative to the heading's own font size) and space below is <code>0.5em</code>, so larger headings get proportionally more breathing room. The <code>h1</code> has no top margin (it&rsquo;s assumed to be first) and includes a bottom border as a visual anchor.</p>
+<p><strong>Accessibility:</strong> Screen readers build a navigable document outline from heading levels. Users can list all headings and jump between them with keyboard shortcuts &mdash; this is one of the most common navigation strategies for assistive technology users. Always use headings in strict hierarchical order (<code>h1</code> &rarr; <code>h2</code> &rarr; <code>h3</code>); never skip a level (e.g., <code>h2</code> to <code>h4</code>) or use a heading tag solely for its visual size (WCAG 1.3.1). Each page should have exactly one <code>h1</code>.</p>
 
 <h4>Stacked headings</h4>
 <p>When headings appear consecutively (like the <code>h3</code> and <code>h4</code> above), the top margin on the second heading collapses to <code>0.5em</code> so they read as a group rather than drifting apart.</p>
@@ -85,6 +86,7 @@
 
 <h3>Highlighted text</h3>
 <p>The <code>&lt;mark&gt;</code> element highlights text with a warm yellow background. When a quarterly review surfaces problems, the audit may flag <mark>three critical findings</mark> that require immediate action. The highlight is subtle enough for inline use but visible enough to scan for quickly.</p>
+<p><strong>Accessibility:</strong> The <code>&lt;mark&gt;</code> element has implicit ARIA semantics (<code>role="mark"</code> in supporting browsers), but screen reader support is inconsistent. When the highlight conveys meaning beyond emphasis, include surrounding context that makes the significance clear without relying on color alone (WCAG 1.4.1).</p>
 
 <h3>Insertions and deletions</h3>
 <p>The <code>&lt;del&gt;</code> and <code>&lt;ins&gt;</code> elements mark removed and added text, useful for tracking amendments in regulatory documents. For example, the standard insurance limit was raised from <del><span class="sr-only">deleted: </span>$100,000</del> to <ins><span class="sr-only">inserted: </span>$250,000</ins> per depositor in 2008.</p>
@@ -140,6 +142,7 @@
 <footer><cite>— Robert Bringhurst, <em>The Elements of Typographic Style</em></cite></footer>
 </blockquote>
 <p>Blockquotes can contain multiple paragraphs, lists, or other block elements. The left border acts as a continuous visual anchor. Use a <code>&lt;cite&gt;</code> element inside the blockquote for attribution — it renders as a block in a smaller secondary style.</p>
+<p><strong>Accessibility:</strong> The <code>&lt;blockquote&gt;</code> element carries implicit <code>blockquote</code> semantics &mdash; screen readers announce it as a block quotation. Wrap attributions in <code>&lt;footer&gt;&lt;cite&gt;</code> so the source is programmatically associated. Do not use <code>&lt;blockquote&gt;</code> for visual indentation of non-quoted content, as screen readers will misrepresent it to users.</p>
 
 <h3>Nested blockquotes</h3>
 <p>Nested blockquotes appear in legal documents, email threads, and forum-style CMS content where authors quote prior rulings that themselves contain quotations. The inner blockquote uses a lighter border to establish visual hierarchy:</p>
@@ -152,14 +155,16 @@
 </blockquote>
 
 <h3>Aside / pull quote</h3>
-<aside>
+<aside aria-label="Key fact about deposit insurance">
 <p><strong>Key fact:</strong> Since 1933, no depositor has lost a single penny of FDIC-insured funds.</p>
 </aside>
 <p>The <code>&lt;aside&gt;</code> element represents content tangentially related to its surrounding context &mdash; pull quotes, sidebar notes, or &ldquo;related content&rdquo; blocks. Many CMS editors expose this as a block type. In prose, asides float right at 40% width with a brand-blue left border, creating a magazine-style pull quote. On narrow viewports, they linearize to full width.</p>
 <p>Pull quotes are particularly useful in long-form regulatory content to highlight key statistics, policy changes, or notable findings that readers should be able to scan without reading every paragraph. The aside clears after the surrounding paragraphs flow past it.</p>
+<p><strong>Accessibility:</strong> The <code>&lt;aside&gt;</code> element is a landmark region &mdash; screen readers list it alongside <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, and other landmarks, allowing users to jump to it directly. Add an <code>aria-label</code> to distinguish multiple asides on a page (e.g., <code>aria-label="Key fact about deposit insurance"</code>). When an article contains only one aside, the label is optional but still recommended for clarity.</p>
 
 <h3>Code blocks</h3>
-<p>Fenced code blocks render in a monospace font against a light background with a subtle border. They scroll horizontally if the content overflows:</p>
+<p>Fenced code blocks render in a monospace font against a light background with a subtle border. They scroll horizontally if the content overflows.</p>
+<p><strong>Accessibility:</strong> Code blocks that overflow horizontally are keyboard-scrollable via <code>tabindex="0"</code> on the <code>&lt;pre&gt;</code> element. They also receive <code>role="region"</code> and an <code>aria-label</code> so screen readers announce entry into a scrollable code region. For code examples that show HTML markup, always use HTML entities (<code>&amp;lt;</code>, <code>&amp;gt;</code>) for angle brackets &mdash; raw tags inside <code>&lt;code&gt;</code> will be parsed as live HTML and break both display and assistive technology output.</p>
 <pre><code class="language-css">.prose {
   font-family: var(--fdic-font-family-sans-serif);
   font-size: var(--fdic-font-size-body, 1.125rem);
@@ -191,6 +196,7 @@
   Washington, D.C. 20429<br />
   <a href="tel:+18773753342">(877) 375-3342</a>
 </address>
+<p><strong>Accessibility:</strong> Screen readers may announce <code>&lt;address&gt;</code> as a content-info landmark. Use it only for contact information &mdash; not for arbitrary postal addresses in body content. Phone links (<code>href="tel:..."</code>) allow mobile users and assistive technology to initiate calls directly; always use the full international format (e.g., <code>+18773753342</code>) for reliable dialing.</p>
 
 <h3>Horizontal rules</h3>
 <p>Horizontal rules provide strong visual breaks between major sections. They use generous vertical margins (<code>3rem</code> above and below) so they don't crowd adjacent content. There's one between each top-level section on this page.</p>
@@ -203,6 +209,7 @@
 <!-- ================================================================== -->
 
 <h2 id="lists">Lists</h2>
+<p><strong>Accessibility:</strong> HTML list elements (<code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code>, <code>&lt;dl&gt;</code>) provide essential structure for screen reader users. Screen readers announce list boundaries and item counts (e.g., &ldquo;list, 4 items&rdquo;), and users can navigate between items with keyboard shortcuts. Never simulate lists with <code>&lt;br&gt;</code>-separated text or <code>&lt;div&gt;</code> elements &mdash; this removes the structure that assistive technology depends on. Use <code>&lt;ul&gt;</code> for unordered items, <code>&lt;ol&gt;</code> when sequence matters, and <code>&lt;dl&gt;</code> for term&ndash;definition pairs.</p>
 
 <h3>Unordered lists</h3>
 <p>Simple unordered lists use tight spacing to keep items feeling cohesive:</p>
@@ -290,16 +297,17 @@
 
 <h3>Task lists</h3>
 <p>Markdown-based CMS tools (Notion, GitHub, Contentful) generate checkbox lists for task tracking. These render as unstyled lists with <code>&lt;input type="checkbox" disabled&gt;</code> elements, using the brand blue as the accent color:</p>
-<ul>
-<li><input type="checkbox" disabled checked /> Verify institution CERT number and insurance status</li>
-<li><input type="checkbox" disabled checked /> Calculate insured deposits per ownership category</li>
-<li><input type="checkbox" disabled checked /> Prepare depositor notification letters</li>
-<li><input type="checkbox" disabled /> Coordinate with acquiring institution for assumption</li>
-<li><input type="checkbox" disabled /> Publish final receivership report</li>
+<ul role="list" aria-label="Resolution process checklist">
+<li><input type="checkbox" disabled checked aria-label="Completed: Verify institution CERT number and insurance status" /> Verify institution CERT number and insurance status</li>
+<li><input type="checkbox" disabled checked aria-label="Completed: Calculate insured deposits per ownership category" /> Calculate insured deposits per ownership category</li>
+<li><input type="checkbox" disabled checked aria-label="Completed: Prepare depositor notification letters" /> Prepare depositor notification letters</li>
+<li><input type="checkbox" disabled aria-label="Not completed: Coordinate with acquiring institution for assumption" /> Coordinate with acquiring institution for assumption</li>
+<li><input type="checkbox" disabled aria-label="Not completed: Publish final receivership report" /> Publish final receivership report</li>
 </ul>
+<p><strong>Accessibility:</strong> Disabled checkboxes lack a programmatic label by default &mdash; screen readers may announce them as &ldquo;checkbox, dimmed&rdquo; without indicating what they represent. Add an <code>aria-label</code> to each <code>&lt;input&gt;</code> that includes the completion state and task text (e.g., <code>aria-label="Completed: Verify CERT number"</code>). The <code>role="list"</code> on the <code>&lt;ul&gt;</code> restores list semantics in Safari/VoiceOver, which removes them when <code>list-style: none</code> is applied.</p>
 
 <h3>Definition lists</h3>
-<p>Definition lists use asymmetric spacing — more space above a term than below it — so each term groups visually with its own definition rather than with the previous entry:</p>
+<p>Definition lists use asymmetric spacing — more space above a term than below it — so each term groups visually with its own definition rather than with the previous entry. Screen readers announce <code>&lt;dl&gt;</code> items as term&ndash;definition pairs, so users know which definition belongs to which term &mdash; a relationship lost when simulating glossaries with bold text and paragraphs:</p>
 <dl>
   <dt>Deposit Insurance</dt>
   <dd>Protection provided by the <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> that guarantees depositors will receive their insured funds if an insured bank or savings institution fails. The standard insurance amount is $250,000 per depositor, per insured bank, for each account ownership category.</dd>
@@ -499,6 +507,8 @@
   <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="Sample embedded video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
+<p><strong>Accessibility:</strong> All <code>&lt;iframe&gt;</code> embeds must include a <code>title</code> attribute that describes the embedded content (WCAG 4.1.2) &mdash; screen readers use it as the accessible name for the frame. For self-hosted <code>&lt;video&gt;</code> and <code>&lt;audio&gt;</code>, always include the <code>controls</code> attribute so keyboard users can play, pause, and seek. Provide captions (<code>&lt;track kind="captions"&gt;</code>) for video and a transcript link for audio to meet Section&nbsp;508 requirements for multimedia. The text fallback inside the element (e.g., &ldquo;Your browser does not support the video element&rdquo;) serves users on older browsers, not assistive technology users.</p>
+
 <p>Self-hosted <code>&lt;video&gt;</code> elements render as block-level with rounded corners, matching image styling:</p>
 <figure>
 <video controls preload="metadata" poster="https://placehold.co/720x400?text=Video+poster+frame">
@@ -578,7 +588,8 @@
 &lt;/div&gt;</code></pre>
 
 <h3>Progress bars</h3>
-<p>The <code>&lt;progress&gt;</code> element represents the completion of a task. Always pair it with a visible label and use <code>aria-label</code> or a <code>&lt;label&gt;</code> element for screen readers. When a <code>value</code> attribute is present, the bar fills to that proportion. Omitting <code>value</code> creates an <strong>indeterminate</strong> progress bar &mdash; a striped animation indicating work in progress without a known completion percentage:</p>
+<p>The <code>&lt;progress&gt;</code> element represents the completion of a task. Always pair it with a visible label and use <code>aria-label</code> or a <code>&lt;label&gt;</code> element for screen readers. When a <code>value</code> attribute is present, the bar fills to that proportion. Omitting <code>value</code> creates an <strong>indeterminate</strong> progress bar &mdash; a striped animation indicating work in progress without a known completion percentage.</p>
+<p><strong>Accessibility:</strong> The <code>&lt;progress&gt;</code> element has implicit <code>role="progressbar"</code> semantics. Screen readers announce its value as a percentage. Always provide both a visible <code>&lt;label&gt;</code> (via <code>for</code>/<code>id</code>) and an <code>aria-label</code> that includes the current value (e.g., <code>"Examination review progress: 72%"</code>). Include text content inside the <code>&lt;progress&gt;</code> tag as fallback for older browsers. For indeterminate progress, use descriptive text like <code>"Uploading&hellip;"</code> as the fallback:</p>
 <div class="prose-progress-group">
   <label for="progress-review">Examination review progress</label>
   <progress id="progress-review" value="72" max="100" aria-label="Examination review progress: 72%">72%</progress>
@@ -590,7 +601,8 @@
 </div>
 
 <h3>Meters</h3>
-<p>The <code>&lt;meter&gt;</code> element represents a scalar measurement within a known range — ideal for capital ratios, compliance scores, or any bounded value. The <code>low</code>, <code>high</code>, and <code>optimum</code> attributes let the browser color the bar to indicate whether the value is acceptable:</p>
+<p>The <code>&lt;meter&gt;</code> element represents a scalar measurement within a known range — ideal for capital ratios, compliance scores, or any bounded value. The <code>low</code>, <code>high</code>, and <code>optimum</code> attributes let the browser color the bar to indicate whether the value is acceptable.</p>
+<p><strong>Accessibility:</strong> Screen readers announce <code>&lt;meter&gt;</code> elements with their value and range. The <code>low</code>, <code>high</code>, and <code>optimum</code> attributes change the bar color (green/yellow/red), but color alone does not convey status to non-visual users. Always include a visible text label with the value and status descriptor (e.g., <code>"12.4% (well-capitalized)"</code>) adjacent to the meter:</p>
 <div class="prose-meter-group">
   <label for="meter-cet1">CET1 capital ratio</label>
   <meter id="meter-cet1" value="12.4" min="0" max="20" low="4.5" high="8" optimum="12" aria-label="CET1 capital ratio: 12.4%">12.4%</meter>
@@ -609,6 +621,7 @@
 
 <h3>Output element</h3>
 <p>The <code>&lt;output&gt;</code> element represents the result of a calculation or user action. It renders in a monospace font with a subtle background, similar to inline code but semantically distinct. For example, based on three beneficiaries at $250,000 each, the maximum insured amount is <output>$750,000</output>. Use <code>&lt;output&gt;</code> for computed values, conversion results, or system-generated responses within flowing text.</p>
+<p><strong>Accessibility:</strong> The <code>&lt;output&gt;</code> element has an implicit <code>role="status"</code> (ARIA live region), meaning screen readers will announce its content when it changes dynamically. Use the <code>for</code> attribute to associate it with the input controls that drive the calculation (e.g., <code>&lt;output for="beneficiaries amount"&gt;</code>). For static content that does not update, <code>&lt;output&gt;</code> is still appropriate semantically but the live region behavior will not apply.</p>
 
 <h3>Collapsible sections</h3>
 <p>The <code>&lt;details&gt;</code> and <code>&lt;summary&gt;</code> elements create accordion-style collapsible sections. The summary uses a Phosphor chevron icon on the right side that rotates on open, with hover, active, and focus-visible states:</p>
