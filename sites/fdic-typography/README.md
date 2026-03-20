@@ -364,22 +364,22 @@ Code block copy button. Positioned absolute inside `<pre>` (which needs `positio
 ```html
 <div class="prose-progress-group">
   <label for="p1">Label</label>
-  <progress id="p1" value="75" max="100"></progress>
-  <span class="prose-progress-value">75 / 100 (75%)</span>
+  <progress id="p1" value="75" max="100" aria-label="Label: 75%">75%</progress>
+  <span class="prose-progress-value">75%</span>
 </div>
 ```
 
-Grid layout (label spanning full width, bar + value side by side). Styled for WebKit and Firefox. Indeterminate progress gets animated stripes.
+Grid layout (label spanning full width, bar + value side by side). Styled for WebKit and Firefox. Indeterminate progress gets animated stripes. Always provide a visible `<label>` (via `for`/`id`), an `aria-label` including the current value, and text content inside the element as fallback. For `<meter>`, include a visible status descriptor adjacent to the bar (e.g., "12.4% (well-capitalized)") since the color-coded bar alone does not convey status to non-visual users.
 
 ### Aside / Pull Quote
 
 ```html
-<aside>
+<aside aria-label="Key fact about deposit insurance">
   <p>Pulled-out supplementary content.</p>
 </aside>
 ```
 
-Floats right at 40% width with brand-blue left border. Linearizes to full width at 640px and in print.
+Floats right at 40% width with brand-blue left border. Linearizes to full width at 640px and in print. The `<aside>` element is an ARIA landmark — screen readers list it alongside `<nav>`, `<main>`, etc. Add `aria-label` to distinguish multiple asides on a page.
 
 ## Accessibility Requirements (WCAG 2.1 AA)
 
@@ -395,6 +395,29 @@ These are non-negotiable:
 8. **`<del>` / `<ins>` screen reader text**: Include `<span class="sr-only">deleted: </span>` / `<span class="sr-only">inserted: </span>` inside the elements
 9. **`prefers-reduced-motion`**: Suppress all animations and transitions; any animated highlight should fall back to a static equivalent
 10. **`forced-colors`** (Windows High Contrast): Borders use system colors (`LinkText`, `ButtonText`); elements that convey meaning via color/background use `forced-color-adjust: none`; `<ins>` falls back to underline instead of background
+
+### Element-Level Accessibility Guidance
+
+These patterns are documented inline throughout `index.html` and must be followed when authoring prose content:
+
+| Element / Pattern | Requirement | WCAG Reference |
+|---|---|---|
+| **Headings** | Use in strict hierarchical order (h1 → h2 → h3); never skip levels or use for visual sizing alone. One `h1` per page. | 1.3.1 |
+| **Links** | Use descriptive link text; avoid "click here" or "read more." External-link icons are decorative (CSS `background-image`). | 2.4.4 |
+| **`<mark>`** | Screen reader support for `role="mark"` is inconsistent. Ensure surrounding context conveys the significance without relying on color alone. | 1.4.1 |
+| **`<blockquote>`** | Do not use for visual indentation of non-quoted content. Wrap attributions in `<footer><cite>`. | 1.3.1 |
+| **`<aside>`** | Is an ARIA landmark. Add `aria-label` to distinguish multiple asides on a page. | 1.3.1, 2.4.1 |
+| **Code blocks** | Overflowing `<pre>` elements need `tabindex="0"` for keyboard scrolling and `role="region"` + `aria-label` for screen reader context. | 2.1.1 |
+| **`<address>`** | Use only for contact information, not arbitrary postal addresses. Phone links should use full international `tel:` format. | 1.3.1 |
+| **Lists** | Always use semantic list elements (`<ul>`, `<ol>`, `<dl>`). Never simulate lists with `<br>`-separated text or `<div>` elements. | 1.3.1 |
+| **Task lists** | Add `aria-label` to each `<input type="checkbox" disabled>` including completion state and task text. Add `role="list"` to the `<ul>` to restore list semantics in Safari/VoiceOver. | 4.1.2, 1.3.1 |
+| **`<output>`** | Has implicit `role="status"` (ARIA live region). Use the `for` attribute to associate with input controls. | 4.1.3 |
+| **`<progress>`** | Provide a visible `<label>`, an `aria-label` with the current value, and text content inside the element as fallback. | 4.1.2 |
+| **`<meter>`** | Color-coded bar does not convey status to non-visual users. Include a visible text descriptor with value and status (e.g., "12.4% (well-capitalized)"). | 1.4.1, 4.1.2 |
+| **Embedded media** | `<iframe>` requires `title`. `<video>` and `<audio>` require `controls`. Provide `<track kind="captions">` for video and transcript links for audio (Section 508). | 4.1.2, 1.2.2 |
+| **Images** | Every `<img>` must have `alt`. Describe the image's purpose, not its appearance. Decorative images use `alt=""`. | 1.1.1 |
+| **Color independence** | Never use color as the sole means of conveying information. Callouts pair color with icons and bold lead text; table headers pair color with position and weight. | 1.4.1 |
+| **Language** | `lang="en"` on `<html>` for correct screen reader pronunciation. Mark foreign-language passages with `lang` on the containing element. | 3.1.1, 3.1.2 |
 
 ## Micro-Interactions
 
@@ -456,6 +479,10 @@ Icon colors are hardcoded in the SVG `fill` attribute to match their context (br
 - Use `<pre><code class="language-{lang}">` for code examples, with HTML entities for angle brackets
 - Footnote references use bracketed numbers: `[1]`, `[2]`, etc.
 - Back-links use the ↩ character (`&#x21a9;` or `&larrhk;`)
+- Write descriptive link text that makes sense out of context (not "click here")
+- Include `<span class="sr-only">deleted: </span>` / `<span class="sr-only">inserted: </span>` inside `<del>` and `<ins>` elements
+- Add `aria-label` to landmark elements (`<aside>`, `<nav>`) when multiple instances appear on a page
+- Provide captions/transcripts for multimedia content (Section 508)
 
 ## Checklist: Adding a New Element Style
 
@@ -466,15 +493,20 @@ Icon colors are hardcoded in the SVG `fill` attribute to match their context (br
 5. Add print override if background/decoration should be removed on paper
 6. Add `prefers-reduced-motion` override if the element has transitions or animations
 7. Add responsive override at 640px if layout changes
+8. If the element conveys meaning via color alone, ensure a non-color alternative exists (text label, icon, position)
+9. If the element has inconsistent screen reader support (e.g., `<mark>`, `<meter>`), document the workaround in `index.html`
 
 ## Checklist: Adding a New Component
 
 1. Use `.prose-{name}` class naming
-2. Include appropriate ARIA attributes in the HTML pattern
+2. Include appropriate ARIA attributes in the HTML pattern (`role`, `aria-label`, `aria-hidden` on decorative elements)
 3. Add `forced-colors`, print, and `prefers-reduced-motion` overrides as needed
 4. Add responsive overrides at 640px if layout changes
 5. Hide from print if the component is interactive-only
 6. Ensure all interactive elements have `:focus-visible` styles using the standard focus ring pattern
+7. If the component is a landmark (`<aside>`, `<nav>`, `<section>`), require `aria-label` when multiple instances may appear
+8. If the component contains scrollable overflow, add `tabindex="0"`, `role="region"`, and `aria-label`
+9. Document the accessibility pattern (ARIA roles, keyboard interaction, screen reader behavior) inline in `index.html`
 
 ## Reference Implementation
 
