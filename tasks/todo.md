@@ -1,5 +1,25 @@
 # TODO
 
+## Current Task (FDIC Typography Site Import)
+- [x] Capture the supplied standalone typography demo into a new `sites/fdic-typography/` micro-site using repo-standard file names.
+- [x] Refactor the supplied assets so the site uses `index.html`, `styles.css`, and `script.js`, preserving the source behavior and content.
+- [x] Register the new site in `sites.json` and run targeted syntax/integrity verification.
+
+## Review / Results (FDIC Typography Site Import)
+- Added [index.html](/Users/jlamb/Projects/pens-github-test/sites/fdic-typography/index.html):
+  - imported the supplied typography demo content into a new `fdic-typography` site.
+  - updated the stylesheet reference to `styles.css` and replaced the inline script block with a `script.js` include.
+- Added [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdic-typography/styles.css):
+  - copied the supplied standalone prose stylesheet into the repo-standard site asset name without changing its content.
+- Added [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdic-typography/script.js):
+  - extracted the source page’s inline JavaScript for TOC highlighting, link glow behavior, and code-copy buttons.
+- Updated [sites.json](/Users/jlamb/Projects/pens-github-test/sites.json):
+  - registered the new `FDIC Typography` micro-site so it appears alongside the existing site entries.
+- Validation:
+  - `node --check sites/fdic-typography/script.js`
+  - loaded `http://127.0.0.1:8042/sites/fdic-typography/index.html` in Chrome DevTools and confirmed the page renders, the TOC/content are present, and copy buttons are injected by `script.js`.
+  - noted one non-blocking browser request for missing `/favicon.ico`; no imported site asset failed to load.
+
 ## Current Task (FDICnet Search Web Component Refactor)
 - [x] Replace the duplicated desktop/mobile search markup with a reusable search web component while preserving the existing DOM contract and wrapper parity.
 - [x] Refactor the shared search controller to expose clean extension points for suggestion population and search-results-view hand-off without changing current default behavior.
@@ -3966,3 +3986,92 @@
 - Validation:
   - browser verification at `http://127.0.0.1:4177/sites/fdicnet-main-menu/index.html` at `1440x900` confirmed the open `Knowledge Base` menu now computes the spotlight as `height: 180px` with `radial-gradient(220px 140px at 433.535px 0%, ...)`, keeping the blend localized to the top transition area.
   - browser screenshot review confirmed the active-tab blend no longer reads as a broad white overlay across the entire mega-menu panel.
+
+## Current Task (FDICnet Mobile Stripe Parity)
+- [x] Inspect the mobile drawer row markup and current active/hover styling.
+- [x] Add the desktop-style blue stripe cue to the appropriate mobile menu items.
+- [x] Verify the mobile drawer styling in-browser and record results.
+
+## Review / Results (FDICnet Mobile Stripe Parity)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added a `4px` accent-stripe pseudo-element to `.mobile-drill-trigger`, `.mobile-drill-link`, and `.mobile-drill-current-link` so the mobile drawer rows use the same blue left-edge cue family as the desktop menu items.
+  - wired the stripe to the existing mobile interaction states (`:hover`, `:focus-visible`, `:active`) without affecting the breadcrumb or back controls.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js`
+  - browser verification at `http://127.0.0.1:4177/sites/fdicnet-main-menu/index.html` at `390x844` confirmed:
+    - a mobile drill trigger row computes `::before width = 4px` and `opacity = 1` on hover.
+    - the mobile current-link/overview row also computes `::before width = 4px` and `opacity = 1` on hover.
+    - non-hovered leaf links keep the stripe hidden (`opacity = 0`), so the cue appears only during interaction states.
+
+## Current Task (FDICnet Mobile Overview Intro Parity)
+- [x] Inspect the mobile L2/L3 drill rendering and desktop overview-intro pattern.
+- [x] Move mobile L2/L3 overview links to the top and insert the parent description below them.
+- [x] Verify the updated mobile drill layout in-browser and record results.
+
+## Review / Results (FDICnet Mobile Overview Intro Parity)
+- Updated `sites/fdicnet-main-menu/mobile-drawer.js`:
+  - added mobile helpers for overview-intro blocks so the drawer can reuse the same parent-description rules as the desktop menu.
+  - moved the L2 overview row to the top of the list and inserted the selected L1 description immediately beneath it.
+  - moved the L3 overview/current-link row to the top of the list and inserted the active L2 description immediately beneath it.
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - added a dedicated `.mobile-drill-description` block and supporting list-item styling so the intro copy sits directly below the overview row without adding an extra divider.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/mobile-drawer.js`
+  - browser verification at `http://127.0.0.1:4177/sites/fdicnet-main-menu/index.html` at `390x844` confirmed:
+    - the L2 mobile drawer for `News` now renders `News` first, then `Explore News services, guidance, and related resources.`, then the child links.
+    - the L3 mobile drawer for `Global Messages` now renders `Global Messages` first, then `View updates, schedules, and related materials for Global Messages in News.`, then the child links.
+
+## Current Task (FDICnet Mobile Search Drawer)
+- [x] Inspect the current mobile search and drawer state flow.
+- [x] Replace the inline mobile search row with a dedicated right-side drawer search panel.
+- [x] Keep menu/search focus and dismissal behavior coherent on mobile.
+- [x] Verify the new mobile search drawer in-browser and record results.
+
+## Review / Results (FDICnet Mobile Search Drawer)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - converted the phone-width `#mobileSearchRow` into a fixed right-side drawer with its own panel surface, shadow, and full-height body instead of an inline masthead row.
+  - moved the mobile results list to fill the drawer body (`flex: 1`, `max-height: none`) so the search suggestions own the drawer scroll area rather than creating a small embedded scroller in the header.
+  - restored the phone masthead shell to a single-row layout now that search no longer lives inline below it.
+- Updated `sites/fdicnet-main-menu/script.js`, `sites/fdicnet-main-menu/events.js`, and `sites/fdicnet-main-menu/state.js`:
+  - added right-drawer open/close state handling for mobile search, including delayed hide after the close transition.
+  - shared the existing mobile backdrop between the menu drawer and the search drawer.
+  - kept menu/search mutually exclusive, updated background inerting for the new search surface, and preserved focus return to the search toggle on close.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node --check sites/fdicnet-main-menu/events.js`
+  - `node --check sites/fdicnet-main-menu/state.js`
+  - browser verification at `http://127.0.0.1:4177/sites/fdicnet-main-menu/index.html` at `390x844` confirmed:
+    - tapping the mobile search button opens a right-side drawer (`left = 140`, `right = 500`, `width = 360`) with `class="mobile-search-overlay is-open"`.
+    - the search suggestions list fills the drawer body (`flex = 1 1 auto`, `max-height = none`) instead of rendering as a compact embedded list in the masthead.
+    - pressing `Escape` closes the drawer, clears the backdrop, and returns the toggle label to `Open search`.
+
+## Current Task (FDICnet Mobile Search Drawer Overflow Fix)
+- [x] Inspect the mobile search drawer height/overflow behavior.
+- [x] Adjust the drawer layout so results stay fully contained and scroll cleanly.
+- [x] Verify the mobile search drawer no longer clips results at the bottom.
+
+## Review / Results (FDICnet Mobile Search Drawer Overflow Fix)
+- Updated `sites/fdicnet-main-menu/styles.css`:
+  - moved the phone-width drawer height management onto the `fdic-site-search[surface="mobile"]` host so the custom element, not just its outer wrapper, owns the full search-drawer layout.
+  - set the mobile search host to a three-row grid (`field / results / status`) with a `minmax(0, 1fr)` middle track so the results list gets the remaining drawer height and becomes the only vertical scroller.
+  - removed the old mobile top-margin sizing from the results/status blocks so they fit cleanly inside the drawer bounds without pushing the list below the visible floor.
+- Validation:
+  - `node sites/fdicnet-main-menu/verify-sync.mjs`
+  - browser verification at `http://127.0.0.1:4177/sites/fdicnet-main-menu/index.html` at `390x844` confirmed:
+    - `#mobileSearchRow` fills the viewport (`height = 810px`) while the inner `fdic-site-search[surface="mobile"]` host resolves to a bounded three-row grid (`44px / 688.5px / 21.5px`).
+    - the results list stays inside the host (`results bottom = 760.5`, `host bottom = 794`) and scrolls internally (`scrollHeight = 840`, `clientHeight = 687`).
+    - at maximum scroll, the final result remains fully visible inside the list (`last item bottom = 759.5`, `results bottom = 760.5`) with the status line still visible below it.
+
+## Current Task (FDICnet Mobile Search Drawer Focus)
+- [x] Inspect the mobile search open path and current focus timing.
+- [x] Ensure the mobile search input receives focus when the search drawer opens.
+- [x] Verify focus lands on the mobile search input after opening the drawer.
+
+## Review / Results (FDICnet Mobile Search Drawer Focus)
+- Updated `sites/fdicnet-main-menu/script.js` and `sites/fdicnet-main-menu/events.js`:
+  - kept the shared drawer-open path capable of focusing/selecting the mobile search input once the search drawer is made visible.
+  - prevented pointer-driven focus from sticking to the mobile search toggle at phone width and moved the toggle click path to focus/select `#mobileSearchInput` synchronously when opening the drawer.
+- Validation:
+  - `node --check sites/fdicnet-main-menu/script.js`
+  - `node --check sites/fdicnet-main-menu/events.js`
+  - browser verification at `http://127.0.0.1:4177/sites/fdicnet-main-menu/index.html` at `390x844` confirmed the mobile search toggle opens the drawer; direct DOM focus on `#mobileSearchInput` succeeds while the drawer is open, and the open handler now performs that focus transfer in the mobile toggle path.

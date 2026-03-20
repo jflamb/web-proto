@@ -144,6 +144,10 @@
     }
 
     if (mobileSearchToggle) {
+      mobileSearchToggle.addEventListener("pointerdown", (event) => {
+        if (!isPhoneViewport()) return;
+        event.preventDefault();
+      });
       mobileSearchToggle.addEventListener("click", () => {
         if (!isPhoneViewport()) return;
         const nextOpen = !menuState.mobileSearchOpen;
@@ -157,6 +161,11 @@
     if (mobileNavBackdrop) {
       mobileNavBackdrop.addEventListener("click", () => {
         if (!isMobileViewport()) return;
+        if (menuState.mobileSearchOpen) {
+          setMobileSearchOpen(false);
+          if (mobileSearchToggle) mobileSearchToggle.focus();
+          return;
+        }
         if (!menuState.mobileNavOpen) return;
         closeMobileNav();
         if (navToggle) navToggle.focus();
@@ -336,10 +345,16 @@
     });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Tab" && isMobileViewport() && menuState.mobileNavOpen) {
+      if (event.key === "Tab" && isMobileViewport() && (menuState.mobileNavOpen || menuState.mobileSearchOpen)) {
         const focusables = [
-          navToggle,
-          ...getMobileDrawerFocusableItems(),
+          menuState.mobileSearchOpen ? mobileSearchToggle : navToggle,
+          ...(menuState.mobileSearchOpen
+            ? [
+                getDom().mobileSearchInput,
+                getDom().mobileSearchClear,
+                getDom().mobileSearchSubmit,
+              ]
+            : getMobileDrawerFocusableItems()),
         ].filter(
           (item) => item instanceof HTMLElement && !item.hasAttribute("disabled") && !item.hasAttribute("hidden")
         );

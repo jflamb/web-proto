@@ -16,6 +16,7 @@
     topNavFocusIndex: 0,
     mobileNavOpen: false,
     mobileSearchOpen: false,
+    mobileSearchCloseHideTimer: null,
     mobileNavCloseHandler: null,
     mobileNavCloseHideTimer: null,
     closeTransitionHandler: null,
