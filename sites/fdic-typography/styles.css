@@ -1,0 +1,1718 @@
+/**
+ * FDIC Penny Prose — Standalone
+ *
+ * Self-contained stylesheet for rendering prose content using the
+ * FDIC design system's typographic conventions. Includes only the
+ * base styles from FDICnet.css that prose depends on, plus the full
+ * .prose component styles.
+ *
+ * NOTE: This version uses individual font properties (font-family,
+ * font-size, font-weight, line-height) instead of the `font` shorthand
+ * to avoid parse failures in PostCSS and cross-browser edge cases.
+ */
+
+/* ===========================================================================
+   0. FONT LOADING
+   Source Sans 3 — weights 400, 600, 700, plus italics.
+   In CodePen, you can also add this via Settings > Stuff for <head>.
+   =========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;1,400;1,600&display=swap");
+
+/* ===========================================================================
+   1. DESIGN TOKENS
+   Subset of --fdic-* custom properties used by prose styles.
+   =========================================================================== */
+
+:root {
+  /* Font families */
+  --fdic-font-family-sans-serif: "Source Sans 3", "Source Sans Pro", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fdic-font-family-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+
+  /* Font size base */
+  --font-size-base: 16px;
+
+  /* Heading sizes */
+  --fdic-font-size-h1: 2.5313rem;
+  --fdic-font-size-h2: 1.6875rem;
+  --fdic-font-size-h3: 1.4063rem;
+  --fdic-font-size-h4: 1.125rem;
+
+  /* Heading line-heights */
+  --fdic-line-height-h1: 1.15;
+  --fdic-line-height-h2: 1.2;
+  --fdic-line-height-h3: 1.25;
+  --fdic-line-height-h4: 1.25;
+
+  /* Body sizes */
+  --fdic-font-size-body: 1.125rem;
+  --fdic-font-size-body-big: 1.25rem;
+  --fdic-font-size-body-small: 1rem;
+  --fdic-line-height-body: 1.5;
+
+  /* Letter spacing */
+  --fdic-letter-spacing-0: 0;
+  --fdic-letter-spacing-1: -0.01em;
+  --fdic-letter-spacing-2: -0.005em;
+
+  /* Spacing scale */
+  --fdic-spacing-2xs: 0.25rem;
+  --fdic-spacing-xs: 0.5rem;
+  --fdic-spacing-sm: 0.75rem;
+  --fdic-spacing-md: 1rem;
+  --fdic-spacing-xl: 1.25rem;
+  --fdic-spacing-3xl: 3rem;
+
+  /* Colors — text */
+  --fdic-text-primary: #212123;
+  --fdic-text-secondary: #595961;
+  --fdic-text-inverted: #ffffff;
+  --fdic-text-link: #1278b0;
+  --fdic-text-link-visited: #855aa5;
+  --fdic-text-link-visited-hover: #79579f;
+
+  /* Colors — brand */
+  --fdic-brand-core-default: #0d6191;
+  --fdic-color-brand-primary-500: #0d6191;
+
+  /* Colors — backgrounds */
+  --fdic-background-base: #ffffff;
+  --fdic-background-container: #f5f5f7;
+
+  /* Colors — borders */
+  --fdic-border-divider: #bdbdbf;
+
+  /* Corner radii */
+  --fdic-corner-radius-sm: 3px;
+  --fdic-corner-radius-lg: 7px;
+
+  /* Interactive states */
+  --fdic-overlay-emphasize-100: rgba(0, 0, 0, 0.04);
+  --fdic-overlay-emphasize-200: rgba(0, 0, 0, 0.08);
+  --fdic-border-input-active: #424244;
+  --fdic-border-input-focus: #38b6ff;
+
+  /* Link state colors */
+  --fdic-body-text: #1b1b1b;
+  --link-unvisited: #1278B0;
+  --link-unvisited-hover: #0D6191;
+  --link-visited: #855AA5;
+  --link-visited-hover: #79579F;
+  /* Callout colors — derived from brand palette with transparency */
+  --fdic-callout-bg: var(--fdic-background-container, #f5f5f7);
+  --fdic-callout-border: var(--fdic-border-divider, #bdbdbf);
+  --fdic-callout-info-bg: rgba(18, 120, 176, 0.08);
+  --fdic-callout-info-border: rgba(18, 120, 176, 0.25);
+  --fdic-callout-warning-bg: rgba(180, 140, 20, 0.08);
+  --fdic-callout-warning-border: rgba(180, 140, 20, 0.25);
+  --fdic-callout-success-bg: rgba(30, 130, 50, 0.08);
+  --fdic-callout-success-border: rgba(30, 130, 50, 0.3);
+  --fdic-callout-danger-bg: rgba(190, 40, 40, 0.08);
+  --fdic-callout-danger-border: rgba(190, 40, 40, 0.25);
+
+  /* Prose layout */
+  --prose-max-width: 65ch;
+}
+
+/* ===========================================================================
+   2. BASE RESET & ELEMENT STYLES
+   Minimal subset from FDICnet.css that prose content depends on.
+   =========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: var(--font-size-base, 16px);
+}
+
+body {
+  font-family: var(--fdic-font-family-sans-serif);
+  font-size: var(--fdic-font-size-body, 1.125rem);
+  font-weight: 400;
+  line-height: var(--fdic-line-height-body, 1.5);
+  color: var(--fdic-text-primary, #212123);
+  background-color: var(--fdic-background-base, #fff);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  margin: 2.5rem; /* demo only — remove when embedding in a real layout */
+}
+
+/* --- Headings ------------------------------------------------------------ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--fdic-font-family-sans-serif);
+  font-weight: 600;
+  color: var(--fdic-text-primary, #212123);
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: var(--fdic-font-size-h1, 2.5313rem);
+  line-height: var(--fdic-line-height-h1, 1.15);
+  letter-spacing: var(--fdic-letter-spacing-1, -0.01em);
+}
+
+h2 {
+  font-size: var(--fdic-font-size-h2, 1.6875rem);
+  line-height: var(--fdic-line-height-h2, 1.2);
+  letter-spacing: var(--fdic-letter-spacing-2, -0.005em);
+}
+
+h3 {
+  font-size: var(--fdic-font-size-h3, 1.4063rem);
+  line-height: var(--fdic-line-height-h3, 1.25);
+  letter-spacing: var(--fdic-letter-spacing-0, 0);
+}
+
+h4 {
+  font-size: var(--fdic-font-size-h4, 1.125rem);
+  line-height: var(--fdic-line-height-h4, 1.25);
+  letter-spacing: var(--fdic-letter-spacing-2, -0.005em);
+}
+
+/* --- Links --------------------------------------------------------------- */
+
+a {
+  color: var(--link-unvisited);
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: auto;
+  text-decoration-thickness: 6.25%;
+  text-underline-offset: 12.5%;
+  text-underline-position: from-font;
+}
+
+a:hover {
+  color: var(--link-unvisited-hover);
+  text-decoration-thickness: 2px;
+}
+
+a:visited {
+  color: var(--link-visited);
+}
+
+a:visited:hover {
+  color: var(--link-visited-hover);
+  text-decoration-thickness: 2px;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--fdic-border-input-focus, #38b6ff);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* --- External link icon -------------------------------------------------- */
+/* Phosphor ArrowSquareOut (regular) — appended to links pointing outside fdic.gov */
+/* Icon placed as right-padding background on the link itself. */
+.prose a[href^="http"]:not([href*="fdic.gov"]) {
+  --_ext-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%231278b0' d='M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z'/%3E%3C/svg%3E");
+  --_ext-icon-visited: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%23855AA5' d='M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z'/%3E%3C/svg%3E");
+  --_ext-size: 0.9em;
+  --_ext-top: 0.3em;
+  padding-right: calc(var(--_ext-size) + 0.2em);
+  background-image: var(--_ext-icon);
+  background-position: right 0 top var(--_ext-top);
+  background-size: var(--_ext-size) var(--_ext-size);
+  background-repeat: no-repeat;
+}
+
+.prose a[href^="http"]:not([href*="fdic.gov"]):visited {
+  background-image: var(--_ext-icon-visited);
+}
+
+.prose a[href^="http"]:not([href*="fdic.gov"]):visited:hover {
+  background-image: var(--_ext-icon-visited);
+}
+
+/* --- Media --------------------------------------------------------------- */
+
+img, svg {
+  vertical-align: middle;
+}
+
+img, video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- Paragraphs ---------------------------------------------------------- */
+
+p {
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+/* ===========================================================================
+   3. PROSE COMPONENT
+   Scoped typographic styles for long-form content.
+   =========================================================================== */
+
+/* Visually hidden — available to screen readers only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Container ----------------------------------------------------------- */
+
+.prose {
+  font-family: var(--fdic-font-family-sans-serif);
+  font-size: var(--fdic-font-size-body, 1.125rem);
+  font-weight: 400;
+  line-height: var(--fdic-line-height-body, 1.5);
+  color: var(--fdic-text-primary, #212123);
+  max-width: var(--prose-max-width, 65ch);
+  text-wrap: pretty;
+  hanging-punctuation: first allow-end last;
+}
+
+/* --- Vertical rhythm ----------------------------------------------------- */
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose dl,
+.prose blockquote,
+.prose pre,
+.prose figure,
+.prose table,
+.prose hr {
+  margin-top: 0;
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+}
+
+/* --- Lead paragraph ------------------------------------------------------ */
+
+.prose .lead,
+.prose .prose-lead {
+  font-size: var(--fdic-font-size-body-big, 1.25rem);
+  line-height: var(--fdic-line-height-body, 1.5);
+  color: var(--fdic-text-secondary, #595961);
+}
+
+/* --- Headings ------------------------------------------------------------ */
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose h1 {
+  margin-top: 0;
+  padding-bottom: var(--fdic-spacing-xs, 8px);
+  border-bottom: 1px solid var(--fdic-border-divider, #bdbdbf);
+}
+
+.prose h2 {
+  padding-bottom: var(--fdic-spacing-2xs, 4px);
+}
+
+.prose h2 + h3,
+.prose h3 + h4,
+.prose h4 + h5,
+.prose h5 + h6 {
+  margin-top: 0.5em;
+}
+
+/* --- Bold & emphasis ----------------------------------------------------- */
+
+.prose strong,
+.prose b {
+  font-weight: 600;
+}
+
+/* --- Abbreviations ------------------------------------------------------- */
+
+.prose abbr[title] {
+  text-decoration: underline dotted;
+  text-decoration-color: var(--fdic-text-secondary, #595961);
+  text-underline-offset: 0.15em;
+  cursor: help;
+}
+
+/* --- Keyboard input ------------------------------------------------------ */
+
+.prose kbd {
+  font-family: var(--fdic-font-family-mono);
+  font-size: 0.8em;
+  background: var(--fdic-background-container, #f5f5f7);
+  border: 1px solid var(--fdic-border-divider, #bdbdbf);
+  border-bottom-width: 2px;
+  border-radius: var(--fdic-corner-radius-sm, 3px);
+  padding: 0.125em 0.375em;
+  white-space: nowrap;
+}
+
+/* --- Highlighted text ---------------------------------------------------- */
+
+.prose mark {
+  background-color: #fff3cd;
+  color: inherit;
+  padding: 0.125em 0.25em;
+  border-radius: 2px;
+}
+
+/* --- Dates & times ------------------------------------------------------- */
+
+.prose time[datetime][title] {
+  text-decoration: underline dotted;
+  text-decoration-color: var(--fdic-text-secondary, #595961);
+  text-underline-offset: 0.15em;
+  cursor: help;
+}
+
+/* --- Sample output ------------------------------------------------------- */
+
+.prose samp {
+  font-family: var(--fdic-font-family-mono);
+  font-size: 0.8em;
+  background: var(--fdic-background-container, #f5f5f7);
+  border-left: 3px solid var(--fdic-border-divider, #bdbdbf);
+  border-radius: 0 var(--fdic-corner-radius-sm, 3px) var(--fdic-corner-radius-sm, 3px) 0;
+  padding: 0.15em 0.4em;
+}
+
+/* --- Inline quotations --------------------------------------------------- */
+
+.prose q {
+  quotes: "\201c" "\201d" "\2018" "\2019";
+}
+
+/* --- Defining instance --------------------------------------------------- */
+
+.prose dfn {
+  font-style: italic;
+  font-weight: 600;
+}
+
+/* --- Variables ----------------------------------------------------------- */
+
+.prose var {
+  font-family: var(--fdic-font-family-mono);
+  font-style: italic;
+  font-size: 0.875em;
+}
+
+/* --- Output -------------------------------------------------------------- */
+
+.prose output {
+  font-family: var(--fdic-font-family-mono);
+  font-size: 0.8em;
+  background: var(--fdic-background-container, #f5f5f7);
+  border: 1px solid var(--fdic-border-divider, #bdbdbf);
+  border-radius: var(--fdic-corner-radius-sm, 3px);
+  padding: 0.125em 0.375em;
+}
+
+/* --- Insertions & deletions ---------------------------------------------- */
+
+.prose del {
+  text-decoration: line-through;
+  text-decoration-color: var(--fdic-text-secondary, #595961);
+}
+
+.prose ins {
+  text-decoration: none;
+  background-color: #e6f4ea;
+  padding: 0.05em 0.15em;
+  border-radius: 2px;
+}
+
+/* --- Small / fine print -------------------------------------------------- */
+
+.prose small {
+  font-size: 0.875em;
+  color: var(--fdic-text-secondary, #595961);
+}
+
+/* --- Superscript & subscript --------------------------------------------- */
+
+.prose sup,
+.prose sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.prose sup {
+  top: -0.5em;
+}
+
+.prose sub {
+  bottom: -0.25em;
+}
+
+/* --- Blockquotes --------------------------------------------------------- */
+
+.prose blockquote {
+  font-size: var(--fdic-font-size-body, 1.125rem);
+  line-height: 1.6;
+  color: var(--fdic-text-secondary, #595961);
+  border-left: 4px solid var(--fdic-brand-core-default, #0d6191);
+  padding: var(--fdic-spacing-sm, 12px) var(--fdic-spacing-xl, 1.25rem);
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.prose blockquote p {
+  margin-bottom: var(--fdic-spacing-xs, 8px);
+}
+
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.prose blockquote footer {
+  margin-top: 0.5em;
+}
+
+.prose blockquote cite {
+  display: block;
+  font-style: normal;
+  font-size: 0.875em;
+  color: var(--fdic-text-secondary, #595961);
+}
+
+/* Nested blockquotes — lighter border to show hierarchy */
+.prose blockquote blockquote {
+  margin-top: var(--fdic-spacing-xs, 0.5rem);
+  border-left-color: var(--fdic-border-divider, #bdbdbf);
+}
+
+/* --- Aside / pull quote -------------------------------------------------- */
+
+.prose aside {
+  float: right;
+  width: 40%;
+  margin: 0 0 var(--fdic-spacing-md, 1rem) var(--fdic-spacing-xl, 1.25rem);
+  padding: var(--fdic-spacing-md, 1rem);
+  border-left: 3px solid var(--fdic-brand-core-default, #0d6191);
+  color: var(--fdic-text-secondary, #595961);
+}
+
+.prose aside > *:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Inline code --------------------------------------------------------- */
+
+.prose code {
+  font-family: var(--fdic-font-family-mono);
+  font-size: 0.8em;
+  background: var(--fdic-background-container, #f5f5f7);
+  border-radius: var(--fdic-corner-radius-sm, 3px);
+  padding: 0.125em 0.35em;
+  word-break: break-word;
+}
+
+/* Don't double-style code inside pre blocks */
+.prose pre code {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  font-size: inherit;
+  word-break: normal;
+}
+
+/* --- Code blocks --------------------------------------------------------- */
+
+.prose pre {
+  font-family: var(--fdic-font-family-mono);
+  font-size: 0.875rem;
+  line-height: 1.625;
+  background: var(--fdic-background-container, #f5f5f7);
+  border: 1px solid var(--fdic-border-divider, #bdbdbf);
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+  padding: var(--fdic-spacing-md, 16px) var(--fdic-spacing-xl, 1.25rem);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* --- Addresses ----------------------------------------------------------- */
+
+.prose address {
+  font-style: normal;
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+}
+
+/* --- Wrapping code blocks ------------------------------------------------ */
+
+.prose pre.prose-pre-wrap {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* --- Lists --------------------------------------------------------------- */
+
+.prose ul,
+.prose ol {
+  padding-left: var(--fdic-spacing-xl, 1.25rem);
+  margin-left: 0;
+}
+
+/* Give ordered lists slightly more padding to account for wider number markers,
+   so the gap between marker and text visually matches unordered lists. */
+.prose ol {
+  padding-left: 1.75rem;
+}
+
+/* Simple list items — tight spacing keeps the list cohesive */
+.prose li {
+  margin-bottom: var(--fdic-spacing-2xs, 0.25rem);
+}
+
+.prose li:last-child {
+  margin-bottom: 0;
+}
+
+/* Complex list items (contain paragraphs) —
+   more space ABOVE each item to separate from previous sibling,
+   tight space below internal content to group with its own bullet. */
+.prose li p {
+  margin-bottom: var(--fdic-spacing-2xs, 0.25rem);
+}
+
+.prose li p:last-child {
+  margin-bottom: 0;
+}
+
+.prose li:has(> p) + li {
+  margin-top: var(--fdic-spacing-md, 1rem);
+}
+
+.prose li:has(> p):first-child {
+  margin-top: 0;
+}
+
+/* Nested lists — tight above (grouped with parent item) */
+.prose ul ul,
+.prose ol ol,
+.prose ul ol,
+.prose ol ul {
+  margin-top: var(--fdic-spacing-2xs, 0.25rem);
+  margin-bottom: 0;
+}
+
+/* Sibling list items that contain nested lists or bold+list combos:
+   more space BETWEEN siblings than between parent and its nested child.
+   This creates proximity grouping — each item's children stay close
+   to their parent, with a clear gap before the next sibling. */
+.prose li + li:has(> ul),
+.prose li + li:has(> ol) {
+  margin-top: var(--fdic-spacing-md, 1rem);
+}
+
+/* Also handle the case where the li has direct text/strong + nested list
+   but is not the first item */
+.prose li:has(> ul) + li,
+.prose li:has(> ol) + li {
+  margin-top: var(--fdic-spacing-md, 1rem);
+}
+
+/* Lettered and roman numeral lists — wider markers need more padding */
+.prose ol[type="a"],
+.prose ol[type="A"] {
+  padding-left: 2rem;
+}
+
+.prose ol[type="i"],
+.prose ol[type="I"] {
+  padding-left: 2.25rem;
+}
+
+/* --- Task lists (checkbox lists) ----------------------------------------- */
+
+.prose ul:has(> li > input[type="checkbox"]) {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose li > input[type="checkbox"] {
+  margin-right: var(--fdic-spacing-xs, 0.5rem);
+  accent-color: var(--fdic-brand-core-default, #0d6191);
+  vertical-align: -0.1em;
+}
+
+/* --- Definition lists ---------------------------------------------------- */
+
+.prose dl {
+  /* margin-top/bottom handled by the vertical rhythm group above */
+}
+
+.prose dt {
+  font-weight: 600;
+  color: var(--fdic-text-primary, #212123);
+  margin-top: var(--fdic-spacing-md, 1rem);
+  margin-bottom: var(--fdic-spacing-2xs, 0.25rem);
+}
+
+.prose dt:first-child {
+  margin-top: 0;
+}
+
+.prose dd {
+  margin-left: 1.5rem;
+  margin-bottom: var(--fdic-spacing-sm, 0.75rem);
+}
+
+.prose dd:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Collapsible sections (accordion) ------------------------------------ */
+
+.prose details {
+  margin-top: 0;
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+}
+
+/* Hide native disclosure triangle */
+.prose summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fdic-spacing-md, 1rem);
+  background: var(--fdic-background-container, #f5f5f7);
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+  padding: var(--fdic-spacing-md, 1rem);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+
+.prose summary::-webkit-details-marker {
+  display: none;
+}
+
+.prose summary::marker {
+  content: "";
+}
+
+/* Phosphor CaretDown icon — rotates on open */
+.prose summary::after {
+  content: "";
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  padding: 4px;
+  box-sizing: content-box;
+  background: no-repeat center / 18px 18px;
+  /* Phosphor CaretDown (regular) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 256 256'%3E%3Cpath fill='%23212123' d='M213.66 101.66l-80 80a8 8 0 0 1-11.32 0l-80-80a8 8 0 0 1 11.32-11.32L128 164.69l74.34-74.35a8 8 0 0 1 11.32 11.32Z'/%3E%3C/svg%3E");
+  transition: transform 0.2s ease;
+}
+
+.prose details[open] > summary {
+  margin-bottom: var(--fdic-spacing-xs, 0.5rem);
+}
+
+.prose details[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+/* Hover overlay */
+.prose summary:hover {
+  box-shadow: inset 0 0 0 999px var(--fdic-overlay-emphasize-100, rgba(0, 0, 0, 0.04));
+}
+
+/* Pressed / active overlay */
+.prose summary:active {
+  box-shadow: inset 0 0 0 999px var(--fdic-overlay-emphasize-200, rgba(0, 0, 0, 0.08));
+}
+
+/* Focus state — border + blue glow */
+.prose summary:focus-visible {
+  outline: none;
+  border: 2px solid var(--fdic-border-input-active, #424244);
+  box-shadow: 0 0 2.5px 2px var(--fdic-border-input-focus, #38b6ff);
+  padding: calc(var(--fdic-spacing-md, 1rem) - 2px);
+}
+
+/* Content area when expanded — indent to align with summary text,
+   no background so the summary pill stays visually self-contained. */
+.prose details[open] > *:not(summary) {
+  padding-left: var(--fdic-spacing-md, 1rem);
+  padding-right: var(--fdic-spacing-md, 1rem);
+}
+
+/* Smooth content reveal — interpolate-size enables animating to
+   auto height; opacity provides a fade-in. Older browsers that
+   don't support interpolate-size get an instant reveal (graceful). */
+.prose details {
+  interpolate-size: allow-keywords;
+}
+
+.prose details > *:not(summary) {
+  overflow: hidden;
+  opacity: 0;
+  max-height: 0;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+.prose details[open] > *:not(summary) {
+  opacity: 1;
+  max-height: none;
+}
+
+/* Remove bottom margin from last child in content */
+.prose details > *:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Horizontal rules ---------------------------------------------------- */
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--fdic-border-divider, #bdbdbf);
+  margin-top: var(--fdic-spacing-3xl, 48px);
+  margin-bottom: var(--fdic-spacing-3xl, 48px);
+}
+
+/* --- Images -------------------------------------------------------------- */
+
+.prose img {
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+  margin-top: var(--fdic-spacing-md, 16px);
+  margin-bottom: var(--fdic-spacing-md, 16px);
+}
+
+/* --- Figures & captions -------------------------------------------------- */
+
+.prose figure {
+  display: block;
+  margin: var(--fdic-spacing-xl, 1.25rem) 0;
+}
+
+.prose figure img {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose figcaption {
+  font-size: var(--fdic-font-size-body-small, 1rem);
+  line-height: var(--fdic-line-height-body, 1.5);
+  color: var(--fdic-text-secondary, #595961);
+  margin-top: var(--fdic-spacing-sm, 12px);
+}
+
+/* --- Embedded media (responsive iframe/video/audio) ---------------------- */
+
+.prose-embed-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+}
+
+.prose-embed-wrapper iframe,
+.prose-embed-wrapper video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+}
+
+.prose video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+}
+
+.prose audio {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+}
+
+/* --- Linked images ------------------------------------------------------- */
+
+.prose a:has(> img) {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.prose a:has(> img):hover img {
+  box-shadow: 0 0 0 3px var(--fdic-text-link, #1278b0);
+}
+
+.prose a:has(> img):focus-visible {
+  outline: none;
+}
+
+.prose a:has(> img):focus-visible img {
+  box-shadow: 0 0 0 3px var(--fdic-border-input-focus, #38b6ff);
+}
+
+/* --- Tables -------------------------------------------------------------- */
+
+.prose .prose-table-wrapper {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+}
+
+.prose .prose-table-wrapper table {
+  margin-bottom: 0;
+}
+
+.prose .prose-table-wrapper:focus-visible {
+  outline: 2px solid var(--fdic-border-input-focus, #38b6ff);
+  outline-offset: 2px;
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+}
+
+.prose caption {
+  caption-side: top;
+  font-size: var(--fdic-font-size-body-small, 1rem);
+  font-weight: 600;
+  color: var(--fdic-text-secondary, #595961);
+  text-align: left;
+  padding-bottom: var(--fdic-spacing-xs, 0.5rem);
+}
+
+.prose table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  table-layout: auto;
+  font-size: var(--fdic-font-size-body-small, 1rem);
+  line-height: normal;
+}
+
+.prose thead th {
+  font-size: var(--fdic-font-size-body-small, 1rem);
+  font-weight: 600;
+  line-height: normal;
+  background: var(--fdic-color-brand-primary-500, #0d6191);
+  color: var(--fdic-text-inverted, #ffffff);
+  text-align: left;
+  padding: var(--fdic-spacing-sm, 12px) var(--fdic-spacing-md, 16px);
+}
+
+.prose thead th:first-child {
+  border-top-left-radius: var(--fdic-corner-radius-lg, 7px);
+}
+
+.prose thead th:last-child {
+  border-top-right-radius: var(--fdic-corner-radius-lg, 7px);
+}
+
+.prose tbody td,
+.prose tbody th {
+  padding: var(--fdic-spacing-sm, 12px) var(--fdic-spacing-md, 16px);
+  border-bottom: 1px solid var(--fdic-border-divider, #bdbdbf);
+  vertical-align: top;
+}
+
+/* Row headers in tbody — use body styling, not thead styling */
+.prose tbody th {
+  background: transparent;
+  color: var(--fdic-text-primary, #212123);
+  text-align: left;
+  font-weight: 600;
+}
+
+.prose tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.prose tbody tr:nth-child(even) {
+  background-color: var(--fdic-background-container, #f5f5f7);
+}
+
+.prose tbody tr:hover {
+  background-color: var(--fdic-overlay-emphasize-100, rgba(0, 0, 0, 0.04));
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Table footer — summary/totals row */
+.prose tfoot th,
+.prose tfoot td {
+  font-weight: 600;
+  padding: var(--fdic-spacing-sm, 12px) var(--fdic-spacing-md, 16px);
+  border-top: 2px solid var(--fdic-border-divider, #bdbdbf);
+  background: var(--fdic-background-container, #f5f5f7);
+}
+
+.prose tfoot tr:last-child th:first-child {
+  border-bottom-left-radius: var(--fdic-corner-radius-lg, 7px);
+}
+
+.prose tfoot tr:last-child td:last-child {
+  border-bottom-right-radius: var(--fdic-corner-radius-lg, 7px);
+}
+
+/* Right-align numeric data columns */
+.prose .prose-td-numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Footnotes ----------------------------------------------------------- */
+
+/* Inline footnote reference */
+.prose sup a[href^="#fn"] {
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--fdic-text-link, #1278b0);
+  padding: 0.5em 0.35em;
+  margin: -0.5em -0.25em;
+}
+
+.prose sup a[href^="#fn"]:hover {
+  text-decoration: underline;
+}
+
+.prose sup a[href^="#fn"]:focus-visible {
+  outline: 2px solid var(--fdic-border-input-focus, #38b6ff);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Footnote section */
+.prose .prose-footnotes {
+  font-size: 0.875em;
+  color: var(--fdic-text-secondary, #595961);
+}
+
+.prose .prose-footnotes hr {
+  width: 33%;
+  margin-left: 0;
+  margin-top: var(--fdic-spacing-3xl, 3rem);
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+}
+
+.prose .prose-footnotes ol {
+  padding-left: var(--fdic-spacing-xl, 1.25rem);
+}
+
+.prose .prose-footnotes li {
+  margin-bottom: var(--fdic-spacing-xs, 0.5rem);
+}
+
+/* Multi-paragraph footnotes */
+.prose .prose-footnotes li p {
+  margin-bottom: var(--fdic-spacing-2xs, 0.25rem);
+}
+
+.prose .prose-footnotes li p:last-child {
+  margin-bottom: 0;
+}
+
+/* Back-link */
+.prose .prose-footnotes a[href^="#ref"] {
+  text-decoration: none;
+  margin-left: 0.25em;
+}
+
+.prose .prose-footnotes a[href^="#ref"]:hover {
+  text-decoration: underline;
+}
+
+.prose .prose-footnotes a[href^="#ref"]:focus-visible {
+  outline: 2px solid var(--fdic-border-input-focus, #38b6ff);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Target highlight when clicking a footnote reference */
+.prose .prose-footnotes li:target {
+  border-radius: 2px;
+  padding: 0.125em 0.375em;
+  margin-left: -0.375em;
+  animation: footnote-flash 1.5s ease;
+}
+
+@keyframes footnote-flash {
+  0%   { background-color: #fff3cd; }
+  100% { background-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose .prose-footnotes li:target {
+    animation: none;
+    background-color: #fff3cd;
+  }
+}
+
+/* --- Spacing fine-tuning ------------------------------------------------- */
+
+.prose h1 + p,
+.prose h2 + p,
+.prose h3 + p,
+.prose h4 + p,
+.prose h5 + p,
+.prose h6 + p {
+  margin-top: 0;
+}
+
+/* --- Selection ----------------------------------------------------------- */
+
+.prose ::selection {
+  background-color: rgba(18, 120, 176, 0.2);
+}
+
+.prose-callout-info ::selection {
+  background-color: rgba(18, 120, 176, 0.25);
+}
+
+.prose-callout-warning ::selection {
+  background-color: rgba(180, 140, 20, 0.25);
+}
+
+.prose-callout-success ::selection {
+  background-color: rgba(30, 130, 50, 0.2);
+}
+
+.prose-callout-danger ::selection {
+  background-color: rgba(190, 40, 40, 0.2);
+}
+
+/* --- Callouts ------------------------------------------------------------ */
+
+.prose-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fdic-spacing-sm, 0.75rem);
+  padding: var(--fdic-spacing-md, 1rem);
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+  border: 1px solid var(--fdic-callout-border);
+  background-color: var(--fdic-callout-bg);
+}
+
+.prose-callout-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  background: no-repeat center / 20px 20px;
+  /* Default: Phosphor Lightbulb (regular) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 256 256'%3E%3Cpath fill='%23595961' d='M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-16,0a72,72,0,0,0-73.74-72c-39,.92-70.47,33.39-70.26,72.39a71.65,71.65,0,0,0,27.64,56.3A32,32,0,0,1,96,186v6h64v-6a32.15,32.15,0,0,1,12.47-25.35A71.65,71.65,0,0,0,200,104Zm-16.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z'/%3E%3C/svg%3E");
+}
+
+.prose-callout-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.prose-callout-content > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Color variants — use token-derived colors with transparency */
+.prose-callout-info {
+  background-color: var(--fdic-callout-info-bg);
+  border-color: var(--fdic-callout-info-border);
+}
+
+.prose-callout-warning {
+  background-color: var(--fdic-callout-warning-bg);
+  border-color: var(--fdic-callout-warning-border);
+}
+
+.prose-callout-success {
+  background-color: var(--fdic-callout-success-bg);
+  border-color: var(--fdic-callout-success-border);
+}
+
+.prose-callout-danger {
+  background-color: var(--fdic-callout-danger-bg);
+  border-color: var(--fdic-callout-danger-border);
+}
+
+/* Phosphor icons per callout variant */
+.prose-callout-info .prose-callout-icon {
+  /* Phosphor Info (regular) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 256 256'%3E%3Cpath fill='%231278b0' d='M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z'/%3E%3C/svg%3E");
+}
+
+.prose-callout-warning .prose-callout-icon {
+  /* Phosphor Warning (regular) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 256 256'%3E%3Cpath fill='%23b48c14' d='M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z'/%3E%3C/svg%3E");
+}
+
+.prose-callout-success .prose-callout-icon {
+  /* Phosphor CheckCircle (regular) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 256 256'%3E%3Cpath fill='%231e8232' d='M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z'/%3E%3C/svg%3E");
+}
+
+.prose-callout-danger .prose-callout-icon {
+  /* Phosphor WarningOctagon (regular) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 256 256'%3E%3Cpath fill='%23be2828' d='M120,136V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0ZM232,91.55v72.9a15.86,15.86,0,0,1-4.69,11.31l-51.55,51.55A15.86,15.86,0,0,1,164.45,232H91.55a15.86,15.86,0,0,1-11.31-4.69L28.69,175.76A15.86,15.86,0,0,1,24,164.45V91.55a15.86,15.86,0,0,1,4.69-11.31L80.24,28.69A15.86,15.86,0,0,1,91.55,24h72.9a15.86,15.86,0,0,1,11.31,4.69l51.55,51.55A15.86,15.86,0,0,1,232,91.55Zm-16,0L164.45,40H91.55L40,91.55v72.9L91.55,216h72.9L216,164.45ZM128,160a12,12,0,1,0,12,12A12,12,0,0,0,128,160Z'/%3E%3C/svg%3E");
+}
+
+/* --- Progress & meter ---------------------------------------------------- */
+
+.prose-progress-group,
+.prose-meter-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--fdic-spacing-2xs, 0.25rem) var(--fdic-spacing-sm, 0.75rem);
+  align-items: center;
+  margin-bottom: var(--fdic-spacing-md, 1rem);
+}
+
+.prose-progress-group label,
+.prose-meter-group label {
+  font-weight: 600;
+  grid-column: 1 / -1;
+}
+
+.prose progress,
+.prose meter {
+  width: 100%;
+  height: 0.75rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--fdic-background-container, #f5f5f7);
+  overflow: hidden;
+}
+
+/* Progress — WebKit */
+.prose progress::-webkit-progress-bar {
+  background: var(--fdic-background-container, #f5f5f7);
+  border-radius: 999px;
+}
+
+.prose progress::-webkit-progress-value {
+  background: var(--fdic-brand-core-default, #0d6191);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* Progress — Firefox */
+.prose progress::-moz-progress-bar {
+  background: var(--fdic-brand-core-default, #0d6191);
+  border-radius: 999px;
+}
+
+/* Indeterminate progress — animated stripes */
+@keyframes prose-progress-stripes {
+  0%   { background-position: 0 0; }
+  100% { background-position: 32px 0; }
+}
+
+.prose progress:indeterminate::-webkit-progress-bar {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--fdic-background-container) 0 8px,
+    var(--fdic-border-divider) 8px 16px
+  );
+  background-size: 32px 32px;
+  animation: prose-progress-stripes 0.8s linear infinite;
+}
+
+.prose progress:indeterminate::-moz-progress-bar {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--fdic-background-container) 0 8px,
+    var(--fdic-border-divider) 8px 16px
+  );
+  background-size: 32px 32px;
+  animation: prose-progress-stripes 0.8s linear infinite;
+}
+
+/* Meter — WebKit */
+.prose meter::-webkit-meter-bar {
+  background: var(--fdic-background-container, #f5f5f7);
+  border: none;
+  border-radius: 999px;
+}
+
+.prose meter::-webkit-meter-optimum-value {
+  background: #1e8232;
+  border-radius: 999px;
+}
+
+.prose meter::-webkit-meter-suboptimum-value {
+  background: #b48c14;
+  border-radius: 999px;
+}
+
+.prose meter::-webkit-meter-even-less-good-value {
+  background: #be2828;
+  border-radius: 999px;
+}
+
+/* Meter — Firefox */
+.prose meter:-moz-meter-optimum::-moz-meter-bar {
+  background: #1e8232;
+  border-radius: 999px;
+}
+
+.prose meter:-moz-meter-sub-optimum::-moz-meter-bar {
+  background: #b48c14;
+  border-radius: 999px;
+}
+
+.prose meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+  background: #be2828;
+  border-radius: 999px;
+}
+
+.prose-progress-value,
+.prose-meter-value {
+  font-size: var(--fdic-font-size-body-small, 1rem);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+  min-width: 19ch;
+}
+
+/* --- Table of contents --------------------------------------------------- */
+
+.prose-toc {
+  background: var(--fdic-background-container, #f5f5f7);
+  border: 1px solid var(--fdic-border-divider, #bdbdbf);
+  border-radius: var(--fdic-corner-radius-lg, 7px);
+  padding: var(--fdic-spacing-md, 1rem);
+  margin-bottom: var(--fdic-spacing-xl, 1.25rem);
+}
+
+.prose .prose-toc-title {
+  font-size: var(--fdic-font-size-h3, 1.4063rem);
+  line-height: var(--fdic-line-height-h3, 1.25);
+  font-weight: 600;
+  color: var(--fdic-text-primary, #212123);
+  margin-top: 0;
+  margin-bottom: var(--fdic-spacing-xs, 0.5rem);
+}
+
+.prose-toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.prose-toc li {
+  margin-bottom: var(--fdic-spacing-2xs, 0.25rem);
+}
+
+.prose-toc li:last-child {
+  margin-bottom: 0;
+}
+
+.prose-toc a {
+  text-decoration: none;
+}
+
+.prose-toc a:hover,
+.prose-toc a:focus {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  a,
+  .prose tbody tr,
+  .prose summary::after,
+  .prose details > *:not(summary),
+  .prose-toc a,
+  .prose-copy-btn {
+    transition: none;
+  }
+
+  .prose progress:indeterminate::-webkit-progress-bar,
+  .prose progress:indeterminate::-moz-progress-bar {
+    animation: none;
+  }
+}
+
+/* --- Prose boundary resets ----------------------------------------------- */
+
+.prose > *:first-child {
+  margin-top: 0;
+}
+
+.prose > *:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Skip link ----------------------------------------------------------- */
+
+.skip-link:focus {
+  position: fixed;
+  top: var(--fdic-spacing-md, 1rem);
+  left: var(--fdic-spacing-md, 1rem);
+  z-index: 1000;
+  width: auto;
+  height: auto;
+  padding: var(--fdic-spacing-xs, 0.5rem) var(--fdic-spacing-md, 1rem);
+  clip: auto;
+  overflow: visible;
+  white-space: normal;
+  background: var(--fdic-background-base, #ffffff);
+  color: var(--fdic-text-link, #1278b0);
+  border: 2px solid var(--fdic-border-input-focus, #38b6ff);
+  border-radius: var(--fdic-corner-radius-sm, 3px);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* --- Back to top --------------------------------------------------------- */
+
+.prose .prose-back-to-top {
+  text-align: right;
+  margin-bottom: 0;
+}
+
+.prose .prose-back-to-top a {
+  font-size: var(--fdic-font-size-body-small, 1rem);
+  color: var(--fdic-text-secondary, #595961);
+  text-decoration: none;
+}
+
+.prose .prose-back-to-top a:hover,
+.prose .prose-back-to-top a:focus {
+  color: var(--fdic-text-link, #1278b0);
+  text-decoration: underline;
+}
+
+/* --- TOC active state ---------------------------------------------------- */
+
+.prose-toc a {
+  transition: color 0.2s ease;
+}
+
+.prose-toc a.prose-toc-active {
+  color: var(--fdic-text-primary, #212123);
+  font-weight: 600;
+}
+
+/* --- Copy button --------------------------------------------------------- */
+
+.prose-copy-btn {
+  position: absolute;
+  top: var(--fdic-spacing-xs, 0.5rem);
+  right: var(--fdic-spacing-xs, 0.5rem);
+  padding: 0.25em 0.625em;
+  font-family: var(--fdic-font-family-sans-serif);
+  font-size: var(--fdic-font-size-body-small, 1rem);
+  font-weight: 600;
+  color: var(--fdic-text-secondary, #595961);
+  background: var(--fdic-background-base, #ffffff);
+  border: 1px solid var(--fdic-border-divider, #bdbdbf);
+  border-radius: var(--fdic-corner-radius-sm, 3px);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.prose pre:hover .prose-copy-btn,
+.prose pre:focus-within .prose-copy-btn,
+.prose-copy-btn:focus {
+  opacity: 1;
+}
+
+.prose-copy-btn:hover {
+  color: var(--fdic-text-primary, #212123);
+  border-color: var(--fdic-border-input-active, #424244);
+}
+
+.prose-copy-btn:focus-visible {
+  outline: 2px solid var(--fdic-border-input-focus, #38b6ff);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+.prose-copy-btn-success {
+  color: #1e8232;
+  border-color: rgba(30, 130, 50, 0.3);
+}
+
+/* ===========================================================================
+   4. RESPONSIVE TYPE SCALING
+   Reduce heading sizes on narrow viewports to prevent overflow.
+   =========================================================================== */
+
+@media (max-width: 640px) {
+  :root {
+    --fdic-font-size-h1: 2rem;
+    --fdic-font-size-h2: 1.5rem;
+    --fdic-font-size-h3: 1.25rem;
+    --fdic-font-size-h4: 1.0625rem;
+  }
+
+  .prose .lead,
+  .prose .prose-lead {
+    font-size: 1.125rem;
+  }
+
+  .prose aside {
+    float: none;
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* ===========================================================================
+   5. PRINT STYLES
+   Optimise prose content for paper: force black text, remove decorative
+   backgrounds, show link URLs, and hide interactive-only elements.
+   =========================================================================== */
+
+@media print {
+  .prose {
+    max-width: none;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    color: #000;
+    break-after: avoid;
+  }
+
+  .prose h1 {
+    border-bottom-color: #000;
+  }
+
+  .prose a {
+    color: #000;
+    text-decoration: underline;
+  }
+
+  /* Append URLs to links so they're visible on paper */
+  .prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    font-weight: 400;
+    word-break: break-all;
+  }
+
+  /* Don't append URL to footnote back-links */
+  .prose .prose-footnotes a[href^="#ref"]::after {
+    content: none;
+  }
+
+  .prose blockquote {
+    border-left-color: #000;
+    color: #000;
+  }
+
+  .prose pre,
+  .prose kbd {
+    background: none;
+    border-color: #999;
+  }
+
+  .prose code {
+    background: none;
+  }
+
+  .prose thead th {
+    background: #000;
+    color: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .prose img,
+  .prose figure {
+    break-inside: avoid;
+  }
+
+  /* Hide TOC — anchor links aren't useful on paper */
+  .prose-toc {
+    display: none;
+  }
+
+  /* Callouts: remove backgrounds, keep borders for structure */
+  .prose-callout {
+    background: none !important;
+    border-color: #999;
+  }
+
+  .prose-callout-icon {
+    display: none;
+  }
+
+  /* Table: suppress decorative row backgrounds */
+  .prose tbody tr:nth-child(even) {
+    background: none;
+  }
+
+  .prose tbody tr:hover {
+    background: none;
+  }
+
+  /* Hide back-to-top links — not useful on paper */
+  .prose .prose-back-to-top {
+    display: none;
+  }
+
+  /* Hide copy buttons */
+  .prose-copy-btn {
+    display: none;
+  }
+
+  /* Table footer */
+  .prose tfoot th,
+  .prose tfoot td {
+    background: none;
+    border-top: 2px solid #000;
+  }
+
+  /* Progress & meter — show text fallback, hide bar */
+  .prose progress,
+  .prose meter {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid #999;
+  }
+
+  /* Aside: linearize for print */
+  .prose aside {
+    float: none;
+    width: 100%;
+    margin-left: 0;
+    border-left-color: #000;
+  }
+
+  /* Embedded media */
+  .prose-embed-wrapper {
+    break-inside: avoid;
+  }
+
+  .prose video,
+  .prose audio {
+    break-inside: avoid;
+  }
+
+  /* Output element */
+  .prose output {
+    background: none;
+    border-color: #999;
+  }
+
+  /* Hide interactive toggle icons; force-expand all details */
+  .prose summary::after {
+    display: none;
+  }
+
+  .prose details {
+    display: block;
+  }
+
+  .prose details > *:not(summary) {
+    display: block;
+    opacity: 1;
+    max-height: none;
+  }
+
+  .prose details > summary {
+    background: none;
+  }
+}
+
+/* ===========================================================================
+   6. FORCED-COLORS / HIGH-CONTRAST MODE
+   Ensure callout structure and icons remain visible when the OS overrides
+   colors (e.g. Windows High Contrast).
+   =========================================================================== */
+
+@media (forced-colors: active) {
+  .prose-callout {
+    border: 2px solid LinkText;
+  }
+
+  .prose-callout-icon {
+    forced-color-adjust: none;
+  }
+
+  .prose mark {
+    forced-color-adjust: none;
+  }
+
+  .prose ins {
+    border-bottom: 2px solid LinkText;
+    background: none;
+  }
+
+  .prose summary::after {
+    forced-color-adjust: none;
+  }
+
+  .prose kbd {
+    border: 1px solid ButtonText;
+  }
+
+  .prose samp {
+    border-left: 3px solid LinkText;
+  }
+
+  .prose progress,
+  .prose meter {
+    forced-color-adjust: none;
+  }
+
+  .prose tfoot th,
+  .prose tfoot td {
+    border-top: 2px solid ButtonText;
+  }
+
+  .prose aside {
+    border-left: 3px solid LinkText;
+  }
+
+  .prose output {
+    border: 1px solid ButtonText;
+  }
+
+  .prose a:has(> img):hover img,
+  .prose a:has(> img):focus-visible img {
+    outline: 3px solid LinkText;
+    box-shadow: none;
+  }
+}
