@@ -1,5 +1,21 @@
 # TODO
 
+## Current Task (FDIC Typography Content Refresh)
+- [x] Compare the pulled `sites/fdic-typography/` site against the attached `fdicnet-prose` source files.
+- [x] Sync the HTML content updates into the repo site while preserving repo-standard asset references.
+- [x] Run targeted verification and record results.
+
+## Review / Results (FDIC Typography Content Refresh)
+- Updated [index.html](/Users/jlamb/Projects/pens-github-test/sites/fdic-typography/index.html):
+  - synced the page body content to match the attached `/Users/jlamb/Projects/fdicnet-prose/index.html`.
+  - preserved the repo-standard asset references to `styles.css` and `script.js`.
+- Confirmed [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdic-typography/styles.css):
+  - matches the attached `/Users/jlamb/Projects/fdicnet-prose/prose-standalone.css` with no CSS changes required.
+- Validation:
+  - `diff -u /Users/jlamb/Projects/fdicnet-prose/index.html sites/fdic-typography/index.html` now shows only the expected `prose-standalone.css -> styles.css` and inline-script -> `script.js` changes.
+  - `diff -u /Users/jlamb/Projects/fdicnet-prose/prose-standalone.css sites/fdic-typography/styles.css` returns no differences.
+  - `node --check sites/fdic-typography/script.js`
+
 ## Current Task (FDIC Typography Site Import)
 - [x] Capture the supplied standalone typography demo into a new `sites/fdic-typography/` micro-site using repo-standard file names.
 - [x] Refactor the supplied assets so the site uses `index.html`, `styles.css`, and `script.js`, preserving the source behavior and content.
