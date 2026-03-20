@@ -5,6 +5,7 @@ Thumbs.db
 *.code-workspace
 .vscode/
 .idea/
+.claude/
 
 # Local scratch/reference files
 fdic_ref.html
