@@ -1208,6 +1208,11 @@ p {
   overflow: hidden;
 }
 
+.prose progress {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
 /* Progress — WebKit */
 .prose progress::-webkit-progress-bar {
   background: var(--fdic-background-container, #f5f5f7);
@@ -1226,30 +1231,41 @@ p {
   border-radius: 999px;
 }
 
-/* Indeterminate progress — animated stripes */
-@keyframes prose-progress-stripes {
-  0%   { background-position: 0 0; }
-  100% { background-position: 32px 0; }
+/* Indeterminate progress — animated shimmer */
+@keyframes prose-progress-indeterminate {
+  0% {
+    background-position: 160% 0;
+  }
+
+  100% {
+    background-position: -60% 0;
+  }
 }
 
-.prose progress:indeterminate::-webkit-progress-bar {
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--fdic-background-container) 0 8px,
-    var(--fdic-border-divider) 8px 16px
+.prose progress:not([value]) {
+  background-color: var(--fdic-background-container, #f5f5f7);
+  background-image: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0) 34%,
+    rgba(255, 255, 255, 0.92) 44%,
+    rgba(189, 189, 191, 0.9) 50%,
+    rgba(255, 255, 255, 0.92) 56%,
+    rgba(255, 255, 255, 0) 66%,
+    rgba(255, 255, 255, 0) 100%
   );
-  background-size: 32px 32px;
-  animation: prose-progress-stripes 0.8s linear infinite;
+  background-repeat: no-repeat;
+  background-size: 180% 100%;
+  animation: prose-progress-indeterminate 1.15s ease-in-out infinite;
 }
 
-.prose progress:indeterminate::-moz-progress-bar {
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--fdic-background-container) 0 8px,
-    var(--fdic-border-divider) 8px 16px
-  );
-  background-size: 32px 32px;
-  animation: prose-progress-stripes 0.8s linear infinite;
+.prose progress:not([value])::-webkit-progress-bar,
+.prose progress:not([value])::-webkit-progress-value {
+  background: transparent;
+}
+
+.prose progress:not([value])::-moz-progress-bar {
+  background: transparent;
 }
 
 /* Meter — WebKit */
