@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FDIC Penny Prose — Style Guide</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<a href="#typography" class="skip-link sr-only">Skip to content</a>
+<article class="prose" id="main">
+
+<h1 id="top">Penny Prose Style Guide</h1>
+<p class="lead">A reference for the <code>prose</code> component in the FDIC Design System. Add <code>class="prose"</code> to any container to apply these typographic styles to its content automatically. This paragraph uses <code>class="lead"</code> to introduce the page at a slightly larger size (20px) in a secondary color &mdash; useful for article summaries and section introductions.</p>
+
+<pre><code class="language-html">&lt;article class="prose"&gt;
+  &lt;p class="lead"&gt;Your introductory text here.&lt;/p&gt;
+  &lt;!-- Your content here --&gt;
+&lt;/article&gt;</code></pre>
+
+<nav class="prose-toc" aria-label="Table of contents">
+  <p class="prose-toc-title" id="toc">On this page</p>
+  <ul>
+    <li><a href="#typography">Typography</a></li>
+    <li><a href="#inline-elements">Inline Elements</a></li>
+    <li><a href="#block-elements">Block Elements</a></li>
+    <li><a href="#lists">Lists</a></li>
+    <li><a href="#tables">Tables</a></li>
+    <li><a href="#media">Media</a></li>
+    <li><a href="#components">Components</a></li>
+    <li><a href="#footnotes">Footnotes</a></li>
+  </ul>
+</nav>
+
+<hr />
+
+<!-- ================================================================== -->
+<!--  TYPOGRAPHY                                                        -->
+<!-- ================================================================== -->
+
+<h2 id="typography">Typography</h2>
+
+<h3>Headings</h3>
+<p>Headings use Source Sans 3 at weight 600. Space above a heading is <code>1.5em</code> (relative to the heading's own font size) and space below is <code>0.5em</code>, so larger headings get proportionally more breathing room. The <code>h1</code> has no top margin (it&rsquo;s assumed to be first) and includes a bottom border as a visual anchor.</p>
+
+<h4>Stacked headings</h4>
+<p>When headings appear consecutively (like the <code>h3</code> and <code>h4</code> above), the top margin on the second heading collapses to <code>0.5em</code> so they read as a group rather than drifting apart.</p>
+
+
+<h3>Body text</h3>
+<p>Body text is set at 18px (<code>1.125rem</code>) with a line-height of 1.5. This combination gives long-form content enough breathing room for sustained reading without feeling loose. The <code>text-wrap: pretty</code> property improves paragraph rag in browsers that support it.</p>
+
+<h3>Fine print</h3>
+<p>Disclaimers, version notes, and legal caveats are everywhere in regulatory content. The <code>&lt;small&gt;</code> element renders text at a reduced size in a secondary color — readable but clearly subordinate to surrounding content.</p>
+<p><small>The prose component is provided as-is under the FDIC Design System and may change in future releases. Refer to the design system changelog for the latest updates.</small></p>
+
+<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<hr />
+
+<!-- ================================================================== -->
+<!--  INLINE ELEMENTS                                                   -->
+<!-- ================================================================== -->
+
+<h2 id="inline-elements">Inline Elements</h2>
+
+<h3>Links</h3>
+<p>Links are underlined in the <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> brand blue (<code>#1278b0</code>) with a subtle, partially transparent 1px underline at rest. On hover, three properties animate together: the underline thickens to 2px, drops from a 2px to 4px offset, and saturates from 40% to full opacity &mdash; creating a clearly perceptible response without being flashy. Visited links shift to a muted purple (<code>#855AA5</code>) that darkens slightly on hover. Here&rsquo;s <a href="https://www.fdic.gov">a link to the FDIC website</a> and here&rsquo;s <a href="https://www.fdic.gov/about">one you may have visited before</a>. External links display a small arrow icon after the text &mdash; for example, <a href="https://en.wikipedia.org/wiki/Federal_Deposit_Insurance_Corporation">the FDIC article on Wikipedia</a>.</p>
+
+<h3>Bold and emphasis</h3>
+<p>Use <code>&lt;strong&gt;</code> for <strong>strong importance</strong> and <code>&lt;em&gt;</code> for <em>stress emphasis</em>. Bold text uses weight 600 (semibold) rather than 700 to match the heading weight and avoid looking heavy in body copy. You can combine them for <strong><em>strong emphasis</em></strong> when warranted.</p>
+
+<h3>Inline code</h3>
+<p>Inline <code>&lt;code&gt;</code> elements render in the system monospace stack at a slightly reduced size, with a subtle background and border: <code>font-size: 0.8em</code>. Use it for tag names like <code>&lt;article&gt;</code>, property names like <code>margin-top</code>, or values like <code>1.5rem</code>.</p>
+
+<h3>Abbreviations</h3>
+<p>The <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> was established in 1933 to maintain public confidence in the nation&rsquo;s financial system.<sup><a href="#fn1" id="ref1" role="doc-noteref">[1]</a></sup> Abbreviations with a <code>title</code> attribute get a dotted underline and a help cursor &mdash; hover over &ldquo;<abbr title="Federal Deposit Insurance Corporation">FDIC</abbr>&rdquo; to see the tooltip. Use <code>&lt;abbr title="&hellip;"&gt;</code> for the first occurrence of any acronym on a page.</p>
+
+<h3>Keyboard input</h3>
+<p>The <code>&lt;kbd&gt;</code> element represents keyboard input. It renders as a raised pill that mimics a physical key: <kbd>Ctrl</kbd> + <kbd>S</kbd> to save, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> to toggle full-screen mode. The subtle bottom border creates a three-dimensional appearance.</p>
+
+<h3>Highlighted text</h3>
+<p>The <code>&lt;mark&gt;</code> element highlights text with a warm yellow background. When a quarterly review surfaces problems, the audit may flag <mark>three critical findings</mark> that require immediate action. The highlight is subtle enough for inline use but visible enough to scan for quickly.</p>
+
+<h3>Insertions and deletions</h3>
+<p>The <code>&lt;del&gt;</code> and <code>&lt;ins&gt;</code> elements mark removed and added text, useful for tracking amendments in regulatory documents. For example, the standard insurance limit was raised from <del><span class="sr-only">deleted: </span>$100,000</del> to <ins><span class="sr-only">inserted: </span>$250,000</ins> per depositor in 2008.</p>
+
+<h3>Dates and times</h3>
+<p>The <code>&lt;time&gt;</code> element associates human-readable dates with a machine-readable <code>datetime</code> attribute. When a <code>title</code> attribute is present, it displays the ISO date on hover: the FDIC was established on <time datetime="1933-06-16" title="1933-06-16">June 16, 1933</time>. Quarterly Call Reports are due within <time datetime="P30D" title="30 days">30 days</time> of each quarter end — for example, the Q4 2025 report was due by <time datetime="2026-01-30" title="2026-01-30">January 30, 2026</time>.</p>
+
+<h3>Sample output</h3>
+<p>The <code>&lt;samp&gt;</code> element represents sample output from a program or system, visually distinct from <code>&lt;code&gt;</code> (source code) and <code>&lt;kbd&gt;</code> (user input). After submitting a Call Report, the system responds with <samp>Report CR-2026-Q1 accepted — confirmation ID 7FA3B</samp>. Use <code>&lt;samp&gt;</code> for status messages, error output, or any machine-generated text.</p>
+
+<h3>Special characters and entities</h3>
+<p>Financial and regulatory documents rely on a range of special characters that must be encoded as HTML entities. Using the correct entity &mdash; rather than a keyboard approximation &mdash; ensures proper rendering, searchability, and accessibility:</p>
+<ul>
+<li><strong>Quotation marks:</strong> Use curly quotes (&ldquo;insured&rdquo; and &lsquo;insured&rsquo;) via <code>&amp;ldquo;</code>/<code>&amp;rdquo;</code> and <code>&amp;lsquo;</code>/<code>&amp;rsquo;</code> rather than straight primes (<code>"</code>&nbsp;/<code>'</code>). The right single quote also serves as the typographic apostrophe: don&rsquo;t, it&rsquo;s, depositors&rsquo;.</li>
+<li><strong>Dashes:</strong> Use an em dash (&mdash;) via <code>&amp;mdash;</code> for parenthetical breaks, and an en dash (&ndash;) via <code>&amp;ndash;</code> for ranges: pages 181&ndash;200, fiscal years 2024&ndash;2025.</li>
+<li><strong>Section sign:</strong> &sect;363 sales, 12&nbsp;U.S.C. &sect;1831o &mdash; use <code>&amp;sect;</code> for regulatory section references.</li>
+<li><strong>Daggers:</strong> Use &dagger; (<code>&amp;dagger;</code>) and &Dagger; (<code>&amp;Dagger;</code>) as secondary footnote markers when numbered notes are reserved for citations.</li>
+<li><strong>Ellipsis:</strong> Use <code>&amp;hellip;</code> (&hellip;) for a proper single-glyph ellipsis rather than three periods.</li>
+<li><strong>Legal marks:</strong> FDIC&reg; insured &mdash; use <code>&amp;copy;</code> (&copy;), <code>&amp;reg;</code> (&reg;), and <code>&amp;trade;</code> (&trade;) for legal designations.</li>
+<li><strong>Math and comparisons:</strong> Capital ratios &ge;&nbsp;4.5%, tolerance of &plusmn;0.5%, and per-transaction fees of 15&cent; &mdash; use <code>&amp;ge;</code>, <code>&amp;le;</code>, <code>&amp;plusmn;</code>, and <code>&amp;cent;</code>.</li>
+<li><strong>Non-breaking space:</strong> Use <code>&amp;nbsp;</code> between quantities and units (12&nbsp;U.S.C., $250,000&nbsp;per depositor) to prevent awkward line breaks.</li>
+</ul>
+
+<h3>Superscripts and subscripts</h3>
+<p>Footnote references use superscript links<sup><a href="#fn2" id="ref2" role="doc-noteref">[2]</a></sup> that don&rsquo;t disrupt line height — this is achieved with <code>line-height: 0</code> on <code>sup</code> and <code>sub</code> elements, which prevents them from inflating the line box. Subscripts appear in scientific contexts: CO<sub>2</sub> levels, H<sub>2</sub>O quality, and Fe<sub>2</sub>O<sub>3</sub> concentrations all render at the correct baseline without affecting vertical rhythm.</p>
+
+<h3>Inline quotations</h3>
+<p>The <code>&lt;q&gt;</code> element wraps inline quotations with language-appropriate curly quotes automatically. Some CMS editors emit <code>&lt;q&gt;</code> tags instead of manual quote characters. For example, the FDIC&rsquo;s mission is <q>to maintain stability and public confidence in the nation&rsquo;s financial system</q>. Nested quotations switch to single quotes: <q>The examiner noted <q>material weakness in internal controls</q> in the final report</q>.</p>
+
+<h3>Defining instance</h3>
+<p>The <code>&lt;dfn&gt;</code> element marks the defining instance of a term &mdash; its first or most authoritative explanation. <dfn>Prompt Corrective Action</dfn> (<abbr title="Prompt Corrective Action">PCA</abbr>) is a framework of supervisory actions tied to a bank&rsquo;s capital levels. Once a term has been introduced with <code>&lt;dfn&gt;</code>, subsequent uses should appear as plain text or abbreviations.</p>
+
+<h3>Variables</h3>
+<p>The <code>&lt;var&gt;</code> element represents a variable in a mathematical expression or programming context. For example, a bank is considered well-capitalized when its CET1 ratio <var>r</var>&nbsp;&ge;&nbsp;<var>r<sub>min</sub></var>, where <var>r<sub>min</sub></var>&nbsp;=&nbsp;6.5%. In system configuration, set <var>threshold</var> to the desired trigger value.</p>
+
+<h3>Word break opportunities</h3>
+<p>The <code>&lt;wbr&gt;</code> element suggests optional line-break points within long strings that would otherwise overflow. This is useful for certificate numbers (CERT<wbr>#<wbr>00012345<wbr>-<wbr>2026<wbr>-<wbr>Q1<wbr>-<wbr>RC), long URLs, or regulatory reference codes that lack natural break points. The browser will only break at a <code>&lt;wbr&gt;</code> if the line would otherwise overflow.</p>
+
+<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<hr />
+
+<!-- ================================================================== -->
+<!--  BLOCK ELEMENTS                                                    -->
+<!-- ================================================================== -->
+
+<h2 id="block-elements">Block Elements</h2>
+
+<h3>Blockquotes</h3>
+<p>Blockquotes use the brand blue as a left border with slightly increased line-height (1.6) and secondary text color for visual distinction:</p>
+<blockquote>
+<p>&ldquo;Typography is the craft of endowing human language with a durable visual form.&rdquo; When done well, it is invisible &mdash; the reader absorbs the message without noticing the medium.</p>
+<footer><cite>— Robert Bringhurst, <em>The Elements of Typographic Style</em></cite></footer>
+</blockquote>
+<p>Blockquotes can contain multiple paragraphs, lists, or other block elements. The left border acts as a continuous visual anchor. Use a <code>&lt;cite&gt;</code> element inside the blockquote for attribution — it renders as a block in a smaller secondary style.</p>
+
+<h3>Nested blockquotes</h3>
+<p>Nested blockquotes appear in legal documents, email threads, and forum-style CMS content where authors quote prior rulings that themselves contain quotations. The inner blockquote uses a lighter border to establish visual hierarchy:</p>
+<blockquote>
+<p>The Board of Directors concluded that the institution failed to meet the requirements of 12 U.S.C. &sect;1831o. As noted in the prior examination report:</p>
+<blockquote>
+<p>&ldquo;The institution&rsquo;s Tier 1 leverage ratio of 3.2% falls below the 4.0% threshold required for adequate capitalization. Prompt corrective action is warranted.&rdquo;</p>
+</blockquote>
+<p>The institution was given 30 days to submit a capital restoration plan.</p>
+</blockquote>
+
+<h3>Aside / pull quote</h3>
+<aside>
+<p><strong>Key fact:</strong> Since 1933, no depositor has lost a single penny of FDIC-insured funds.</p>
+</aside>
+<p>The <code>&lt;aside&gt;</code> element represents content tangentially related to its surrounding context &mdash; pull quotes, sidebar notes, or &ldquo;related content&rdquo; blocks. Many CMS editors expose this as a block type. In prose, asides float right at 40% width with a brand-blue left border, creating a magazine-style pull quote. On narrow viewports, they linearize to full width.</p>
+<p>Pull quotes are particularly useful in long-form regulatory content to highlight key statistics, policy changes, or notable findings that readers should be able to scan without reading every paragraph. The aside clears after the surrounding paragraphs flow past it.</p>
+
+<h3>Code blocks</h3>
+<p>Fenced code blocks render in a monospace font against a light background with a subtle border. They scroll horizontally if the content overflows:</p>
+<pre><code class="language-css">.prose {
+  font-family: var(--fdic-font-family-sans-serif);
+  font-size: var(--fdic-font-size-body, 1.125rem);
+  line-height: var(--fdic-line-height-body, 1.5);
+  max-width: var(--prose-max-width, 65ch);
+  text-wrap: pretty;
+}</code></pre>
+
+<h3>Addresses</h3>
+<p>The <code>&lt;address&gt;</code> element marks up contact information for the nearest <code>&lt;article&gt;</code> or <code>&lt;body&gt;</code> ancestor. Browser defaults render it in italic, which the prose component overrides to match body text. Use it for office locations, mailing addresses, or institutional contacts:</p>
+<address>
+  Federal Deposit Insurance Corporation<br />
+  550 17th Street NW<br />
+  Washington, D.C. 20429<br />
+  <a href="tel:+18773753342">(877) 375-3342</a>
+</address>
+
+<h3>Wrapping code blocks</h3>
+<p>By default, code blocks scroll horizontally when content overflows. For configuration files, log output, or prose-heavy code, add <code>class="prose-pre-wrap"</code> to enable word wrapping instead:</p>
+<pre class="prose-pre-wrap"><code>ERROR 2026-01-15T09:23:41Z [fdic-ingest] Failed to process Call Report CR-2026-Q1 for institution CERT#12345: validation error in Schedule RC-R, line item 43 — reported Tier 1 capital ratio (3.8%) falls below the minimum threshold (4.0%). Report has been flagged for supervisory review. Contact the institution's primary federal regulator for corrective action within 30 calendar days.</code></pre>
+
+<h3>Preformatted text (without code)</h3>
+<p>CMS editors sometimes produce bare <code>&lt;pre&gt;</code> blocks without a nested <code>&lt;code&gt;</code> element &mdash; for ASCII tables, formatted addresses, or fixed-width layouts that aren&rsquo;t source code. These render identically to code blocks:</p>
+<pre>
+  FDIC QUARTERLY BANKING PROFILE — Q4 2025
+  ═══════════════════════════════════════════
+  Total Assets:          $24.5 trillion
+  Net Income:            $68.4 billion
+  Problem Institutions:  52
+  FDIC Reserve Ratio:    1.28%
+</pre>
+
+<h3>Horizontal rules</h3>
+<p>Horizontal rules provide strong visual breaks between major sections. They use generous vertical margins (<code>3rem</code> above and below) so they don't crowd adjacent content. There's one between each top-level section on this page.</p>
+
+<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<hr />
+
+<!-- ================================================================== -->
+<!--  LISTS                                                             -->
+<!-- ================================================================== -->
+
+<h2 id="lists">Lists</h2>
+
+<h3>Unordered lists</h3>
+<p>Simple unordered lists use tight spacing to keep items feeling cohesive:</p>
+<ul>
+<li>Standard deposit insurance covers up to $250,000 per depositor.</li>
+<li>Coverage applies per insured bank, not per account.</li>
+<li>Joint accounts are insured separately from individual accounts.</li>
+</ul>
+
+<h3>Ordered lists</h3>
+<p>Ordered lists follow the same spacing conventions:</p>
+<ol>
+<li>Identify the failed institution and confirm FDIC insurance status.</li>
+<li>Determine the applicable insurance limit per ownership category.</li>
+<li>Calculate the insured amount for each depositor.</li>
+<li>Issue payments to insured depositors, typically within two business days.</li>
+</ol>
+
+<h3>Complex list items</h3>
+<p>When list items contain paragraphs or supporting text, more space appears between siblings than between a bullet and its content. This proximity grouping keeps each item's details visually bound to its heading:</p>
+<ul>
+<li>
+  <p><strong>Single-ownership accounts.</strong></p>
+  <p>Deposits owned by one person in one insured bank are insured up to $250,000. This includes checking accounts, savings accounts, money market deposit accounts, and certificates of deposit.</p>
+</li>
+<li>
+  <p><strong>Joint accounts.</strong></p>
+  <p>Deposits owned by two or more people at the same insured bank are insured up to $250,000 per co-owner. For example, a joint account owned by two people is insured up to $500,000.</p>
+</li>
+<li>
+  <p><strong>Revocable trust accounts.</strong></p>
+  <p>Deposits held in a revocable trust (including living trusts and payable-on-death accounts) are insured up to $250,000 per beneficiary, subject to specific conditions and limitations.</p>
+</li>
+</ul>
+
+<h3>Nested lists</h3>
+<p>Nested lists use proximity grouping: there's more space between sibling items than between a parent item and its nested children, so the hierarchy reads clearly:</p>
+<ol>
+<li>
+  <strong>Capital adequacy ratios</strong>
+  <ul>
+  <li>Common Equity Tier 1 (CET1) ratio: minimum 4.5%</li>
+  <li>Tier 1 capital ratio: minimum 6%</li>
+  <li>Total capital ratio: minimum 8%</li>
+  </ul>
+</li>
+<li>
+  <strong>Leverage requirements</strong>
+  <ul>
+  <li>Tier 1 leverage ratio: minimum 4%</li>
+  <li>Supplementary leverage ratio (for large banks): minimum 3%</li>
+  </ul>
+</li>
+<li>
+  <strong>Buffer requirements</strong>
+  <ul>
+  <li>Capital conservation buffer: 2.5% above minimums</li>
+  <li>Countercyclical buffer: 0–2.5%, set by regulators</li>
+  <li>G-SIB surcharge: 1–3.5%, for systemically important banks</li>
+  </ul>
+</li>
+</ol>
+
+<h3>Lettered and roman numeral lists</h3>
+<p>Legal and regulatory text frequently uses lettered (<code>type="a"</code>) and roman numeral (<code>type="i"</code>) sub-lists for nested clauses. Padding adjusts automatically to accommodate wider markers:</p>
+<ol>
+<li>
+  <strong>Section 3(a) &mdash; Definitions.</strong> For the purposes of this regulation:
+  <ol type="a">
+    <li>The term &ldquo;insured depository institution&rdquo; means any bank or savings association the deposits of which are insured by the Corporation.</li>
+    <li>The term &ldquo;deposit&rdquo; has the meaning given in section 3(l) of the Federal Deposit Insurance Act.
+      <ol type="i">
+        <li>This includes checking accounts, savings accounts, and certificates of deposit.</li>
+        <li>This excludes investment products such as stocks, bonds, and mutual funds.</li>
+        <li>Trust arrangements are evaluated under separate ownership categories.</li>
+      </ol>
+    </li>
+    <li>The term &ldquo;default&rdquo; means an act or omission by an insured depository institution which has been adjudged to constitute a breach of contract with the Corporation.</li>
+  </ol>
+</li>
+<li>
+  <strong>Section 3(b) &mdash; Standard maximum deposit insurance amount.</strong> The term &ldquo;standard maximum deposit insurance amount&rdquo; means $250,000.
+</li>
+</ol>
+
+<h3>Task lists</h3>
+<p>Markdown-based CMS tools (Notion, GitHub, Contentful) generate checkbox lists for task tracking. These render as unstyled lists with <code>&lt;input type="checkbox" disabled&gt;</code> elements, using the brand blue as the accent color:</p>
+<ul>
+<li><input type="checkbox" disabled checked /> Verify institution CERT number and insurance status</li>
+<li><input type="checkbox" disabled checked /> Calculate insured deposits per ownership category</li>
+<li><input type="checkbox" disabled checked /> Prepare depositor notification letters</li>
+<li><input type="checkbox" disabled /> Coordinate with acquiring institution for assumption</li>
+<li><input type="checkbox" disabled /> Publish final receivership report</li>
+</ul>
+
+<h3>Definition lists</h3>
+<p>Definition lists use asymmetric spacing — more space above a term than below it — so each term groups visually with its own definition rather than with the previous entry:</p>
+<dl>
+  <dt>Deposit Insurance</dt>
+  <dd>Protection provided by the <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> that guarantees depositors will receive their insured funds if an insured bank or savings institution fails. The standard insurance amount is $250,000 per depositor, per insured bank, for each account ownership category.</dd>
+
+  <dt>Call Report</dt>
+  <dd>A quarterly financial report filed by every insured bank with its primary federal regulator. Call Reports provide detailed balance sheet, income statement, and off-balance-sheet data used for supervisory and analytical purposes.</dd>
+
+  <dt>Capital Adequacy</dt>
+  <dd>A measure of a bank's financial strength, typically expressed as a ratio of capital to risk-weighted assets. Regulators use capital adequacy ratios to determine whether a bank holds enough reserves to absorb potential losses.</dd>
+
+  <dt>Receivership</dt>
+  <dd>The process by which the <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> manages and resolves a failed insured depository institution. The FDIC is appointed as receiver, takes control of the bank's assets, and works to maximize recoveries for depositors and creditors.</dd>
+</dl>
+
+<h3>Multiple definitions per term</h3>
+<p>A single term can have multiple definitions &mdash; common in glossaries where a term has distinct meanings in different contexts. Use multiple <code>&lt;dd&gt;</code> elements after a single <code>&lt;dt&gt;</code>:</p>
+<dl>
+  <dt>Resolution</dt>
+  <dd>The process of closing a failed bank and disposing of its assets, either through a purchase-and-assumption transaction or a deposit payoff.</dd>
+  <dd>A formal decision or statement adopted by a board of directors, such as a resolution authorizing a specific action or policy change.</dd>
+
+  <dt>Examination</dt>
+  <dd>An on-site review of a bank&rsquo;s financial condition, risk management practices, and compliance with laws and regulations, conducted by federal or state examiners.</dd>
+  <dd>In legal proceedings, the questioning of a witness under oath, as in direct examination or cross-examination.</dd>
+</dl>
+
+<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<hr />
+
+<!-- ================================================================== -->
+<!--  TABLES                                                            -->
+<!-- ================================================================== -->
+
+<h2 id="tables">Tables</h2>
+<p>Tables use the brand blue for header backgrounds with white text. Body rows alternate with subtle striping, and a hover highlight aids row tracking. The <code>&lt;caption&gt;</code> element provides an accessible title, and <code>&lt;tfoot&gt;</code> contains summary rows.</p>
+
+<h3>Column alignment</h3>
+<p>Choose alignment based on what the column contains. The goal is to make values easy to scan and compare vertically:</p>
+<ul>
+<li><strong>Left-align</strong> text, names, descriptions, and categories &mdash; anything readers scan as prose. This is the default.</li>
+<li><strong>Right-align</strong> numbers, currency, and percentages using <code>class="prose-td-numeric"</code>. Right alignment keeps decimal points and digit places lined up so readers can compare magnitudes at a glance. Pair with <code>font-variant-numeric: tabular-nums</code> (already applied by the class) to ensure uniform digit widths.</li>
+<li><strong>Center-align</strong> short, categorical values like status badges, yes/no flags, or single-digit counts where vertical scanning isn&rsquo;t meaningful.</li>
+<li><strong>Match header to data</strong> &mdash; always align the <code>&lt;th&gt;</code> the same way as the <code>&lt;td&gt;</code> cells beneath it so the label sits directly above the values it describes.</li>
+</ul>
+<div class="prose-table-wrapper" role="region" aria-label="Deposit insurance coverage by ownership category" tabindex="0">
+<table>
+<caption>Deposit insurance coverage limits by ownership category</caption>
+<thead>
+  <tr>
+    <th scope="col">Ownership Category</th>
+    <th scope="col">Insurance Limit</th>
+    <th scope="col">Depositors</th>
+    <th scope="col" class="prose-td-numeric">Insured Amount</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Single accounts</td>
+    <td>$250,000 per owner</td>
+    <td>1</td>
+    <td class="prose-td-numeric">$250,000</td>
+  </tr>
+  <tr>
+    <td>Joint accounts</td>
+    <td>$250,000 per co-owner</td>
+    <td>2</td>
+    <td class="prose-td-numeric">$500,000</td>
+  </tr>
+  <tr>
+    <td>Revocable trust</td>
+    <td>$250,000 per beneficiary</td>
+    <td>3</td>
+    <td class="prose-td-numeric">$750,000</td>
+  </tr>
+  <tr>
+    <td>IRAs and self-directed retirement</td>
+    <td>$250,000 per owner</td>
+    <td>1</td>
+    <td class="prose-td-numeric">$250,000</td>
+  </tr>
+  <tr>
+    <td>Government accounts</td>
+    <td>$250,000 per custodian</td>
+    <td>1</td>
+    <td class="prose-td-numeric">$250,000</td>
+  </tr>
+</tbody>
+<tfoot>
+  <tr>
+    <th scope="row" colspan="3">Total insured coverage</th>
+    <td class="prose-td-numeric">$2,000,000</td>
+  </tr>
+</tfoot>
+</table>
+</div>
+
+<h3>Tables with merged cells</h3>
+<p>Financial and regulatory tables frequently use <code>rowspan</code> and <code>colspan</code> to group related rows under a shared header. This pattern is common in Call Report schedules and supervisory summaries:</p>
+<div class="prose-table-wrapper" role="region" aria-label="Capital ratios by category with merged row headers" tabindex="0">
+<table>
+<caption>Capital ratios by category &mdash; First National Bank, Q4 2025</caption>
+<thead>
+  <tr>
+    <th scope="col">Category</th>
+    <th scope="col">Measure</th>
+    <th scope="col" class="prose-td-numeric">Ratio</th>
+    <th scope="col" class="prose-td-numeric">Minimum</th>
+    <th scope="col">Status</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <th scope="row" rowspan="3">Risk-based capital</th>
+    <td>CET1 ratio</td>
+    <td class="prose-td-numeric">12.4%</td>
+    <td class="prose-td-numeric">4.5%</td>
+    <td>Well-capitalized</td>
+  </tr>
+  <tr>
+    <td>Tier 1 ratio</td>
+    <td class="prose-td-numeric">13.8%</td>
+    <td class="prose-td-numeric">6.0%</td>
+    <td>Well-capitalized</td>
+  </tr>
+  <tr>
+    <td>Total capital ratio</td>
+    <td class="prose-td-numeric">15.2%</td>
+    <td class="prose-td-numeric">8.0%</td>
+    <td>Well-capitalized</td>
+  </tr>
+  <tr>
+    <th scope="row" rowspan="2">Leverage</th>
+    <td>Tier 1 leverage ratio</td>
+    <td class="prose-td-numeric">9.1%</td>
+    <td class="prose-td-numeric">4.0%</td>
+    <td>Well-capitalized</td>
+  </tr>
+  <tr>
+    <td>Supplementary leverage ratio</td>
+    <td class="prose-td-numeric">6.8%</td>
+    <td class="prose-td-numeric">3.0%</td>
+    <td>Well-capitalized</td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<hr />
+
+<!-- ================================================================== -->
+<!--  MEDIA                                                             -->
+<!-- ================================================================== -->
+
+<h2 id="media">Media</h2>
+
+<h3>Images and figures</h3>
+<p>Images inside prose containers are block-level with rounded corners and constrained to 100% width. Wrap images in a <code>&lt;figure&gt;</code> with a <code>&lt;figcaption&gt;</code> for captioned media:</p>
+<figure>
+<img src="https://placehold.co/720x400?text=720+%C3%97+400" alt="Placeholder image demonstrating figure styling" />
+<figcaption>Captions appear below the image in a smaller size and secondary color, providing context without competing with body text for attention.</figcaption>
+</figure>
+
+<h3>Responsive images</h3>
+<p>The <code>&lt;picture&gt;</code> element with <code>&lt;source&gt;</code> children lets CMS tools serve different images at different viewport widths. The prose component styles the rendered <code>&lt;img&gt;</code> identically regardless of which source is selected:</p>
+<figure>
+<picture>
+  <source srcset="https://placehold.co/720x300?text=Desktop+720+%C3%97+300" media="(min-width: 640px)" />
+  <img src="https://placehold.co/360x200?text=Mobile+360+%C3%97+200" alt="Responsive image demonstrating picture element" />
+</picture>
+<figcaption>This image uses a <code>&lt;picture&gt;</code> element &mdash; resize your browser to see the source switch between mobile and desktop variants.</figcaption>
+</figure>
+
+<h3>Linked images</h3>
+<p>Images wrapped in anchor tags &mdash; common in CMS content for thumbnails linking to full-size versions or external pages. On hover, a brand-blue ring appears around the image; on keyboard focus, a blue focus ring replaces it:</p>
+<a href="https://placehold.co/1440x800?text=Full+size+1440+%C3%97+800">
+  <img src="https://placehold.co/720x400?text=Click+to+view+full+size" alt="Linked placeholder image — click to view full size" />
+</a>
+
+<h3>Figures with non-image content</h3>
+<p>The <code>&lt;figure&gt;</code> element can wrap any self-contained content &mdash; not just images. Tables, code blocks, and blockquotes inside a <code>&lt;figure&gt;</code> get a shared caption via <code>&lt;figcaption&gt;</code>:</p>
+<figure>
+<pre><code class="language-sql">SELECT institution_name, cert_number, total_assets
+  FROM institutions
+ WHERE fdic_insured = 1
+   AND total_assets &gt; 10000000000
+ ORDER BY total_assets DESC
+ LIMIT 20;</code></pre>
+<figcaption>SQL query to retrieve the 20 largest FDIC-insured institutions by total assets.</figcaption>
+</figure>
+
+<h3>Embedded video</h3>
+<p>CMS WYSIWYG editors frequently embed video via <code>&lt;iframe&gt;</code> (YouTube, Vimeo) or self-hosted <code>&lt;video&gt;</code> elements. Wrap iframes in a <code>prose-embed-wrapper</code> div for responsive 16:9 containment:</p>
+<div class="prose-embed-wrapper">
+  <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="Sample embedded video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+<p>Self-hosted <code>&lt;video&gt;</code> elements render as block-level with rounded corners, matching image styling:</p>
+<figure>
+<video controls preload="metadata" poster="https://placehold.co/720x400?text=Video+poster+frame">
+  <source src="#" type="video/mp4" />
+  Your browser does not support the video element.
+</video>
+<figcaption>Self-hosted video using the <code>&lt;video&gt;</code> element with a poster frame. The <code>controls</code> attribute provides native playback controls.</figcaption>
+</figure>
+
+<h3>Embedded audio</h3>
+<p>The <code>&lt;audio&gt;</code> element renders as a full-width native player &mdash; ideal for podcast episodes, recorded public meetings, or oral history interviews. Always include a text fallback and descriptive context:</p>
+<figure>
+<audio controls preload="metadata">
+  <source src="https://d3ctxlq1ktw2nl.cloudfront.net/staging/2025-0-6/a4316d80-8125-8a18-f2e4-2d4aa48568f0.mp3" type="audio/mpeg" />
+  Your browser does not support the audio element.
+</audio>
+<figcaption>&ldquo;Small Business Lending&rdquo; &mdash; FDIC Podcast, <time datetime="2025-01-06">January 6, 2025</time>. Duration: 13 minutes.</figcaption>
+</figure>
+
+<pre><code class="language-html">&lt;figure&gt;
+  &lt;audio controls preload="metadata"&gt;
+    &lt;source src="episode-12.mp3" type="audio/mpeg" /&gt;
+    Your browser does not support the audio element.
+  &lt;/audio&gt;
+  &lt;figcaption&gt;Episode description and metadata.&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+
+<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<hr />
+
+<!-- ================================================================== -->
+<!--  COMPONENTS                                                        -->
+<!-- ================================================================== -->
+
+<h2 id="components">Components</h2>
+
+<h3>Callouts</h3>
+<p>Callouts draw attention to important information without interrupting the reading flow. They use Phosphor icons and color variants derived from the design system's token palette:</p>
+
+<div class="prose-callout" role="note" aria-label="Tip">
+  <span class="prose-callout-icon" aria-hidden="true"></span>
+  <div class="prose-callout-content">
+    <p><strong>Tip:</strong> You can verify your deposit insurance coverage using the FDIC&rsquo;s Electronic Deposit Insurance Estimator (<abbr title="Electronic Deposit Insurance Estimator">EDIE</abbr>) tool at <a href="https://www.fdic.gov">fdic.gov</a>. It calculates coverage across all ownership categories for any FDIC-insured institution.</p>
+  </div>
+</div>
+<div class="prose-callout prose-callout-info" role="note" aria-label="Information">
+  <span class="prose-callout-icon" aria-hidden="true"></span>
+  <div class="prose-callout-content">
+    <p><strong>Coverage categories:</strong> Insured deposits include checking accounts, savings accounts, money market deposit accounts, and certificates of deposit (<abbr title="Certificates of Deposit">CDs</abbr>) at FDIC-insured banks. Each ownership category &mdash; single accounts, joint accounts, revocable trusts, and retirement accounts &mdash; is insured separately up to $250,000.</p>
+  </div>
+</div>
+<div class="prose-callout prose-callout-warning" role="note" aria-label="Warning">
+  <span class="prose-callout-icon" aria-hidden="true"></span>
+  <div class="prose-callout-content">
+    <p><strong>Not insured:</strong> Deposit insurance does <strong>not</strong> cover investments such as stocks, bonds, mutual funds, annuities, or life insurance policies &mdash; even if they were purchased at an FDIC-insured bank or through an affiliated broker.</p>
+  </div>
+</div>
+<div class="prose-callout prose-callout-success" role="note" aria-label="Success">
+  <span class="prose-callout-icon" aria-hidden="true"></span>
+  <div class="prose-callout-content">
+    <p><strong>Your deposits are safe.</strong> Since the FDIC was established in 1933, no depositor has lost a single penny of insured funds. The Deposit Insurance Fund is backed by the full faith and credit of the United States government.</p>
+  </div>
+</div>
+<div class="prose-callout prose-callout-danger" role="alert" aria-label="Danger">
+  <span class="prose-callout-icon" aria-hidden="true"></span>
+  <div class="prose-callout-content">
+    <p><strong>Bank closure notice:</strong> If your bank has been closed by regulators, contact the FDIC at <strong>(877)&nbsp;275-3342</strong> immediately. Insured depositors typically receive access to their funds within two business days of closure. Do not send deposits to a closed institution.</p>
+  </div>
+</div>
+
+<p>Callout markup uses a simple flex layout with an icon span and a content div:</p>
+<pre><code class="language-html">&lt;div class="prose-callout prose-callout-info"&gt;
+  &lt;span class="prose-callout-icon"&gt;&lt;/span&gt;
+  &lt;div class="prose-callout-content"&gt;
+    &lt;p&gt;Your callout text here.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+<h3>Progress bars</h3>
+<p>The <code>&lt;progress&gt;</code> element represents the completion of a task. Always pair it with a visible label and use <code>aria-label</code> or a <code>&lt;label&gt;</code> element for screen readers. When a <code>value</code> attribute is present, the bar fills to that proportion. Omitting <code>value</code> creates an <strong>indeterminate</strong> progress bar &mdash; a striped animation indicating work in progress without a known completion percentage:</p>
+<div class="prose-progress-group">
+  <label for="progress-review">Examination review progress</label>
+  <progress id="progress-review" value="72" max="100" aria-label="Examination review progress: 72%">72%</progress>
+  <span class="prose-progress-value">72%</span>
+</div>
+<div class="prose-progress-group">
+  <label for="progress-upload">Call Report upload</label>
+  <progress id="progress-upload" max="100" aria-label="Call Report upload: indeterminate">Uploading…</progress>
+</div>
+
+<h3>Meters</h3>
+<p>The <code>&lt;meter&gt;</code> element represents a scalar measurement within a known range — ideal for capital ratios, compliance scores, or any bounded value. The <code>low</code>, <code>high</code>, and <code>optimum</code> attributes let the browser color the bar to indicate whether the value is acceptable:</p>
+<div class="prose-meter-group">
+  <label for="meter-cet1">CET1 capital ratio</label>
+  <meter id="meter-cet1" value="12.4" min="0" max="20" low="4.5" high="8" optimum="12" aria-label="CET1 capital ratio: 12.4%">12.4%</meter>
+  <span class="prose-meter-value">12.4% <small>(well-capitalized)</small></span>
+</div>
+<div class="prose-meter-group">
+  <label for="meter-leverage">Tier 1 leverage ratio</label>
+  <meter id="meter-leverage" value="3.2" min="0" max="20" low="4" high="8" optimum="10" aria-label="Tier 1 leverage ratio: 3.2%">3.2%</meter>
+  <span class="prose-meter-value">3.2% <small>(undercapitalized)</small></span>
+</div>
+<div class="prose-meter-group">
+  <label for="meter-liquidity">Liquidity coverage ratio</label>
+  <meter id="meter-liquidity" value="105" min="0" max="200" low="100" high="130" optimum="150" aria-label="Liquidity coverage ratio: 105%">105%</meter>
+  <span class="prose-meter-value">105% <small>(adequate)</small></span>
+</div>
+
+<h3>Output element</h3>
+<p>The <code>&lt;output&gt;</code> element represents the result of a calculation or user action. It renders in a monospace font with a subtle background, similar to inline code but semantically distinct. For example, based on three beneficiaries at $250,000 each, the maximum insured amount is <output>$750,000</output>. Use <code>&lt;output&gt;</code> for computed values, conversion results, or system-generated responses within flowing text.</p>
+
+<h3>Collapsible sections</h3>
+<p>The <code>&lt;details&gt;</code> and <code>&lt;summary&gt;</code> elements create accordion-style collapsible sections. The summary uses a Phosphor chevron icon on the right side that rotates on open, with hover, active, and focus-visible states:</p>
+<details>
+  <summary>What is deposit insurance?</summary>
+  <p>Deposit insurance is a guarantee provided by the <abbr title="Federal Deposit Insurance Corporation">FDIC</abbr> that protects depositors against the loss of their insured deposits if an FDIC-insured bank or savings association fails. Since the FDIC was established in 1933, no depositor has lost a single penny of insured funds.</p>
+</details>
+<details>
+  <summary>How are bank examinations conducted?</summary>
+  <p>Bank examinations are conducted on-site by teams of trained examiners who review a bank's financial condition, management practices, compliance with laws and regulations, and risk management processes. The examination results in a confidential report and a composite rating under the <abbr title="Capital adequacy, Asset quality, Management, Earnings, Liquidity, and Sensitivity to market risk">CAMELS</abbr> system.</p>
+</details>
+<details>
+  <summary>What happens when a bank fails?</summary>
+  <p>When a bank fails, the FDIC is typically appointed as receiver. It assumes responsibility for selling or collecting the assets of the failed bank and settling its debts, including claims for deposits in excess of the insured limit. Insured depositors typically have access to their funds within two business days of the closure.</p>
+</details>
+
+<p class="prose-back-to-top"><a href="#top">Back to top &uarr;</a></p>
+<hr />
+
+<!-- ================================================================== -->
+<!--  FOOTNOTES                                                         -->
+<!-- ================================================================== -->
+
+<h2 id="footnotes">Footnotes</h2>
+<p>Footnotes use the standard scholarly pattern with bidirectional linking: a superscript reference<sup><a href="#fn3" id="ref3" role="doc-noteref">[3]</a></sup> in the body links down to the footnote, and a back-link (<code>↩</code>) in the footnote returns to the reference. Clicking a footnote highlights it briefly with the <code>:target</code> pseudo-class. The footnote section uses a partial-width horizontal rule as a visual separator<sup><a href="#fn4" id="ref4" role="doc-noteref">[4]</a></sup>:</p>
+
+<pre><code class="language-html">&lt;!-- Inline reference --&gt;
+&lt;sup&gt;&lt;a href="#fn1" id="ref1"&gt;[1]&lt;/a&gt;&lt;/sup&gt;
+
+&lt;!-- Footnote section --&gt;
+&lt;section class="prose-footnotes"&gt;
+  &lt;hr /&gt;
+  &lt;ol&gt;
+    &lt;li id="fn1"&gt;Footnote text. &lt;a href="#ref1"&gt;&amp;#8617;&lt;/a&gt;&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/section&gt;</code></pre>
+
+<section class="prose-footnotes" role="doc-endnotes" aria-label="Footnotes">
+  <hr />
+  <ol>
+    <li id="fn1" role="doc-footnote">Golembe, Carter H. &ldquo;The Deposit Insurance Legislation of 1933: An Examination of Its Antecedents and Its Purposes.&rdquo; <em>Political Science Quarterly</em> 75, no.&nbsp;2 (1960): 181&ndash;200. <a href="#ref1" role="doc-backlink" title="Back to reference">↩</a></li>
+    <li id="fn2" role="doc-footnote">
+      <p>The Banking Act of 1933, also known as the Glass-Steagall Act, established the FDIC and introduced banking reforms in response to the Great Depression. It separated commercial banking from investment banking and created a framework for federal deposit insurance.</p>
+      <p>The Act was passed in response to the failure of nearly 5,000 banks during 1929–1933. Its core provisions remained in effect for over six decades, until the Gramm-Leach-Bliley Act of 1999 repealed the separation between commercial and investment banking. <a href="#ref2" role="doc-backlink" title="Back to reference">↩</a></p>
+    </li>
+    <li id="fn3" role="doc-footnote">The FDIC Design System (internally known as &ldquo;Penny&rdquo;) provides a shared set of UI components, design tokens, and typography presets used across FDIC digital properties. The <code>prose</code> component handles long-form content styling so that teams don&rsquo;t have to reinvent typographic defaults for every project. <a href="#ref3" role="doc-backlink" title="Back to reference">↩</a></li>
+    <li id="fn4" role="doc-footnote">The footnote section uses <code>font-size: 0.875em</code> and a 33%-width <code>hr</code> aligned to the left. The <code>:target</code> highlight on clicked footnotes uses the same warm yellow as the <code>mark</code> element, with a 1.5-second fade-out transition. <a href="#ref4" role="doc-backlink" title="Back to reference">↩</a></li>
+  </ol>
+</section>
+
+</article>
+
+<script src="script.js"></script>
+</body>
+</html>

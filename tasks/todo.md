@@ -1,5 +1,25 @@
 # TODO
 
+## Current Task (FDIC Typography Site Import)
+- [x] Capture the supplied standalone typography demo into a new `sites/fdic-typography/` micro-site using repo-standard file names.
+- [x] Refactor the supplied assets so the site uses `index.html`, `styles.css`, and `script.js`, preserving the source behavior and content.
+- [x] Register the new site in `sites.json` and run targeted syntax/integrity verification.
+
+## Review / Results (FDIC Typography Site Import)
+- Added [index.html](/Users/jlamb/Projects/pens-github-test/sites/fdic-typography/index.html):
+  - imported the supplied typography demo content into a new `fdic-typography` site.
+  - updated the stylesheet reference to `styles.css` and replaced the inline script block with a `script.js` include.
+- Added [styles.css](/Users/jlamb/Projects/pens-github-test/sites/fdic-typography/styles.css):
+  - copied the supplied standalone prose stylesheet into the repo-standard site asset name without changing its content.
+- Added [script.js](/Users/jlamb/Projects/pens-github-test/sites/fdic-typography/script.js):
+  - extracted the source page’s inline JavaScript for TOC highlighting, link glow behavior, and code-copy buttons.
+- Updated [sites.json](/Users/jlamb/Projects/pens-github-test/sites.json):
+  - registered the new `FDIC Typography` micro-site so it appears alongside the existing site entries.
+- Validation:
+  - `node --check sites/fdic-typography/script.js`
+  - loaded `http://127.0.0.1:8042/sites/fdic-typography/index.html` in Chrome DevTools and confirmed the page renders, the TOC/content are present, and copy buttons are injected by `script.js`.
+  - noted one non-blocking browser request for missing `/favicon.ico`; no imported site asset failed to load.
+
 ## Current Task (FDICnet Search Web Component Refactor)
 - [x] Replace the duplicated desktop/mobile search markup with a reusable search web component while preserving the existing DOM contract and wrapper parity.
 - [x] Refactor the shared search controller to expose clean extension points for suggestion population and search-results-view hand-off without changing current default behavior.
